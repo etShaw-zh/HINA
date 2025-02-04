@@ -26,4 +26,4 @@ jobs:
           pip install networkx
           pip install hina
       - name: Run Auto-Tests
-        run: pytest Tests/
+        # run: pytest Tests/

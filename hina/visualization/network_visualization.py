@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from bnapy.dyad.significant_edges import prune_edges
-from bnapy.mesoscale.clustering import cluster_nodes
-from bnapy.individual.quantity_diversity import get_bipartite
+from hina.dyad.significant_edges import prune_edges
+from hina.mesoscale.clustering import cluster_nodes
+from hina.individual.quantity_diversity import get_bipartite
 
 
 def plot_HINA(df, group='All', attribute_1=None, attribute_2=None, pruning=False, layout='spring', NetworkX_kwargs=None):
