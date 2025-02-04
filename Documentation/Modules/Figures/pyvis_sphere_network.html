@@ -1,0 +1,164 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "hsl(0, 70%, 50%)", "font": {"color": "white"}, "id": "2672923117", "label": "Student 2672923117", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 1"}, {"color": "green", "font": {"color": "white"}, "id": "Task 3", "label": "Task Task 3", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 1"}, {"color": "hsl(0, 70%, 50%)", "font": {"color": "white"}, "id": "4683644331", "label": "Student 4683644331", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 1"}, {"color": "green", "font": {"color": "white"}, "id": "Task 0", "label": "Task Task 0", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 2"}, {"color": "green", "font": {"color": "white"}, "id": "Task 9", "label": "Task Task 9", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 3"}, {"color": "green", "font": {"color": "white"}, "id": "Task 7", "label": "Task Task 7", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 4"}, {"color": "hsl(0, 70%, 50%)", "font": {"color": "white"}, "id": "677451636", "label": "Student 677451636", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 1"}, {"color": "green", "font": {"color": "white"}, "id": "Task 1", "label": "Task Task 1", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 5"}, {"color": "green", "font": {"color": "white"}, "id": "Task 2", "label": "Task Task 2", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 6"}, {"color": "green", "font": {"color": "white"}, "id": "Task 8", "label": "Task Task 8", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 7"}, {"color": "green", "font": {"color": "white"}, "id": "Task 6", "label": "Task Task 6", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 8"}, {"color": "hsl(0, 70%, 50%)", "font": {"color": "white"}, "id": "656284769", "label": "Student 656284769", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 1"}, {"color": "green", "font": {"color": "white"}, "id": "Task 5", "label": "Task Task 5", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 9"}, {"color": "green", "font": {"color": "white"}, "id": "Task 4", "label": "Task Task 4", "level": 2, "shape": "ellipse", "size": 10, "title": "Task Weight: 10"}, {"color": "hsl(60, 70%, 50%)", "font": {"color": "white"}, "id": "8660641089", "label": "Student 8660641089", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 2 "}, {"color": "hsl(60, 70%, 50%)", "font": {"color": "white"}, "id": "2696351192", "label": "Student 2696351192", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 2 "}, {"color": "hsl(60, 70%, 50%)", "font": {"color": "white"}, "id": "669299764", "label": "Student 669299764", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 2 "}, {"color": "hsl(60, 70%, 50%)", "font": {"color": "white"}, "id": "9643015554", "label": "Student 9643015554", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 2 "}, {"color": "hsl(60, 70%, 50%)", "font": {"color": "white"}, "id": "8686018826", "label": "Student 8686018826", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 2 "}, {"color": "hsl(120, 70%, 50%)", "font": {"color": "white"}, "id": "7687423176", "label": "Student 7687423176", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 3 "}, {"color": "hsl(120, 70%, 50%)", "font": {"color": "white"}, "id": "9692144060", "label": "Student 9692144060", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 3 "}, {"color": "hsl(120, 70%, 50%)", "font": {"color": "white"}, "id": "6689337607", "label": "Student 6689337607", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 3 "}, {"color": "hsl(120, 70%, 50%)", "font": {"color": "white"}, "id": "5672017968", "label": "Student 5672017968", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 3 "}, {"color": "hsl(120, 70%, 50%)", "font": {"color": "white"}, "id": "7646103537", "label": "Student 7646103537", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 3 "}, {"color": "hsl(180, 70%, 50%)", "font": {"color": "white"}, "id": "3663181044", "label": "Student 3663181044", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 4 "}, {"color": "hsl(180, 70%, 50%)", "font": {"color": "white"}, "id": "6557873471", "label": "Student 6557873471", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 4 "}, {"color": "hsl(180, 70%, 50%)", "font": {"color": "white"}, "id": "2670306486", "label": "Student 2670306486", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 4 "}, {"color": "hsl(180, 70%, 50%)", "font": {"color": "white"}, "id": "2680733162", "label": "Student 2680733162", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 4 "}, {"color": "hsl(180, 70%, 50%)", "font": {"color": "white"}, "id": "3698704029", "label": "Student 3698704029", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 4 "}, {"color": "hsl(240, 70%, 50%)", "font": {"color": "white"}, "id": "6672371941", "label": "Student 6672371941", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 5 "}, {"color": "hsl(240, 70%, 50%)", "font": {"color": "white"}, "id": "1643625751", "label": "Student 1643625751", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 5 "}, {"color": "hsl(240, 70%, 50%)", "font": {"color": "white"}, "id": "9665158095", "label": "Student 9665158095", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 5 "}, {"color": "hsl(240, 70%, 50%)", "font": {"color": "white"}, "id": "8695794720", "label": "Student 8695794720", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 5 "}, {"color": "hsl(240, 70%, 50%)", "font": {"color": "white"}, "id": "8685112191", "label": "Student 8685112191", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 5 "}, {"color": "hsl(300, 70%, 50%)", "font": {"color": "white"}, "id": "584000468", "label": "Student 584000468", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 6"}, {"color": "hsl(300, 70%, 50%)", "font": {"color": "white"}, "id": "7669190288", "label": "Student 7669190288", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 6"}, {"color": "hsl(300, 70%, 50%)", "font": {"color": "white"}, "id": "3649778646", "label": "Student 3649778646", "level": 1, "shape": "dot", "size": 15, "title": "Group: Group 6"}]);
+                  edges = new vis.DataSet([{"from": "2672923117", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "4683644331", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "4683644331", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "4683644331", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "2672923117", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "677451636", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "677451636", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "2672923117", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2672923117", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "656284769", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "656284769", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "4683644331", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "4683644331", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2672923117", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "2672923117", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "4683644331", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "677451636", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "4683644331", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "4683644331", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "4683644331", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "677451636", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "677451636", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "677451636", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "4683644331", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "677451636", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "2672923117", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "656284769", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "656284769", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "2672923117", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "8660641089", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "8660641089", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "8660641089", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "8660641089", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "2696351192", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "8660641089", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "669299764", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "9643015554", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "669299764", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "669299764", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "669299764", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "8686018826", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "9643015554", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "2696351192", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2696351192", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "9643015554", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "8686018826", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "8686018826", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2696351192", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "2696351192", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "8660641089", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "7687423176", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "9692144060", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "6689337607", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "9692144060", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "6689337607", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "9692144060", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "6689337607", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "9692144060", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "5672017968", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "6689337607", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "5672017968", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "9692144060", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "5672017968", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "7646103537", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "9692144060", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "9692144060", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "5672017968", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "9692144060", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "7646103537", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "7687423176", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "7646103537", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "7687423176", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "7687423176", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "7687423176", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "7687423176", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "7646103537", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "7687423176", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "9692144060", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "3663181044", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "6557873471", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "6557873471", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "3663181044", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "6557873471", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "3663181044", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "2670306486", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "2670306486", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "6557873471", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "6557873471", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "2680733162", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "3663181044", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "2670306486", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "2680733162", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "6557873471", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2670306486", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2680733162", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "6557873471", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "2680733162", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "2680733162", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "2680733162", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "2680733162", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "6557873471", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "6557873471", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "3698704029", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "6557873471", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "3698704029", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "3698704029", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "2680733162", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "2680733162", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "6672371941", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "1643625751", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "6672371941", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "6672371941", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "6672371941", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "6672371941", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "1643625751", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "1643625751", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "1643625751", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "1643625751", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "6672371941", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "9665158095", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "9665158095", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "1643625751", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "1643625751", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "8695794720", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "8695794720", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "8695794720", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "8695794720", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "8695794720", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "8695794720", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "8685112191", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "8685112191", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "8695794720", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "6672371941", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "8695794720", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "584000468", "title": "Weight: 2", "to": "Task 0", "value": 2}, {"from": "584000468", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "584000468", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "584000468", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "584000468", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "7669190288", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "584000468", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "3649778646", "title": "Weight: 10", "to": "Task 4", "value": 10}, {"from": "584000468", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "7669190288", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "7669190288", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "7669190288", "title": "Weight: 5", "to": "Task 1", "value": 5}, {"from": "7669190288", "title": "Weight: 6", "to": "Task 2", "value": 6}, {"from": "3649778646", "title": "Weight: 3", "to": "Task 9", "value": 3}, {"from": "3649778646", "title": "Weight: 1", "to": "Task 3", "value": 1}, {"from": "3649778646", "title": "Weight: 7", "to": "Task 8", "value": 7}, {"from": "3649778646", "title": "Weight: 8", "to": "Task 6", "value": 8}, {"from": "584000468", "title": "Weight: 9", "to": "Task 5", "value": 9}, {"from": "3649778646", "title": "Weight: 4", "to": "Task 7", "value": 4}, {"from": "584000468", "title": "Weight: 10", "to": "Task 4", "value": 10}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "forceAtlas2Based": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.01,
+            "damping": 0.4,
+            "gravitationalConstant": -50,
+            "springConstant": 0.08,
+            "springLength": 100
+        },
+        "solver": "forceAtlas2Based",
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
