@@ -6,9 +6,9 @@ import dash_cytoscape as cyto
 import dash_table
 import pandas as pd
 import networkx as nx
-from bnapy.dyad.significant_edges import prune_edges
-from bnapy.mesoscale.clustering import cluster_nodes
-from bnapy.individual.quantity_diversity import get_bipartite, quantity_and_diversity
+from hina.dyad.significant_edges import prune_edges
+from hina.mesoscale.clustering import cluster_nodes
+from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
 
 #############################
 # Helper Functions
