@@ -26,7 +26,7 @@ def parse_contents(contents, filename):
 
 def build_hina_network(df, group, attribute_1, attribute_2, pruning, layout):
     """
-    Build a NetworkX graph for the HINA network using bnapy logic.
+    Build a NetworkX graph for the HINA network using hina logic.
     Node labels are converted to strings.
     """
     if attribute_1 is None or attribute_2 is None:
@@ -104,7 +104,7 @@ def cy_elements_from_graph(G, pos):
 
 def build_clustered_network(df, group, attribute_1, attribute_2, clustering_method, pruning="none", layout="spring"):
     """
-    Build a clustered bipartite network using bnapy's get_bipartite and cluster_nodes.
+    Build a clustered bipartite network using hina's get_bipartite and cluster_nodes.
     An optional pruning parameter (either "none" or a dict) is applied before clustering.
     All node IDs are cast to strings.
     """
