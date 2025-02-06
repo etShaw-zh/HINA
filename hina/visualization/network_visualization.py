@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
 from hina.mesoscale.clustering import cluster_nodes
 from hina.individual.quantity_diversity import get_bipartite
@@ -201,4 +202,102 @@ def plot_clusters(df, group='All', attribute_1=None, attribute_2=None, pruning=F
     plt.legend(handles=legend_elements, loc='upper right', title='Clusters', frameon=True)
 
     plt.title(f"Clustered Bipartite Network ({clustering_method.capitalize()} Method) for Group: {group}")
+    plt.show()
+
+def plot_bipartite_clusters(G,community_labels,noise_scale=3,radius=20.,encode_labels=False,\
+                            node_labels='Set 2',edge_labels=False,\
+                            scale_nodes_by_degree=False,node_scale=2000.,\
+                node_kwargs={'edgecolors':'black'},edge_kwargs={'edge_color':'black'}):
+    """
+    G: bipartite edge set with tuples (node in set 1, node in set 2)
+    community_labels: dict of form {node:community label}
+    noise_scale: tunes dispersion of nodes of type 1 around cluster centroids
+    radius: tunes radius of circle of community centers
+    node_labels: 'Set X' labels only set X (X = 1 or 2) nodes, and 'Both Sets' labels both sets. else, no labels 
+    encode_labels: if True, encodes each node label as a unique string and retruns list showing the encoding map
+    edge_labels: whether or not to include edge labels
+    scale_nodes_by_degree: whether or not to scale node size by degree
+    node_scale: average node size
+    node_kwargs: NetworkX plot arguments for draw_networkx_nodes
+    edge_kwargs: NetworkX plot arguments for draw_networkx_edges
+    """
+    set1 = set([str(e[0]) for e in G]) 
+    set2 = set([str(e[1]) for e in G]) 
+    Gnx = nx.Graph()
+    Gnx.add_weighted_edges_from([(str(e[0]),str(e[1]),e[2]) for e in G])
+
+    offset = np.random.rand()*np.pi
+
+    B = len(set(community_labels.values())) 
+    comm2ind = dict(zip(list(set(community_labels.values())),range(B)))
+    
+    set1_pos = {}
+    for node in set1:
+        c = comm2ind[community_labels[node]]
+        angle = 2*np.pi*c/B + offset
+        x = radius*np.cos(angle) + (2.*np.random.rand()-1.)*noise_scale
+        y = radius*np.sin(angle) + (2.*np.random.rand()-1.)*noise_scale
+        set1_pos[node] = (x, y)
+
+    set2_pos = {}
+    num_s2 = len(set2)
+    for c,node in enumerate(set2):
+        angle = 2*np.pi*c/num_s2 + offset
+        x = 0.5*radius*np.cos(angle)
+        y = 0.5*radius*np.sin(angle)
+        set2_pos[node] = (x, y)
+
+    pos = {**set1_pos, **set2_pos}
+
+    comm_colors = dict(zip(list(set(community_labels.values())),list(mcolors.TABLEAU_COLORS.values())))
+    color_dict = {node:comm_colors[community_labels[node]] for node in set1} | {node:'Gray' for node in set2}
+    node_colors = {node:color_dict[node] for node in Gnx.nodes()}
+
+    edge_weights = [Gnx[u][v]['weight'] for u, v in Gnx.edges()]
+    max_weight = max(edge_weights)
+    edge_widths = [weight / max_weight * 5 for weight in edge_weights]
+
+    weighted_degrees = {node: sum(weight for _, _, weight in Gnx.edges(node, data='weight'))\
+                        for node in Gnx.nodes()}
+    if scale_nodes_by_degree:
+        avg = np.mean(list(weighted_degrees.values()))
+        node_sizes = {node:weighted_degrees[node]/avg*node_scale for node in Gnx.nodes()}
+    else:
+        node_sizes = {node:node_scale for node in Gnx.nodes()}
+
+    plt.figure(figsize=(20, 20))
+
+    nodes = [str(n) for n in set1] + [str(n) for n in set2]
+    if encode_labels:
+        codes = [i for i in range(len(nodes))]
+        labelmap = dict(zip(nodes,codes))
+        for node in set1:
+            print('Original Label (Set 1):',node,'| Encoded Label:',labelmap[node])
+        for node in set2:
+            print('Original Label (Set 2):',node,'| Encoded Label:',labelmap[node])
+
+    else:
+        labelmap = dict(zip(nodes,nodes))
+
+    shapes = {node:'o' for node in set1} | {node:'^' for node in set2}
+    for node, shape in shapes.items():
+        nx.draw_networkx_nodes(Gnx, pos, nodelist=[node], node_shape=shape, \
+                            node_color=node_colors[node],node_size=node_sizes[node],**node_kwargs)
+
+    nx.draw_networkx_edges(Gnx,pos,width=edge_widths,**edge_kwargs)
+
+    label_options = {'bbox': {'facecolor': 'white', 'alpha': 1, 'edgecolor': 'black'}}
+    if node_labels == 'Set 1': 
+        for node in set2: labelmap[node] = ''
+        nx.draw_networkx_labels(Gnx, pos, labels=labelmap, **label_options)
+    elif node_labels == 'Set 2': 
+        for node in set1: labelmap[node] = ''
+        nx.draw_networkx_labels(Gnx, pos, labels=labelmap, **label_options)
+    elif node_labels == 'Both Sets':
+        nx.draw_networkx_labels(Gnx, pos, labels=labelmap, **label_options)
+    
+    if edge_labels:
+        edge_labels = nx.get_edge_attributes(Gnx, 'weight')
+        nx.draw_networkx_edge_labels(Gnx, pos, edge_labels=edge_labels)
+
     plt.show()

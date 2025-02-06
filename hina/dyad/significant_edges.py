@@ -12,7 +12,14 @@ def prune_edges(G,alpha=0.05,fix_deg='Set 1'):
     returns:
         subset of G corresponding to statistically significant edges under the null model
     """
+    if not G:
 
+        return set()
+
+    if len(G) == 1:
+
+        return set(G)
+    
     set1,set2 = set([e[0] for e in G]),set([e[1] for e in G])
     N1,N2 = len(set1),len(set2)
     

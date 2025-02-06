@@ -14,7 +14,7 @@ def save_network(G, filename, format='gml'):
         nx.write_gml(B, filename + '.gml')
     elif format == 'gexf':
         nx.write_gexf(B, filename + '.gexf')
-    elif format == 'gpickle':
-        nx.write_gpickle(B, filename + '.gpickle')
+    elif format == 'graphml':
+        nx.write_graphml(B, filename + '.graphml')
     else:
         raise ValueError("Unsupported format: {}".format(format))

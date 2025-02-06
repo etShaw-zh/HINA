@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='hina',
-    version='0.2',
+    version='0.3',
     description='Heterogenous Interaction Network Analysis in Python',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
@@ -20,8 +20,12 @@ setup(
         "pandas>=2.2",
         "scipy>=1.10",
         "scikit-network==0.32.1",
-        "dash<=3.0.0"
+        "dash<=3.0.0",
+        "dash-cytoscape>=1.0.2"
     ],
-    packages=find_packages(),
+    extras_require={
+        "dev": ["pytest"],  
+    },
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
 )
