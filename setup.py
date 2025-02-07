@@ -16,7 +16,7 @@ setup(
     },
     python_requires=">=3.9, <3.12",
     install_requires=[
-        "numpy>=1.24,<2.0",    
+        "numpy>=1.24, <2.0",    
         "pandas>=2.2",
         "scipy>=1.10",
         "scikit-network==0.32.1",
