@@ -30,7 +30,7 @@ jobs:
 
       - name: Run HINA Tests
         run: |
-          pytest hina/ --maxfail=3 --disable-warnings --tb=short
+          pytest hina/ --maxfail=4 --disable-warnings --tb=short
 
       - name: Upload Test Results
         if: failure()

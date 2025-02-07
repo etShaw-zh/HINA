@@ -21,7 +21,8 @@ setup(
         "scipy>=1.10",
         "scikit-network==0.32.1",
         "dash<=3.0.0",
-        "dash-cytoscape>=1.0.2"
+        "dash-cytoscape>=1.0.2",
+        "matplotlib>=3.8.4"
     ],
     extras_require={
         "dev": ["pytest"],  
