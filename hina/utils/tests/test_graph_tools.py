@@ -26,5 +26,5 @@ def test_save_network_unsupported_format(tmp_path):
     with pytest.raises(ValueError, match="Unsupported format: unsupported"):
         save_network(G, str(filename), format='unsupported')
 
-if __name__ == "__main__":
-    pytest.main()
+# if __name__ == "__main__":
+#     pytest.main()

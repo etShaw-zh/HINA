@@ -1,9 +1,8 @@
 import base64
 import io
 import dash
-from dash import dcc, html, Input, Output, State, no_update
+from dash import dcc, html, Input, Output, State, no_update, dash_table
 import dash_cytoscape as cyto
-import dash_table
 import pandas as pd
 import networkx as nx
 from hina.dyad.significant_edges import prune_edges

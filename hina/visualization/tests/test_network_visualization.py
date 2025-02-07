@@ -42,5 +42,5 @@ def test_plot_bipartite_clusters():
     except Exception as e:
         pytest.fail(f"plot_bipartite_clusters raised an exception: {e}")
 
-if __name__ == "__main__":
-    pytest.main()
+# if __name__ == "__main__":
+#     pytest.main()

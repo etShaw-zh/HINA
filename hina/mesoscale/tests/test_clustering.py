@@ -33,5 +33,5 @@ def test_bipartite_communities_fixed_B():
     assert all(isinstance(k, str) and isinstance(v, str) for k, v in community_labels.items())
     assert isinstance(compression_ratio, float)
 
-if __name__ == "__main__":
-    pytest.main()
+# if __name__ == "__main__":
+#     pytest.main()

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='hina',
-    version='0.3',
+    version='0.4',
     description='Heterogenous Interaction Network Analysis in Python',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
@@ -16,7 +16,7 @@ setup(
     },
     python_requires=">=3.9, <3.12",
     install_requires=[
-        "numpy>=1.24",    
+        "numpy>=1.24,<2.0",    
         "pandas>=2.2",
         "scipy>=1.10",
         "scikit-network==0.32.1",
