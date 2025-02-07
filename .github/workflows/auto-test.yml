@@ -3,7 +3,7 @@ name: Run Auto-Tests
 on:
   push:
     paths:
-      - 'HINA/**'
+      - 'hina/**'
       - '.github/workflows/auto-test.yml'
   pull_request:
     branches:
