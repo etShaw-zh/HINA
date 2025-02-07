@@ -22,7 +22,8 @@ setup(
         "scikit-network==0.32.1",
         "dash<=3.0.0",
         "dash-cytoscape>=1.0.2",
-        "matplotlib>=3.8.4"
+        "matplotlib>=3.8.4",
+        "networkx>=3.0"
     ],
     extras_require={
         "dev": ["pytest"],  

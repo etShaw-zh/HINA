@@ -76,5 +76,5 @@ def test_single_entry():
     print(f"Single Entry - Actual Diversity: {diversities['A']}, Expected Diversity: 0.0")
     np.testing.assert_almost_equal(diversities['A'], 0.0, decimal=6)
 
-# if __name__ == "__main__":
-#     pytest.main()
+if __name__ == "__main__":
+    pytest.main()

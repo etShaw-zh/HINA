@@ -35,5 +35,5 @@ def test_prune_edges_single_edge():
     assert isinstance(result, set)
     assert len(result) == 1
 
-# if __name__ == "__main__":
-#     pytest.main()
+if __name__ == "__main__":
+    pytest.main()
