@@ -1,15 +1,29 @@
 from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import pandas as pd
 from hina.app.api import utils
+import base64
 
 app = FastAPI(title="HINA REST API")
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,        
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     contents = await file.read()
     # Encode the file contents in base64 (without header)
-    encoded = contents  # We'll pass the raw bytes to our parse_contents function
+    encoded = contents 
     df = utils.parse_contents(base64.b64encode(encoded).decode('utf-8'))
     groups = list(df['group'].unique()) if 'group' in df.columns else ["All"]
     return {
@@ -61,6 +75,9 @@ async def quantity_diversity_endpoint(
     weight_col: str = Form(...)
 ):
     df = pd.read_json(data, orient="split")
+    if weight_col == "equal_weight":
+        df["equal_weight"] = 1
+        weight_col = "equal_weight"
     q, d = utils.quantity_and_diversity(df, student_col=attribute1, task_col=attribute2, weight_col=weight_col)
     return {"quantity": q, "diversity": d}
 
