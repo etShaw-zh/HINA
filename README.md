@@ -21,44 +21,70 @@ pip install hina
 
 HINA/
 ├── __init__.py
-├── individual/
+│
+├── individual/                      # Node-level analysis: quantity & diversity
 │   ├── __init__.py
-│   ├── quantity_diversity.py    
-│   └── tests/                   
+│   ├── quantity_diversity.py
+│   └── tests/
 │       ├── __init__.py
 │       └── test_quantity_diversity.py
-├── dyad/
+│
+├── dyad/                            # Edge-level analysis: significant edges
 │   ├── __init__.py
-│   ├── significant_edges.py     
-│   └── tests/                  
+│   ├── significant_edges.py
+│   └── tests/
 │       ├── __init__.py
 │       └── test_significant_edges.py
-├── mesoscale/
+│
+├── mesoscale/                       # Mesoscale clustering analysis
 │   ├── __init__.py
-│   ├── clustering.py            
-│   └── tests/                  
+│   ├── clustering.py
+│   └── tests/
 │       ├── __init__.py
 │       └── test_clustering.py
-├── visualization/
+│
+├── visualization/                   # Network visualization utilities
 │   ├── __init__.py
-│   ├── network_visualization.py 
-│   └── tests/                   
+│   ├── network_visualization.py
+│   └── tests/
 │       ├── __init__.py
 │       └── test_network_visualization.py
-├── app/
+│
+├── app/                              # Web-based API & frontend
 │   ├── __init__.py
-│   ├── app.py 
-│   └── tests/                   
-│       ├── __init__.py
-│       └── app.py
-├── utils/
+│   ├── api/                          # Backend API logic
+│   │   ├── __init__.py
+│   │   ├── api.py
+│   │   ├── utils.py
+│   │
+│   ├── tests/                        # API unit tests
+│   │   ├── __init__.py
+│   │   └── test_api.py
+│   │
+│   ├── frontend/                     # Web interface (React/TypeScript)
+│       ├── src/
+│           ├── components/
+│           │   ├── Navbar/
+│           │   │   ├── NavbarMinimalColored.tsx
+│           │   ├── Webinterface/
+│           │   │   ├── Webinterface.tsx
+│           │
+│           ├── pages/
+│           │   ├── Homepage.tsx
+│           │
+│           ├── App.tsx
+│           ├── main.tsx
+│           ├── Router.tsx
+│
+├── utils/                            # Utility functions for graph & plotting
 │   ├── __init__.py
-│   ├── graph_tools.py        
-│   ├── plot_tools.py          
+│   ├── graph_tools.py
+│   ├── plot_tools.py
 │   └── tests/
 │       ├── __init__.py
 │       ├── test_graph_tools.py
 │       └── test_plot_tools.py
-├── data/                       
-    ├── __init__.py
-    └── synthetic_data.csv
+│
+├── data/                             # Sample datasets
+│   ├── __init__.py
+│   └── synthetic_data.csv
