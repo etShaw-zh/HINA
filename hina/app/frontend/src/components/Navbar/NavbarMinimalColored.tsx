@@ -10,7 +10,7 @@ import {
   IconSwitchHorizontal,
   IconUser,
 } from '@tabler/icons-react';
-import { Center, Stack, Tooltip } from '@mantine/core';
+import { Center, Stack } from '@mantine/core';
 import { MantineLogo } from '@mantinex/mantine-logo';
 import NavbarLink from './NavbarLink';
 import classes from './NavbarMinimalColored.module.css';

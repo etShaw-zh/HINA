@@ -16,7 +16,6 @@ import {
   Burger
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { MantineLogo } from '@mantinex/mantine-logo';
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
 
 
