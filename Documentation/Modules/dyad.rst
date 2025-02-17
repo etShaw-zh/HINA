@@ -1,32 +1,32 @@
-Dyad
+dyad
 +++++
 
 Tutorial
 ========
 
-The `Dyad` module provides methods to identify statistically significant edges in heterogeneous interaction networks relative to multiple null models of interaction structure. The user can specify different null models, allowing for flexibility in analyzing dyad-level interaction patterns.
+The `dyad` module provides methods to identify statistically significant edges in heterogeneous interaction networks relative to multiple null models of interaction structure. The user can specify different null models, allowing for flexibility in analyzing dyad-level interaction patterns.
 
 Currently, the module contains the `significant_edges.py` file, which includes the `prune_edges` function to filter statistically significant edges based on a null model.
 
-This function evaluates edges using a binomial significance test and supports different constraints on node degrees, making it useful for network analysis where understanding dyadic interactions is crucial.
+This function evaluates edges using a binomial significance test and supports different constraints on node degrees.
 
-Inputs include:
+Inputs:
 
 - **G**: A list of tuples representing edges `(i, j, w)`, where `i` and `j` are nodes, and `w` is the weight or frequency of interaction.
 - **alpha**: The significance level (default: `0.05`).
 - **fix_deg**: Specifies which set of nodes should have fixed degrees in the null model. Options include:
  
    - `'None'`: No degree constraints.
-   - `'Set 1'`: Fix degrees for nodes in the first set.
-   - `'Set 2'`: Fix degrees for nodes in the second set.
+   - `'Set 1'`: Fix weighted degrees (sum of incident edge weights) for nodes in the first set.
+   - `'Set 2'`: Fix weighted degrees (sum of incident edge weights) for nodes in the second set.
 
-Outputs include:
+Outputs:
 
-- A subset of `G` containing only the statistically significant edges.
+- A subset of `G` containing only the edges whose weight is statistically significant relative to the specified null model.
 
-The function can be extended with additional null models for more advanced dyadic interaction analyses.
+The function can be extended with additional null models incorporating additional constraints.
 
-Dyad
+dyad
 ====
 
 This module provides functions for statistical analysis of interactions in heterogeneous networks.
@@ -69,14 +69,14 @@ Compute edges that are statistically significant under a null model where the de
                <li><code>w</code> is the weight (or frequency) of the edge between <code>i</code> and <code>j</code>.</li>
            </ul>
        </li>
-       <li><span class="param-name">alpha</span>: The significance level for testing edges.
+       <li><span class="param-name">alpha</span>: The significance level for retaining edges.
            <span class="default-value">Default: <code>0.05</code></span>.
        </li>
        <li><span class="param-name">fix_deg</span>: Specifies the set of nodes whose degrees are fixed during the null model testing.
            <ul>
                <li><code>'None'</code>: No degree constraints.</li>
-               <li><code>'Set 1'</code>: Fix degrees for nodes in the first set.</li>
-               <li><code>'Set 2'</code>: Fix degrees for nodes in the second set.</li>
+               <li><code>'Set 1'</code>: Fix weighted degrees (sum of incident edge weights) for nodes in the first set.</li>
+               <li><code>'Set 2'</code>: Fix weighted degrees (sum of incident edge weights) for nodes in the second set.</li>
            </ul>
            <span class="default-value">Default: <code>'Set 1'</code></span>.
        </li>
@@ -109,11 +109,19 @@ A small weighted interaction network is defined as follows:
 
 .. code-block:: python
 
-    G = [(1, 2, 5), (1, 3, 10), (2, 3, 15)]
+    G = [('Student 1','Task 1',1),\
+     ('Student 1','Task 2',2),\
+     ('Student 1','Task 3',10),\
+     ('Student 2','Task 1',5),\
+     ('Student 2','Task 2',10),\
+     ('Student 2','Task 3',20),\
+     ('Student 3','Task 1',10),\
+     ('Student 3','Task 2',15),\
+     ('Student 3','Task 3',30)]
 
 **Step 3: Compute significant edges with no degree fixing**
 
-This method tests edge significance without fixing the degree of any nodes.
+This method tests edge significance without fixing the degree of any nodes, preferring edges with higher overall weight.
 
 .. code-block:: python
 
@@ -124,7 +132,7 @@ This method tests edge significance without fixing the degree of any nodes.
 
 **Step 4: Compute significant edges with fixed degrees for Set 1**
 
-Fixes degrees for nodes in "Set 1" while evaluating significance.
+This method tests edge significance while fixing weighted degrees for nodes in "Set 1", preferring edges whose weight is high relative to other edges attached to the same Set 1 node.
 
 .. code-block:: python
 
@@ -134,35 +142,13 @@ Fixes degrees for nodes in "Set 1" while evaluating significance.
 
 **Step 5: Compute significant edges with fixed degrees for Set 2**
 
-Fixes degrees for nodes in "Set 2" instead.
+This method tests edge significance while fixing weighted degrees for nodes in "Set 2", preferring edges whose weight is high relative to other edges attached to the same Set 2 node.
 
 .. code-block:: python
 
     result_set2 = prune_edges(G, alpha, fix_deg='Set 2')
 
     print("Significant Edges (Fixing Degree for Set 2):", result_set2)
-
-**Step 6: Handle an empty graph**
-
-If the graph is empty, the function should return an empty set.
-
-.. code-block:: python
-
-    empty_graph = []
-    result_empty = prune_edges(empty_graph, alpha, fix_deg=None)
-
-    print("Significant Edges (Empty Graph):", result_empty)
-
-**Step 7: Handle a single edge**
-
-When there is only one edge, it is returned if it is statistically significant.
-
-.. code-block:: python
-
-    single_edge_graph = [(1, 2, 5)]
-    result_single_edge = prune_edges(single_edge_graph, alpha, fix_deg=None)
-
-    print("Significant Edges (Single Edge):", result_single_edge)
 
 Example Output
 --------------
@@ -171,11 +157,14 @@ The function outputs a set of edges that are statistically significant under the
 
 .. code-block:: console
 
-    Significant Edges (No Degree Fixing): {(1, 2, 5), (1, 3, 10)}
-    Significant Edges (Fixing Degree for Set 1): {(1, 2, 5)}
-    Significant Edges (Fixing Degree for Set 2): {(2, 3, 15)}
-    Significant Edges (Empty Graph): set()
-    Significant Edges (Single Edge): {(1, 2, 5)}
+    Significant Edges (No Degree Fixing): 
+     {('Student 2', 'Task 3', 20), ('Student 3', 'Task 3', 30)} 
+
+    Significant Edges (Fixing Degree for Set 1): 
+     {('Student 2', 'Task 3', 20), ('Student 3', 'Task 3', 30), ('Student 1', 'Task 3', 10)} 
+    
+    Significant Edges (Fixing Degree for Set 2): 
+     {('Student 3', 'Task 3', 30), ('Student 3', 'Task 2', 15), ('Student 3', 'Task 1', 10)} 
 
 Paper Source
 ============
