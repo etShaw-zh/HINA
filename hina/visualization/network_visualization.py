@@ -18,7 +18,7 @@ def plot_HINA(df, group='All', attribute_1=None, attribute_2=None, pruning=False
     - group (str): Group to filter and plot (default: 'All' for entire dataset).
     - attribute_1 (str): Column name for the first node set (e.g., 'student id').
     - attribute_2 (str): Column name for the second node set (e.g., 'task').
-    - pruning (bool or dict): Whether to prune edges using significance logic. 
+    - pruning (bool or dict): Whether to prune edges based on significance of weights. 
                               If dict, specifies parameters for pruning.
     - layout (str): Layout to use for node positioning. Supported layouts:
                     - 'bipartite': Nodes are positioned in two vertical columns.
@@ -39,18 +39,19 @@ def plot_HINA(df, group='All', attribute_1=None, attribute_2=None, pruning=False
     if group != 'All':
         df = df[df['group'] == group]
 
+    G_tuples = get_bipartite(G,attribute_1,attribute_2)
+
     G = nx.Graph()
-    for _, row in df.iterrows():
-        G.add_node(row[attribute_1])
-        G.add_node(row[attribute_2])
-        G.add_edge(row[attribute_1], row[attribute_2], weight=row['task weight'])
+    for e in G_tuples:
+        G.add_node(e[0])
+        G.add_node(e[1])
+        G.add_edge(e[0], e[1], weight=e[2])
 
     if pruning:
-        edge_tuples = [(u, v, d['weight']) for u, v, d in G.edges(data=True)]
         if isinstance(pruning, dict):
-            significant_edges = prune_edges(edge_tuples, **pruning)
+            significant_edges = prune_edges(G_tuples, **pruning)
         else:
-            significant_edges = prune_edges(edge_tuples)
+            significant_edges = prune_edges(G_tuples)
         G = nx.Graph()
         for u, v, w in significant_edges:
             G.add_edge(u, v, weight=w)
