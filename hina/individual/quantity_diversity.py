@@ -55,7 +55,7 @@ def quantity_and_diversity(df,student_col,task_col):
     
         if not(i in out_weights): out_weights[i] = {}
         if not(j in out_weights[i]): out_weights[i][j] = 0
-        out_weights[i][j] += w
+        out_weights[i][j] += wij
     
     diversities = {}
     for i in out_weights:
