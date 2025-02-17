@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
-from hina.mesoscale.clustering import cluster_nodes
+from hina.mesoscale.clustering import bipartite_communities
 from hina.individual.quantity_diversity import get_bipartite
 
 
