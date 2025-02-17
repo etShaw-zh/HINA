@@ -127,48 +127,42 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 .. code-block:: python
 
     import pandas as pd
+    from hina.individual.quantity_diversity import get_bipartite
+    from hina.mesoscale.clustering import bipartite_communities 
     from hina.visualization.network_visualization import plot_HINA, plot_bipartite_clusters
 
-**Step 2: Define the dataset**
+**Step 2: Load the example dataset**
 
 .. code-block:: python
 
-    data = {
-        'student id': ['s1', 's2', 's3', 's4'],
-        'task': ['t1', 't2', 't1', 't3'],
-        'task weight': [1, 2, 3, 4],
-        'group': ['A', 'A', 'B', 'B']
-    }
-    df = pd.DataFrame(data)
+    df = pd.read_csv('synthetic_data_simple.csv')
 
-**Step 3: Plot the bipartite network**
+**Step 3: Plot the bipartite network of students and tasks in all groups**
 
 .. code-block:: python
 
-    plot_HINA(df, attribute_1='student id', attribute_2='task', group='A', layout='spring')
+    plot_HINA(df, attribute_1='student id', attribute_2='task', group='All', layout='spring')
 
-**Step 4: Plot the clustered network**
-
-.. code-block:: python
-
-    plot_clusters(df, attribute_1='student id', attribute_2='task', group='A', clustering_method='modularity')
-
-**Step 5: Plot the bipartite clusters**
+**Step 4: Plot the bipartite network of students and tasks in group 5**
 
 .. code-block:: python
 
-    G = [('s1', 't1', 1), ('s2', 't2', 2), ('s3', 't1', 3), ('s4', 't3', 4)]
-    community_labels = {'s1': 0, 's2': 1, 's3': 0, 's4': 1, 't1': 0, 't2': 1, 't3': 1}
-    plot_bipartite_clusters(G, community_labels)
+    plot_HINA(df, attribute_1='student id', attribute_2='task', group=5, layout='spring')
+
+**Step 5: Plot bipartite clusters inferred using MDL method**
+
+.. code-block:: python
+
+   G = get_bipartite(df,'student id','task')
+   community_labels,cr = bipartite_communities(G)
+   plot_bipartite_clusters(G,community_labels)
 
 Example Output
 --------------
 
 .. code-block:: console
 
-    Plotting HINA network visualization for group A...
-    Plotting clustered network...
-    Plotting bipartite clusters...
+    *SHOW PLOTS OF OUTPUT HERE!*
 
 Paper Source
 ============
