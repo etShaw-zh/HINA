@@ -127,7 +127,7 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 .. code-block:: python
 
     import pandas as pd
-    from hina.visualization.network_visualization import plot_HINA, plot_clusters, plot_bipartite_clusters
+    from hina.visualization.network_visualization import plot_HINA, plot_bipartite_clusters
 
 **Step 2: Define the dataset**
 
