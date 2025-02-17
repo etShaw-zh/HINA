@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from hina.mesoscale.clustering import cluster_nodes, bipartite_communities
+from hina.mesoscale.clustering import bipartite_communities
 
 def test_bipartite_communities():
     G = [(1, 'a', 1), (1, 'b', 2), (2, 'a', 1), (3, 'c', 1), (4, 'd', 1)]
