@@ -1,37 +1,35 @@
-Visualization
+visualization
 +++++++++++++
 
 Tutorial
 ========
 
-The `Visualization` module provides network visualization functions for networks at the group or cohort level, enabling users to project heterogeneous interaction networks onto any subset of node types (e.g., students, tasks, behavioral codes). It also includes functions for visualizing significant interaction structure, clustering results, and alternative representations of the weighted network using Sankey diagrams.
+The `visualization` module provides network visualization functions for networks at the group or cohort level, enabling users to project heterogeneous interaction networks onto any subset of node types (e.g., students, tasks, behavioral codes). It also includes functions for visualizing significant interaction structure and clustering results.
 
 The module allows for the inclusion of various metadata, such as inferred student clusters or contribution metrics, and provides a web-based interface for interactive visualizations and user engagement.
 
 Currently, the module contains the `network_visualization.py` file, which includes:
 
 - `plot_HINA`: Visualizes a bipartite network with specified attributes and layout.
-- `plot_clusters`: Visualizes a clustered bipartite network.
-- `plot_bipartite_clusters`: Optimizes the MDL objective to find bipartite communities and visualizes them.
+- `plot_bipartite_clusters`: Plots bipartite network with specified cluster labels indicated with node colors and positions.
 
 Inputs include:
 
 - **df**: A pandas DataFrame containing network data.
 - **group**: A string indicating which group to filter and plot (e.g., `'All'` for the entire dataset).
 - **attribute_1** and **attribute_2**: The column names representing two sets of nodes (e.g., students and tasks).
-- **pruning**: Boolean or dictionary indicating whether to prune edges using significance logic.
+- **pruning**: Boolean or dictionary indicating whether to prune edges using statistical significance testing.
 - **layout**: Layout method for node positioning (e.g., `'spring'`, `'bipartite'`, `'circular'`).
-- **clustering_method**: Method used to cluster nodes (e.g., `'modularity'`).
 - **NetworkX_kwargs**: Additional arguments for `NetworkX` visualization.
 
 Outputs include:
 
-- Visualizations of the bipartite network with or without clustering and pruning, as well as alternative network representations.
+- Visualizations of the bipartite network with or without cluster labels and pruning.
 
 Visualization
 ============
 
-This module provides functions for visualizing heterogeneous interaction networks, clustering results, and bipartite communities.
+This module provides functions for visualizing heterogeneous interaction networks and bipartite community structure.
 
 .. list-table:: Functions
    :header-rows: 1
@@ -40,10 +38,8 @@ This module provides functions for visualizing heterogeneous interaction network
      - Description
    * - `plot_HINA(df, group='All', attribute_1=None, attribute_2=None, ...) <#plot-hina>`_
      - Plots a bipartite network visualization with specified attributes and layout.
-   * - `plot_clusters(df, group='All', attribute_1=None, attribute_2=None, ...) <#plot-clusters>`_
-     - Plots a clustered bipartite network for the selected group.
    * - `plot_bipartite_clusters(G, community_labels, ...) <#plot-bipartite-clusters>`_
-     - Optimizes MDL objective to find bipartite communities and visualizes them.
+     - Plots bipartite network with specified cluster labels indicated with node colors and positions.
 
 Reference
 ---------
@@ -73,46 +69,13 @@ Plots a bipartite network visualization with specified attributes and layout.
        <li><span class="param-name">group</span>: A string indicating which group to filter and plot (default: <code>'All'</code>).</li>
        <li><span class="param-name">attribute_1</span>: The column name for the first node set (e.g., <code>'student id'</code>).</li>
        <li><span class="param-name">attribute_2</span>: The column name for the second node set (e.g., <code>'task'</code>).</li>
-       <li><span class="param-name">pruning</span>: Whether to prune edges using significance logic. Can be a boolean or a dictionary with pruning parameters (default: <code>False</code>).</li>
+       <li><span class="param-name">pruning</span>: Whether to prune edges using significance testing. Can be a boolean or a dictionary with pruning parameters (default: <code>False</code>).</li>
        <li><span class="param-name">layout</span>: Layout method for positioning nodes. Options include <code>'bipartite'</code>, <code>'spring'</code>, and <code>'circular'</code> (default: <code>'spring'</code>).</li>
        <li><span class="param-name">NetworkX_kwargs</span>: Additional arguments for NetworkX visualization (default: <code>None</code>).</li>
    </ul>
 
 **Returns**:
   - **None**: Displays a plot of the bipartite network.
-
-.. _plot-clusters:
-
-.. raw:: html
-
-   <div id="plot-clusters" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">plot_clusters(df, group='All', attribute_1=None, attribute_2=None, pruning=False, clustering_method='modularity', NetworkX_kwargs=None)</span> 
-       <a href="../Code/network_visualization.html#plot-clusters" class="source-link">[source]</a>
-   </div>
-
-**Description**:
-Plots a clustered bipartite network for the selected group using a specified clustering method.
-
-**Parameters**:
-
-.. raw:: html
-
-   <div class="parameter-block">
-       (df, group='All', attribute_1=None, attribute_2=None, pruning=False, clustering_method='modularity', NetworkX_kwargs=None)
-   </div>
-
-   <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing network data.</li>
-       <li><span class="param-name">group</span>: A string indicating which group to filter and plot (default: <code>'All'</code>).</li>
-       <li><span class="param-name">attribute_1</span>: The column name for the first node set (e.g., <code>'student id'</code>).</li>
-       <li><span class="param-name">attribute_2</span>: The column name for the second node set (e.g., <code>'task'</code>).</li>
-       <li><span class="param-name">pruning</span>: Whether to prune edges using significance logic. Can be a boolean or a dictionary with pruning parameters (default: <code>False</code>).</li>
-       <li><span class="param-name">clustering_method</span>: The method to use for clustering. Options include <code>'modularity'</code> (default) and <code>'SBM'</code>.</li>
-       <li><span class="param-name">NetworkX_kwargs</span>: Additional arguments for NetworkX visualization (default: <code>None</code>).</li>
-   </ul>
-
-**Returns**:
-  - **None**: Displays a plot of the clustered bipartite network.
 
 .. _plot-bipartite-clusters:
 
@@ -124,7 +87,7 @@ Plots a clustered bipartite network for the selected group using a specified clu
    </div>
 
 **Description**:
-Optimizes the MDL objective to find bipartite communities in a network and visualizes them.
+Plots bipartite network with specified cluster labels indicated with node colors and positions.
 
 **Parameters**:
 
@@ -135,7 +98,7 @@ Optimizes the MDL objective to find bipartite communities in a network and visua
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">G</span>: A bipartite edge set with tuples (node in Set 1, node in Set 2).</li>
+       <li><span class="param-name">G</span>: A bipartite edge set with tuples (node in Set 1, node in Set 2, weight).</li>
        <li><span class="param-name">community_labels</span>: A dictionary mapping nodes to their community labels.</li>
        <li><span class="param-name">noise_scale</span>: Controls node dispersion around cluster centroids (default: <code>3</code>).</li>
        <li><span class="param-name">radius</span>: Controls the radius of the community centers (default: <code>20</code>).</li>
