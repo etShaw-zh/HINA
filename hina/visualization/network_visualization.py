@@ -39,7 +39,7 @@ def plot_HINA(df, group='All', attribute_1=None, attribute_2=None, pruning=False
     if group != 'All':
         df = df[df['group'] == group]
 
-    G_tuples = get_bipartite(G,attribute_1,attribute_2)
+    G_tuples = get_bipartite(df,attribute_1,attribute_2)
 
     G = nx.Graph()
     for e in G_tuples:
