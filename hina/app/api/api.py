@@ -8,7 +8,8 @@ import base64
 app = FastAPI(title="HINA REST API")
 
 origins = [
-    "http://localhost:3000",
+    # "http://localhost:3000",
+    "*"
 ]
 
 app.add_middleware(
@@ -71,14 +72,10 @@ async def build_cluster_network_endpoint(
 async def quantity_diversity_endpoint(
     data: str = Form(...),
     attribute1: str = Form(...),
-    attribute2: str = Form(...),
-    weight_col: str = Form(...)
+    attribute2: str = Form(...)
 ):
     df = pd.read_json(data, orient="split")
-    if weight_col == "equal_weight":
-        df["equal_weight"] = 1
-        weight_col = "equal_weight"
-    q, d = utils.quantity_and_diversity(df, student_col=attribute1, task_col=attribute2, weight_col=weight_col)
+    q, d = utils.quantity_and_diversity(df, student_col=attribute1, task_col=attribute2)
     return {"quantity": q, "diversity": d}
 
 if __name__ == "__main__":

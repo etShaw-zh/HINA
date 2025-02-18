@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='hina',
-    version='0.4.4',
+    version='0.4.5',
     description='Heterogenous Interaction Network Analysis in Python',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
@@ -14,7 +14,7 @@ setup(
         "Documentation": "https://hina.readthedocs.io/en/latest/index.html",
         "Source": "https://hina.readthedocs.io/en/latest/index.html"
     },
-    python_requires=">=3.9, <3.12",
+    python_requires=">=3.9",
     install_requires=[
         "numpy>=1.24, <2.0",    
         "pandas>=2.2",

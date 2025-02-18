@@ -40,7 +40,7 @@ export function NavbarMinimalColored() {
   return (
     <nav className={classes.navbar}>
       <Center>
-        <MantineLogo type="mark" size={30} />
+        <MantineLogo type="mark" size={20} />
         <text className={classes.logoText}>HINA</text>
       </Center>
 

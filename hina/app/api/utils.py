@@ -3,7 +3,7 @@ import io
 import pandas as pd
 import networkx as nx
 from hina.dyad.significant_edges import prune_edges
-from hina.mesoscale.clustering import cluster_nodes
+from hina.mesoscale.clustering import bipartite_communities
 from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
 
 def parse_contents(encoded_contents: str) -> pd.DataFrame:
@@ -85,7 +85,7 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
     return elements
 
 def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str,
-                            clustering_method: str, pruning="none", layout="spring"):
+                            number_cluster=None, pruning="none", layout="spring"):
     """
     Build a clustered network using get_bipartite and cluster_nodes.
     """
@@ -100,7 +100,7 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         else:
             pruned = prune_edges(edge_tuples)
         G_edges = pruned
-    cluster_labels = cluster_nodes(G_edges, method=clustering_method)
+    cluster_labels, _ = bipartite_communities(G_edges, fix_B=number_cluster)
     nx_G = nx.Graph()
     for edge in G_edges:
         nx_G.add_edge(str(edge[0]), str(edge[1]), weight=edge[2])
