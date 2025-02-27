@@ -70,8 +70,8 @@ Citation
    :maxdepth: 2
    :caption: Installation and Contributing
 
-   Papers/installation
-   Papers/contributing
+   Modules/installation
+   Modules/contributing
 
 
 .. toctree::
