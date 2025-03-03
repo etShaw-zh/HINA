@@ -4,6 +4,7 @@ import uvicorn
 import pandas as pd
 from hina.app.api import utils
 import base64
+from io import StringIO
 
 app = FastAPI(title="HINA REST API")
 
@@ -44,11 +45,29 @@ async def build_hina_network_endpoint(
     fix_deg: str = Form("Set 1"),
     layout: str = Form("spring")
 ):
-    df = pd.read_json(data, orient="split")
-    pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning=="custom" else "none"
-    G, pos = utils.build_hina_network(df, group, attribute1, attribute2, pruning_param, layout)
+    df = pd.read_json(StringIO(data), orient="split")
+    G_full, pos_full = utils.build_hina_network(df, group, attribute1, attribute2, pruning="none", layout=layout)
+    original_edges = [(u, v, d['weight']) for u, v, d in G_full.edges(data=True)]
+    
+    if pruning != "none":
+        pruning_param = {"alpha": alpha, "fix_deg": fix_deg}  # use custom params
+        significant_edges = utils.prune_edges(original_edges, **pruning_param) or []
+        pruned_edges = [edge for edge in original_edges if edge not in significant_edges]
+        G, pos = utils.build_hina_network(df, group, attribute1, attribute2, pruning_param, layout)
+    else:
+        significant_edges = original_edges
+        pruned_edges = []
+        G, pos = G_full, pos_full
+
     elements = utils.cy_elements_from_graph(G, pos)
-    return {"elements": elements}
+    return {
+        "elements": elements,
+        "dyadic_analysis": {
+            "significant_edges": significant_edges,
+            "pruned_edges": pruned_edges
+        }
+    }
+
 
 @app.post("/build-cluster-network")
 async def build_cluster_network_endpoint(
@@ -62,11 +81,17 @@ async def build_cluster_network_endpoint(
     layout: str = Form("spring"),
     clustering_method: str = Form("modularity")
 ):
-    df = pd.read_json(data, orient="split")
-    pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning=="custom" else "none"
-    nx_G, pos = utils.build_clustered_network(df, group, attribute1, attribute2, clustering_method, pruning=pruning_param, layout=layout)
+    df = pd.read_json(StringIO(data), orient="split")
+    pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning == "custom" else "none"
+    nx_G, pos, cluster_labels = utils.build_clustered_network(
+        df, group, attribute1, attribute2, clustering_method,
+        pruning=pruning_param, layout=layout
+    )
     elements = utils.cy_elements_from_graph(nx_G, pos)
-    return {"elements": elements}
+    return {
+        "elements": elements,
+        "cluster_labels": cluster_labels
+    }
 
 @app.post("/quantity-diversity")
 async def quantity_diversity_endpoint(
@@ -74,7 +99,7 @@ async def quantity_diversity_endpoint(
     attribute1: str = Form(...),
     attribute2: str = Form(...)
 ):
-    df = pd.read_json(data, orient="split")
+    df = pd.read_json(StringIO(data), orient="split")
     q, d = utils.quantity_and_diversity(df, student_col=attribute1, task_col=attribute2)
     return {"quantity": q, "diversity": d}
 

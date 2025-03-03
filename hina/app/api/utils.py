@@ -55,7 +55,7 @@ def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute
         attribute_1_nodes = {n for n, d in G.nodes(data=True) if d['type'] == 'attribute_1'}
         if not nx.is_bipartite(G):
             raise ValueError("The graph is not bipartite; check the input data.")
-        pos = nx.bipartite_layout(G, attribute_1_nodes, align='vertical', scale=2, aspect_ratio=4)
+        pos = nx.bipartite_layout(G, attribute_1_nodes, align='vertical', scale=2, aspect_ratio=6)
     elif layout == 'spring':
         pos = nx.spring_layout(G, k=0.2)
     elif layout == 'circular':
@@ -100,7 +100,7 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         else:
             pruned = prune_edges(edge_tuples)
         G_edges = pruned
-    cluster_labels, _ = bipartite_communities(G_edges, fix_B=number_cluster)
+    cluster_labels, compression_ratio = bipartite_communities(G_edges, fix_B=number_cluster)
     nx_G = nx.Graph()
     for edge in G_edges:
         nx_G.add_edge(str(edge[0]), str(edge[1]), weight=edge[2])
@@ -115,7 +115,11 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         cl = nx_G.nodes[node]['cluster']
         nx_G.nodes[node]['color'] = color_map.get(cl, 'black')
     if layout == 'bipartite':
-        pos = nx.spring_layout(nx_G, k=0.2)
+        # pos = nx.spring_layout(nx_G, k=0.2)
+        attribute_1_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'attribute_1'}
+        if not nx.is_bipartite(nx_G):
+            raise ValueError("The graph is not bipartite; check the input data.")
+        pos = nx.bipartite_layout(nx_G, attribute_1_nodes, align='vertical', scale=2, aspect_ratio=4)
     elif layout == 'spring':
         pos = nx.spring_layout(nx_G, k=0.2)
     elif layout == 'circular':

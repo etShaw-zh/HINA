@@ -27,6 +27,15 @@ interface QDData {
   diversity: Record<string, number>;
 }
 
+interface DyadicAnalysisData {
+  significant_edges: [string, string, number][];
+  pruned_edges: [string, string, number][];
+}
+
+interface ClusterLabelsData {
+  [node: string]: string;
+}
+
 const LAYOUT_OPTIONS = [
   { value: "spring", label: "Spring" },
   { value: "bipartite", label: "Bipartite" },
@@ -39,9 +48,9 @@ const PRUNING_OPTIONS = [
 ];
 
 const DEG_OPTIONS = [
-    { value: "set1", label: "Set 1" },
-    { value: "set2", label: "Set 2" },
-    { value: "none", label: "None" },
+    { value: "Set 1", label: "Set 1" },
+    { value: "Set 2", label: "Set 2" },
+    { value: "None", label: "None" },
 ];
 
 export function Webinterface() {
@@ -60,6 +69,8 @@ export function Webinterface() {
   const [layout, setLayout] = useState<string>("spring");
   const [zoom, setZoom] = useState<number>(1);
   const [qdData, setQdData] = useState<QDData | null>(null);
+  const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
+  const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
 
   // Handle file upload using Mantine's FileInput component
   const handleFileUpload = async (file: File | null) => {
@@ -94,6 +105,11 @@ export function Webinterface() {
     try {
       const res = await axios.post("http://localhost:8000/build-hina-network", params);
       setElements(res.data.elements);
+      if (res.data.dyadic_analysis) {
+        setDyadicAnalysis(res.data.dyadic_analysis);
+      } else {
+        setDyadicAnalysis(null);
+      }
       fetchQuantityAndDiversity();
     } catch (error) {
       console.error("Error updating HINA network:", error);
@@ -116,6 +132,11 @@ export function Webinterface() {
     try {
       const res = await axios.post("http://localhost:8000/build-cluster-network", params);
       setElements(res.data.elements);
+      if (res.data.cluster_labels) {
+        setClusterLabels(res.data.cluster_labels);
+      } else {
+        setClusterLabels(null);
+      }
       fetchQuantityAndDiversity();
     } catch (error) {
       console.error("Error updating Clustered network:", error);
@@ -235,7 +256,7 @@ export function Webinterface() {
                         <Select
                         label="Fix Deg"
                         value={fixDeg}
-                        onChange={(value) => setFixDeg(value || "set1")}
+                        onChange={(value) => setFixDeg(value || "Set 1")}
                         data={DEG_OPTIONS}
                         />
                     </>
@@ -280,7 +301,7 @@ export function Webinterface() {
                       <Tabs.List>
                         <Tabs.Tab value="node-level">Node-Level</Tabs.Tab>
                         <Tabs.Tab value="dyadic">Dyadic Analysis</Tabs.Tab>
-                        <Tabs.Tab value="cluster">Cluster Analysis</Tabs.Tab>
+                        <Tabs.Tab value="cluster">Mesoscale Clustering</Tabs.Tab>
                       </Tabs.List>
 
                       {/* Node-Level Tab Content */}
@@ -312,12 +333,81 @@ export function Webinterface() {
 
                       {/* Dyadic Analysis Tab Content */}
                       <Tabs.Panel value="dyadic">
-                        <Text>Dyadic Analysis Content</Text>
+                        {dyadicAnalysis ? (
+                          <>
+                            <Paper withBorder shadow="sm" p="md" mb="md">
+                              <Title order={3}>Significant Edges</Title>
+                              <Table highlightOnHover withTableBorder withColumnBorders>
+                                <Table.Thead>
+                                  <Table.Tr>
+                                    <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
+                                    <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
+                                    <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
+                                  </Table.Tr>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                  {dyadicAnalysis.significant_edges.map((edge, idx) => (
+                                    <Table.Tr key={idx}>
+                                      <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
+                                      <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
+                                      <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                    </Table.Tr>
+                                  ))}
+                                </Table.Tbody>
+                              </Table>
+                            </Paper>
+                            <Paper withBorder shadow="sm" p="md">
+                              <Title order={3}>Pruned Edges</Title>
+                              <Table highlightOnHover withTableBorder withColumnBorders>
+                                <Table.Thead>
+                                  <Table.Tr>
+                                    <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
+                                    <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
+                                    <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
+                                  </Table.Tr>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                  {dyadicAnalysis.pruned_edges.map((edge, idx) => (
+                                    <Table.Tr key={idx}>
+                                      <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
+                                      <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
+                                      <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                    </Table.Tr>
+                                  ))}
+                                </Table.Tbody>
+                              </Table>
+                            </Paper>
+                          </>
+                        ) : (
+                          <Text>No Dyadic analysis data available.</Text>
+                        )}
                       </Tabs.Panel>
 
-                      {/* Cluster Analysis Tab Content */}
+                      {/* Mesoscale Clustering Tab Content */}
                       <Tabs.Panel value="cluster">
-                        <Text>Cluster Analysis Content</Text>
+                        {clusterLabels ? (
+                          <Paper withBorder shadow="sm" p="md">
+                            <Title order={3}>Cluster Labels</Title>
+                            <Table highlightOnHover withTableBorder withColumnBorders>
+                              <Table.Thead>
+                                <Table.Tr>
+                                  <Table.Th style={{ textAlign: "center" }}>Node</Table.Th>
+                                  <Table.Th style={{ textAlign: "center" }}>Cluster Label</Table.Th>
+                                </Table.Tr>
+                              </Table.Thead>
+                              <Table.Tbody>
+                                {Object.keys(clusterLabels).map((node) => (
+                                  <Table.Tr key={node}>
+                                    <Table.Td style={{ textAlign: "center" }}>{node}</Table.Td>
+                                    <Table.Td style={{ textAlign: "center" }}>{clusterLabels[node]}</Table.Td>
+                                  </Table.Tr>
+                                ))}
+                              </Table.Tbody>
+                            </Table>
+                          </Paper>
+                        ) : (
+                          <Text>No Mesoscale clustering data available.</Text>
+                        )}
                       </Tabs.Panel>
                     </Tabs>
 
