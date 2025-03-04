@@ -19,7 +19,8 @@
     "react": "^19.0.0",
     "react-cytoscapejs": "^2.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5"
+    "react-router-dom": "^7.1.5",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",

@@ -20,8 +20,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
+import * as XLSX from "xlsx";
 
-// Define an interface for Quantity & Diversity data
 interface QDData {
   quantity: Record<string, number>;
   diversity: Record<string, number>;
@@ -50,7 +50,7 @@ const PRUNING_OPTIONS = [
 const DEG_OPTIONS = [
     { value: "Set 1", label: "Set 1" },
     { value: "Set 2", label: "Set 2" },
-    { value: "None", label: "None" },
+    { value: "none", label: "None" },
 ];
 
 export function Webinterface() {
@@ -65,12 +65,13 @@ export function Webinterface() {
   const [weight, setWeight] = useState<string>("equal_weight");
   const [pruning, setPruning] = useState<string>("none");
   const [alpha, setAlpha] = useState<number>(0.05);
-  const [fixDeg, setFixDeg] = useState<string>("set1");
+  const [fixDeg, setFixDeg] = useState<string>("Set 1");
   const [layout, setLayout] = useState<string>("spring");
   const [zoom, setZoom] = useState<number>(1);
   const [qdData, setQdData] = useState<QDData | null>(null);
   const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
+  const [activeTab, setActiveTab] = useState<string | null>("node-level");
 
   // Handle file upload using Mantine's FileInput component
   const handleFileUpload = async (file: File | null) => {
@@ -162,38 +163,64 @@ export function Webinterface() {
   const zoomIn = () => setZoom((prevZoom) => Math.min(prevZoom * 1.2, 3));
   const zoomOut = () => setZoom((prevZoom) => Math.max(prevZoom / 1.2, 0.3));
 
-  // Export to CSV
-  const exportToCSV = () => {
-    if (!qdData) return;
-    const data = [
-      { Attribute: attr1, Quantity: "Quantity", Diversity: "Diversity" },
-      ...Object.keys(qdData.quantity).map((key) => ({
-        Attribute: key,
-        Quantity: qdData.quantity[key],
-        Diversity: qdData.diversity[key],
-      })),
-    ];
+  // Export to XLSX
+  const exportToXLSX = () => {
+    const wb = XLSX.utils.book_new();
 
-    const csvContent = [
-      Object.keys(data[0]).join(","),
-      ...data.map((row) => Object.values(row).join(",")),
-    ].join("\n");
+    if (activeTab === "node-level") {
+      if (!qdData) return;
+      const nodeLevelData = [
+        ["Attribute", "Quantity", "Diversity"],
+        ...Object.keys(qdData.quantity).map((key) => [
+          key,
+          qdData.quantity[key],
+          qdData.diversity[key],
+        ]),
+      ];
+      const wsNode = XLSX.utils.aoa_to_sheet(nodeLevelData);
+      XLSX.utils.book_append_sheet(wb, wsNode, "Quantity & Diversity");
+      XLSX.writeFile(wb, "quantity_and_diversity.xlsx");
+    } else if (activeTab === "dyadic") {
+      if (!dyadicAnalysis) return;
+      const sigData = [
+        ["Node 1", "Node 2", "Weight"],
+        ...dyadicAnalysis.significant_edges.map((edge) => [edge[0], edge[1], edge[2]]),
+      ];
+      const wsSig = XLSX.utils.aoa_to_sheet(sigData);
+      XLSX.utils.book_append_sheet(wb, wsSig, "Significant Edges");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "quantity_and_diversity.csv";
-    link.click();
+      const prunedData = [
+        ["Node 1", "Node 2", "Weight"],
+        ...dyadicAnalysis.pruned_edges.map((edge) => [edge[0], edge[1], edge[2]]),
+      ];
+      const wsPruned = XLSX.utils.aoa_to_sheet(prunedData);
+      XLSX.utils.book_append_sheet(wb, wsPruned, "Pruned Edges");
+
+      XLSX.writeFile(wb, "dyadic_analysis.xlsx");
+    } else if (activeTab === "cluster") {
+      if (!clusterLabels) return;
+      const clusterData = [
+        ["Node", "Cluster Label"],
+        ...Object.keys(clusterLabels).map((node) => [
+          node,
+          clusterLabels[node],
+        ]),
+      ];
+      const wsCluster = XLSX.utils.aoa_to_sheet(clusterData);
+      XLSX.utils.book_append_sheet(wb, wsCluster, "Cluster Labels");
+      XLSX.writeFile(wb, "mesoscale_clustering.xlsx");
+    }
   };
+
 
   return (
     <AppShell
       padding="md"
-      navbar={{ width: 180, breakpoint: "md", collapsed: { mobile: !opened } }} 
+      // navbar={{ width: 180, breakpoint: "md", collapsed: { mobile: !opened } }} 
     >
-      <AppShell.Navbar p="sm">
+      {/* <AppShell.Navbar p="sm">
         <NavbarMinimalColored />  
-      </AppShell.Navbar>
+      </AppShell.Navbar> */}
 
       <AppShell.Main>
         <Container fluid style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -297,7 +324,7 @@ export function Webinterface() {
                 {/* Right Panel for Analytical Results */}
                 <ScrollArea h={1200}>
                   <Paper withBorder shadow="sm" style={{ flex: 1, height: "1200px"}}>
-                    <Tabs defaultValue="node-level">
+                    <Tabs value={activeTab} onChange={setActiveTab}>
                       <Tabs.List>
                         <Tabs.Tab value="node-level">Node-Level</Tabs.Tab>
                         <Tabs.Tab value="dyadic">Dyadic Analysis</Tabs.Tab>
@@ -414,7 +441,7 @@ export function Webinterface() {
                     {/* Export Button */}
                     {qdData && (
                       <Group mt="md">
-                        <Button onClick={exportToCSV}>Export Results</Button>
+                        <Button onClick={exportToXLSX}>Export Results</Button>
                       </Group>
                     )}
                   </Paper>

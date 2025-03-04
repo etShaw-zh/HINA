@@ -47,7 +47,8 @@ async def build_hina_network_endpoint(
 ):
     df = pd.read_json(StringIO(data), orient="split")
     G_full, pos_full = utils.build_hina_network(df, group, attribute1, attribute2, pruning="none", layout=layout)
-    original_edges = [(u, v, d['weight']) for u, v, d in G_full.edges(data=True)]
+    original_edges = [utils.order_edge(u, v, df, attribute1, attribute2, d['weight'])
+                    for u, v, d in G_full.edges(data=True)]
     
     if pruning != "none":
         pruning_param = {"alpha": alpha, "fix_deg": fix_deg}  # use custom params
