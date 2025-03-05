@@ -16,7 +16,8 @@ import {
   Tabs,
   Grid,
   Col,
-  ScrollArea
+  ScrollArea,
+  Accordion 
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
@@ -304,7 +305,7 @@ export function Webinterface() {
             <Grid>
               <Grid.Col span={8}>
                 {/* Left Panel for Network Visualization */}
-                <Paper withBorder shadow="sm" style={{ flex: 1, position: "relative", height: "1200px", marginBottom: "20px" }}>
+                <Paper withBorder shadow="sm" style={{ flex: 1, position: "relative", height: "700px", marginBottom: "20px" }}>
                   <CytoscapeComponent
                     elements={elements}
                     style={{ width: "100%", height: "100%" }}
@@ -322,7 +323,7 @@ export function Webinterface() {
 
               <Grid.Col span={4}>
                 {/* Right Panel for Analytical Results */}
-                <ScrollArea h={1200}>
+                <ScrollArea h={700}>
                   <Paper withBorder shadow="sm" style={{ flex: 1, height: "1200px"}}>
                     <Tabs value={activeTab} onChange={setActiveTab}>
                       <Tabs.List>
@@ -361,50 +362,63 @@ export function Webinterface() {
                       {/* Dyadic Analysis Tab Content */}
                       <Tabs.Panel value="dyadic">
                         {dyadicAnalysis ? (
-                          <>
-                            <Paper withBorder shadow="sm" p="md" mb="md">
-                              <Title order={3}>Significant Edges</Title>
-                              <Table highlightOnHover withTableBorder withColumnBorders>
-                                <Table.Thead>
-                                  <Table.Tr>
-                                    <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
-                                    <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
-                                    <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
-                                  </Table.Tr>
-                                </Table.Thead>
-                                <Table.Tbody>
-                                  {dyadicAnalysis.significant_edges.map((edge, idx) => (
-                                    <Table.Tr key={idx}>
-                                      <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
-                                      <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
-                                      <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                          <Accordion transitionDuration={500}>
+                            <Accordion.Item value="sig">
+                              <Accordion.Control>
+                                <Title order={4}>
+                                  Significant Edges ({dyadicAnalysis.significant_edges.length})
+                                </Title>
+                              </Accordion.Control>
+                              <Accordion.Panel>
+                                <Table highlightOnHover withTableBorder withColumnBorders>
+                                  <Table.Thead>
+                                    <Table.Tr>
+                                      <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
+                                      <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
+                                      <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
                                     </Table.Tr>
-                                  ))}
-                                </Table.Tbody>
-                              </Table>
-                            </Paper>
-                            <Paper withBorder shadow="sm" p="md">
-                              <Title order={3}>Pruned Edges</Title>
-                              <Table highlightOnHover withTableBorder withColumnBorders>
-                                <Table.Thead>
-                                  <Table.Tr>
-                                    <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
-                                    <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
-                                    <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
-                                  </Table.Tr>
-                                </Table.Thead>
-                                <Table.Tbody>
-                                  {dyadicAnalysis.pruned_edges.map((edge, idx) => (
-                                    <Table.Tr key={idx}>
-                                      <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
-                                      <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
-                                      <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                  </Table.Thead>
+                                  <Table.Tbody>
+                                    {dyadicAnalysis.significant_edges.map((edge, idx) => (
+                                      <Table.Tr key={idx}>
+                                        <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                      </Table.Tr>
+                                    ))}
+                                  </Table.Tbody>
+                                </Table>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+
+                            <Accordion.Item value="pruned">
+                              <Accordion.Control>
+                                <Title order={4}>
+                                  Pruned Edges ({dyadicAnalysis.pruned_edges.length})
+                                </Title>
+                              </Accordion.Control>
+                              <Accordion.Panel>
+                                <Table highlightOnHover withTableBorder withColumnBorders>
+                                  <Table.Thead>
+                                    <Table.Tr>
+                                      <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
+                                      <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
+                                      <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
                                     </Table.Tr>
-                                  ))}
-                                </Table.Tbody>
-                              </Table>
-                            </Paper>
-                          </>
+                                  </Table.Thead>
+                                  <Table.Tbody>
+                                    {dyadicAnalysis.pruned_edges.map((edge, idx) => (
+                                      <Table.Tr key={idx}>
+                                        <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                      </Table.Tr>
+                                    ))}
+                                  </Table.Tbody>
+                                </Table>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+                          </Accordion>
                         ) : (
                           <Text>No Dyadic analysis data available.</Text>
                         )}
