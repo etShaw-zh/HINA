@@ -2,6 +2,7 @@ import base64
 import io
 import pandas as pd
 import networkx as nx
+import numpy as np
 from hina.dyad.significant_edges import prune_edges
 from hina.mesoscale.clustering import bipartite_communities
 from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
@@ -114,6 +115,7 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
                             number_cluster=None, pruning="none", layout="spring"):
     """
     Build a clustered network using get_bipartite and cluster_nodes.
+    This version adapts node, edge, and position style from plot_bipartite_clusters.
     """
     if group != 'All':
         df = df[df['group'] == group]
@@ -127,29 +129,66 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         else:
             pruned = prune_edges(G_edges_ordered)
         G_edges_ordered = pruned or []
+    
     cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
     nx_G = nx.Graph()
     for edge in G_edges_ordered:
         nx_G.add_edge(edge[0], edge[1], weight=edge[2])
+    
+    attr1_nodes = set(df[attribute_1].astype(str).values)
+    attr2_nodes = set(df[attribute_2].astype(str).values)
     for node in nx_G.nodes():
-        nx_G.nodes[node]['cluster'] = cluster_labels.get(str(node), "-1")
-    unique_clusters = sorted(set(cluster_labels.values()) | {"-1"})
-    colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33']
-    color_map = {}
-    for i, label in enumerate(unique_clusters):
-        color_map[label] = 'grey' if label == -1 else colors[i % len(colors)]
+        if node in attr1_nodes:
+            nx_G.nodes[node]['type'] = 'attribute_1'
+        elif node in attr2_nodes:
+            nx_G.nodes[node]['type'] = 'attribute_2'
+        else:
+            nx_G.nodes[node]['type'] = 'unknown'
+    
     for node in nx_G.nodes():
-        cl = nx_G.nodes[node]['cluster']
-        nx_G.nodes[node]['color'] = color_map.get(cl, 'black')
+        nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
+    
+    offset = np.random.rand() * np.pi
+    radius = 1
+    noise_scale = 3.
+    
+    # For nodes in attribute_1: position based on community label
+    # Use the cluster labels as the community indicator.
+    communities = set(cluster_labels.values())
+    B = len(communities)
+    comm2ind = {comm: i for i, comm in enumerate(communities)}
+    
+    set1_pos = {}
+    for node in attr1_nodes:
+        comm = cluster_labels.get(str(node), "-1")
+        if comm not in comm2ind:
+            comm2ind[comm] = len(comm2ind)
+        c = comm2ind[comm]
+        angle = 2 * np.pi * c / B + offset
+        x = radius * np.cos(angle) + (2 * np.random.rand() - 1) * noise_scale
+        y = radius * np.sin(angle) + (2 * np.random.rand() - 1) * noise_scale
+        set1_pos[node] = (x, y)
+    
+    # For nodes in attribute_2: arrange in a circle (half radius)
+    set2_pos = {}
+    attr2_list = list(attr2_nodes)
+    num_s2 = len(attr2_list)
+    for i, node in enumerate(attr2_list):
+        angle = 2 * np.pi * i / num_s2 + offset
+        x = 0.5 * radius * np.cos(angle)
+        y = 0.5 * radius * np.sin(angle)
+        set2_pos[node] = (x, y)
+    
+    pos_custom = {**set1_pos, **set2_pos}
+    
     if layout == 'bipartite':
-        attribute_1_nodes = {n for n, d in nx_G.nodes(data=True) if d.get('type') == 'attribute_1'}
-        if not nx.is_bipartite(nx_G):
-            raise ValueError("The graph is not bipartite; check the input data.")
-        pos = nx.bipartite_layout(nx_G, attribute_1_nodes, align='vertical', scale=2, aspect_ratio=4)
+        pos = pos_custom
     elif layout == 'spring':
         pos = nx.spring_layout(nx_G, k=0.2)
     elif layout == 'circular':
         pos = nx.circular_layout(nx_G)
     else:
-        pos = nx.spring_layout(nx_G, k=0.2)
+        pos = pos_custom
+    
     return nx_G, pos, cluster_labels
+
