@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import CytoscapeComponent from "react-cytoscapejs";
 import {
@@ -96,7 +96,7 @@ export function Webinterface() {
 
   const handleSave = (full: boolean) => {
     if (!cyRef.current) return;
-    const dataUrl = cyRef.current.png({ full });
+    const dataUrl = cyRef.current.png({ full, bg: 'white' });
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = `graph_${full ? "full" : "partial"}.png`;
@@ -226,6 +226,20 @@ export function Webinterface() {
     }
   };
 
+  useEffect(() => {
+    if (!cyRef.current) return;
+    const cy = cyRef.current;
+    const handleTap = (evt: any) => {
+      // Remove highlight class from all nodes
+      cy.nodes().removeClass("highlight");
+      // Add highlight to the clicked node
+      evt.target.addClass("highlight");
+    };
+    cy.on("tap", "node", handleTap);
+    return () => {
+      cy.removeListener("tap", "node", handleTap);
+    };
+  }, [elements]);
 
   return (
     <AppShell
@@ -331,10 +345,41 @@ export function Webinterface() {
                     zoom={zoom}
                     userZoomingEnabled={false}
                     userPanningEnabled={true}
+                    stylesheet={[
+                      {
+                        selector: "node",
+                        style: {
+                          "background-color": "data(color)",
+                          "label": "data(id)",
+                          "text-valign": "center",
+                          "color": "#fff",
+                          "text-outline-width": 2,
+                          "text-outline-color": "data(color)"
+                        },
+                      },
+                      {
+                        selector: "node.highlight",
+                        style: {
+                          "background-color": "red"
+                        },
+                      },
+                      {
+                        selector: "edge",
+                        style: {
+                          "line-color": "#ccc",
+                          "width": "data(weight)",
+                          "label": "data(label)",
+                          "font-size": "10px",
+                          "text-rotation": "autorotate",
+                          "text-margin-y": -10,
+                        },
+                      },
+                    ]}
                     cy={(cy) => {
                       cyRef.current = cy;
                     }}
                   />
+
                   <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
                     <Menu shadow="md" width={100} trigger="click-hover" openDelay={100} closeDelay={400}>
                       <Menu.Target>

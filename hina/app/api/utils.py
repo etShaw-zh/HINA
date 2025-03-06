@@ -70,14 +70,17 @@ def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute
     for node in G.nodes():
         if node in df[attribute_1].astype(str).values:
             G.nodes[node]['type'] = 'attribute_1'
-            G.nodes[node]['color'] = 'blue'
+            G.nodes[node]['color'] = 'grey'
         elif node in df[attribute_2].astype(str).values:
             G.nodes[node]['type'] = 'attribute_2'
-            G.nodes[node]['color'] = 'grey'
+            G.nodes[node]['color'] = 'blue'
         else:
             G.nodes[node]['type'] = 'unknown'
             G.nodes[node]['color'] = 'black'
-    
+
+    for u, v, d in G.edges(data=True):
+        d['label'] = str(d.get('weight', ''))
+
     if layout == 'bipartite':
         attribute_1_nodes = {n for n, d in G.nodes(data=True) if d['type'] == 'attribute_1'}
         if not nx.is_bipartite(G):
@@ -94,6 +97,7 @@ def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute
 def cy_elements_from_graph(G: nx.Graph, pos: dict):
     """
     Convert a NetworkX graph and its layout positions into Cytoscape elements.
+    Each node element now includes its color in its data.
     """
     elements = []
     for node, data in G.nodes(data=True):
@@ -101,21 +105,30 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
         x = pos[node][0] * 400 + 300
         y = pos[node][1] * 400 + 300
         elements.append({
-            'data': {'id': node_str, 'label': node_str},
+            'data': {
+                'id': node_str,
+                'label': node_str,
+                'color': data.get('color', 'black')  
+            },
             'position': {'x': x, 'y': y},
             'classes': data.get('type', '')
         })
     for u, v, d in G.edges(data=True):
         elements.append({
-            'data': {'source': str(u), 'target': str(v), 'weight': d.get('weight', 1)}
+            'data': {
+                'source': str(u),
+                'target': str(v),
+                'weight': d.get('weight', 0),
+                'label': d.get('label', str(d.get('weight', '')))
+            }
         })
     return elements
 
 def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str,
-                            number_cluster=None, pruning="none", layout="spring"):
+                            number_cluster=None, pruning="none", layout="biaprtite"):
     """
     Build a clustered network using get_bipartite and cluster_nodes.
-    This version adapts node, edge, and position style from plot_bipartite_clusters.
+    Adapts node, edge, and position style similar to plot_bipartite_clusters.
     """
     if group != 'All':
         df = df[df['group'] == group]
@@ -135,18 +148,25 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
     for edge in G_edges_ordered:
         nx_G.add_edge(edge[0], edge[1], weight=edge[2])
     
+    # Determine nodes that belong to each attribute
     attr1_nodes = set(df[attribute_1].astype(str).values)
     attr2_nodes = set(df[attribute_2].astype(str).values)
     for node in nx_G.nodes():
         if node in attr1_nodes:
             nx_G.nodes[node]['type'] = 'attribute_1'
+            nx_G.nodes[node]['color'] = 'grey'
         elif node in attr2_nodes:
             nx_G.nodes[node]['type'] = 'attribute_2'
+            nx_G.nodes[node]['color'] = 'blue'
         else:
             nx_G.nodes[node]['type'] = 'unknown'
+            nx_G.nodes[node]['color'] = 'black'
     
     for node in nx_G.nodes():
         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
+    
+    for u, v, d in nx_G.edges(data=True):
+        d['label'] = str(d.get('weight', ''))
     
     offset = np.random.rand() * np.pi
     radius = 1
@@ -157,7 +177,6 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
     communities = set(cluster_labels.values())
     B = len(communities)
     comm2ind = {comm: i for i, comm in enumerate(communities)}
-    
     set1_pos = {}
     for node in attr1_nodes:
         comm = cluster_labels.get(str(node), "-1")
