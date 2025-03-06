@@ -82,7 +82,7 @@ def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute
         attribute_1_nodes = {n for n, d in G.nodes(data=True) if d['type'] == 'attribute_1'}
         if not nx.is_bipartite(G):
             raise ValueError("The graph is not bipartite; check the input data.")
-        pos = nx.bipartite_layout(G, attribute_1_nodes, align='vertical', scale=2, aspect_ratio=6)
+        pos = nx.bipartite_layout(G, attribute_1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
     elif layout == 'spring':
         pos = nx.spring_layout(G, k=0.2)
     elif layout == 'circular':

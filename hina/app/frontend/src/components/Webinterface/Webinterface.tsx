@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import CytoscapeComponent from "react-cytoscapejs";
 import {
@@ -17,7 +17,8 @@ import {
   Grid,
   Col,
   ScrollArea,
-  Accordion 
+  Accordion,
+  Menu 
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
@@ -67,12 +68,13 @@ export function Webinterface() {
   const [pruning, setPruning] = useState<string>("none");
   const [alpha, setAlpha] = useState<number>(0.05);
   const [fixDeg, setFixDeg] = useState<string>("Set 1");
-  const [layout, setLayout] = useState<string>("spring");
+  const [layout, setLayout] = useState<string>("bipartite");
   const [zoom, setZoom] = useState<number>(1);
   const [qdData, setQdData] = useState<QDData | null>(null);
   const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>("node-level");
+  const cyRef = useRef<any>(null);
 
   // Handle file upload using Mantine's FileInput component
   const handleFileUpload = async (file: File | null) => {
@@ -90,6 +92,17 @@ export function Webinterface() {
     } catch (error) {
       console.error("Error during file upload:", error);
     }
+  };
+
+  const handleSave = (full: boolean) => {
+    if (!cyRef.current) return;
+    const dataUrl = cyRef.current.png({ full });
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `graph_${full ? "full" : "partial"}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const updateHinaNetwork = async () => {
@@ -303,9 +316,14 @@ export function Webinterface() {
               </Paper>   
             )}
             <Grid>
+
               <Grid.Col span={8}>
                 {/* Left Panel for Network Visualization */}
-                <Paper withBorder shadow="sm" style={{ flex: 1, position: "relative", height: "700px", marginBottom: "20px" }}>
+                <Paper
+                  withBorder
+                  shadow="sm"
+                  style={{ flex: 1, position: "relative", height: "700px", marginBottom: "20px" }}
+                >
                   <CytoscapeComponent
                     elements={elements}
                     style={{ width: "100%", height: "100%" }}
@@ -313,10 +331,42 @@ export function Webinterface() {
                     zoom={zoom}
                     userZoomingEnabled={false}
                     userPanningEnabled={true}
+                    cy={(cy) => {
+                      cyRef.current = cy;
+                    }}
                   />
-                  <div style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 999 }}>
-                    <Button onClick={zoomIn} style={{ fontSize: "24px", margin: "2px" }}>+</Button>
-                    <Button onClick={zoomOut} style={{ fontSize: "24px", margin: "2px" }}>–</Button>
+                  <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
+                    <Menu shadow="md" width={100} trigger="click-hover" openDelay={100} closeDelay={400}>
+                      <Menu.Target>
+                        <Button>Save</Button>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item onClick={() => handleSave(true)}>
+                          Save Full
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item onClick={() => handleSave(false)}>
+                          Save Now
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "10px",
+                      right: "10px",
+                      zIndex: 999,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Button onClick={zoomIn} style={{ fontSize: "24px", margin: "2px" }}>
+                      +
+                    </Button>
+                    <Button onClick={zoomOut} style={{ fontSize: "24px", margin: "2px" }}>
+                      –
+                    </Button>
                   </div>
                 </Paper>
               </Grid.Col>
