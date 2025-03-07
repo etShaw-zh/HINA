@@ -3,6 +3,7 @@ import io
 import pandas as pd
 import networkx as nx
 import numpy as np
+import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
 from hina.mesoscale.clustering import bipartite_communities
 from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
@@ -124,76 +125,90 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
         })
     return elements
 
-def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str,
-                            number_cluster=None, pruning="none", layout="biaprtite"):
+def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, 
+                            number_cluster=None, pruning="none", layout="bipartite"):
     """
-    Build a clustered network using get_bipartite and cluster_nodes.
-    Adapts node, edge, and position style similar to plot_bipartite_clusters.
+    Build a clustered network using get_bipartite and bipartite_communities.
+    
+    Colors:
+      - Nodes in attribute_1 are colored based on their community using TABLEAU_COLORS.
+      - Nodes in attribute_2 are fixed as blue.
     """
     if group != 'All':
         df = df[df['group'] == group]
     
     G_edges = get_bipartite(df, attribute_1, attribute_2)
-    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, w) for u, v, w in G_edges]
+    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, float(w)) for u, v, w in G_edges]
     
     if pruning != "none":
         if isinstance(pruning, dict):
-            pruned = prune_edges(G_edges_ordered, **pruning)
+            significant_edges = prune_edges(G_edges_ordered, **pruning)
         else:
-            pruned = prune_edges(G_edges_ordered)
-        G_edges_ordered = pruned or []
+            significant_edges = prune_edges(G_edges_ordered)
+        significant_edges = significant_edges or set()
+        G_edges_ordered = list(significant_edges)
     
+    if not number_cluster is None:
+        number_cluster = int(number_cluster)
+    
+    # Run community detection (clustering)
     cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
+    
     nx_G = nx.Graph()
     for edge in G_edges_ordered:
-        nx_G.add_edge(edge[0], edge[1], weight=edge[2])
+        nx_G.add_edge(edge[0], edge[1], weight=float(edge[2]))
     
-    # Determine nodes that belong to each attribute
+    # Determine which nodes belong to each attribute
     attr1_nodes = set(df[attribute_1].astype(str).values)
     attr2_nodes = set(df[attribute_2].astype(str).values)
     for node in nx_G.nodes():
         if node in attr1_nodes:
             nx_G.nodes[node]['type'] = 'attribute_1'
-            nx_G.nodes[node]['color'] = 'grey'
         elif node in attr2_nodes:
             nx_G.nodes[node]['type'] = 'attribute_2'
-            nx_G.nodes[node]['color'] = 'blue'
         else:
             nx_G.nodes[node]['type'] = 'unknown'
-            nx_G.nodes[node]['color'] = 'black'
     
     for node in nx_G.nodes():
         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
+    
+    # Build color mapping for attribute_1 nodes based on community labels.
+    communities = sorted({nx_G.nodes[node]['cluster'] 
+                          for node in nx_G.nodes() 
+                          if nx_G.nodes[node]['type'] == 'attribute_1'})
+    comm_colors = dict(zip(communities, list(mcolors.TABLEAU_COLORS.values())[:len(communities)]))
+    
+    for node in nx_G.nodes():
+        if nx_G.nodes[node]['type'] == 'attribute_1':
+            cluster_label = nx_G.nodes[node]['cluster']
+            nx_G.nodes[node]['color'] = comm_colors.get(cluster_label, 'grey')
+        elif nx_G.nodes[node]['type'] == 'attribute_2':
+            nx_G.nodes[node]['color'] = 'blue'
+        else:
+            nx_G.nodes[node]['color'] = 'black'
     
     for u, v, d in nx_G.edges(data=True):
         d['label'] = str(d.get('weight', ''))
     
     offset = np.random.rand() * np.pi
-    radius = 1
-    noise_scale = 3.
-    
-    # For nodes in attribute_1: position based on community label
-    # Use the cluster labels as the community indicator.
-    communities = set(cluster_labels.values())
-    B = len(communities)
-    comm2ind = {comm: i for i, comm in enumerate(communities)}
+    radius = 1 # radius of the circle 20/3 * radius/noise_scale
+    noise_scale = 0.16 
+    # For nodes in attribute_1: position based on community label.
     set1_pos = {}
-    for node in attr1_nodes:
-        comm = cluster_labels.get(str(node), "-1")
-        if comm not in comm2ind:
-            comm2ind[comm] = len(comm2ind)
-        c = comm2ind[comm]
-        angle = 2 * np.pi * c / B + offset
+    for node in attr1_nodes.intersection(set(nx_G.nodes())):
+        comm = nx_G.nodes[node].get('cluster', "-1")
+        comm_index = communities.index(comm) if comm in communities else 0
+        angle = 2 * np.pi * comm_index / len(communities) + offset
         x = radius * np.cos(angle) + (2 * np.random.rand() - 1) * noise_scale
         y = radius * np.sin(angle) + (2 * np.random.rand() - 1) * noise_scale
         set1_pos[node] = (x, y)
-    
     # For nodes in attribute_2: arrange in a circle (half radius)
     set2_pos = {}
-    attr2_list = list(attr2_nodes)
-    num_s2 = len(attr2_list)
-    for i, node in enumerate(attr2_list):
-        angle = 2 * np.pi * i / num_s2 + offset
+    for node in attr2_nodes.intersection(set(nx_G.nodes())):
+        attr2_list = sorted(list(attr2_nodes.intersection(set(nx_G.nodes()))))
+        num_s2 = len(attr2_list)
+        index = attr2_list.index(node)
+        angle = 2 * np.pi * index / num_s2 + offset
         x = 0.5 * radius * np.cos(angle)
         y = 0.5 * radius * np.sin(angle)
         set2_pos[node] = (x, y)
@@ -210,4 +225,3 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         pos = pos_custom
     
     return nx_G, pos, cluster_labels
-

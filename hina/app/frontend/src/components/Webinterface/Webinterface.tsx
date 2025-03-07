@@ -64,7 +64,7 @@ export function Webinterface() {
   const [groups, setGroups] = useState<string[]>([]);
   const [attr1, setAttr1] = useState<string>("");
   const [attr2, setAttr2] = useState<string>("");
-  const [weight, setWeight] = useState<string>("equal_weight");
+  const [numberCluster, setNumberCluster] = useState<string>("");
   const [pruning, setPruning] = useState<string>("none");
   const [alpha, setAlpha] = useState<number>(0.05);
   const [fixDeg, setFixDeg] = useState<string>("Set 1");
@@ -112,7 +112,6 @@ export function Webinterface() {
     params.append("group", group);
     params.append("attribute1", attr1);
     params.append("attribute2", attr2);
-    params.append("weight", weight);
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
     params.append("fix_deg", fixDeg);
@@ -139,11 +138,12 @@ export function Webinterface() {
     params.append("group", group);
     params.append("attribute1", attr1);
     params.append("attribute2", attr2);
-    params.append("weight", weight);
+    params.append("number_cluster", numberCluster);
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
     params.append("fix_deg", fixDeg);
     params.append("layout", layout);
+    console.log("number_cluster", numberCluster)
     try {
       const res = await axios.post("http://localhost:8000/build-cluster-network", params);
       setElements(res.data.elements);
@@ -175,7 +175,7 @@ export function Webinterface() {
 
   // Zoom functions
   const zoomIn = () => setZoom((prevZoom) => Math.min(prevZoom * 1.2, 3));
-  const zoomOut = () => setZoom((prevZoom) => Math.max(prevZoom / 1.2, 0.3));
+  const zoomOut = () => setZoom((prevZoom) => Math.max(prevZoom / 1.2, 0.1));
 
   // Export to XLSX
   const exportToXLSX = () => {
@@ -281,17 +281,8 @@ export function Webinterface() {
                     onChange={(value) => setAttr2(value || "")}
                     data={columns}
                   />
-                  <Select
-                    label="Weight Column"
-                    value={weight}
-                    onChange={(value) => setWeight(value || "equal_weight")}
-                    data={[
-                      { value: "equal_weight", label: "Equal Weight" },
-                      ...columns,
-                    ]}
-                  />
                 </Group>
-                <Group mt="md">
+                <Group grow mt="md" mb="md">
                     <Select
                         label="Pruning"
                         value={pruning}
@@ -321,6 +312,15 @@ export function Webinterface() {
                         value={layout}
                         onChange={(value) => setLayout(value || "spring")}
                         data={LAYOUT_OPTIONS}
+                    />
+                    <NumberInput
+                      label="Fixed Number of Cluster (Optional)"
+                      withAsterisk
+                      value={numberCluster === "" ? 'none' : Number(numberCluster)}
+                      onChange={(val) => setNumberCluster(val?.toString() || "")}
+                      placeholder="None"
+                      min={1}
+                      allowDecimal={false}
                     />
                 </Group>
                 <Group mt="md">

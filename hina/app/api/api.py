@@ -80,12 +80,12 @@ async def build_cluster_network_endpoint(
     alpha: float = Form(0.05),
     fix_deg: str = Form("Set 1"),
     layout: str = Form("spring"),
-    clustering_method: str = Form("modularity")
+    number_cluster: str = Form(None)
 ):
     df = pd.read_json(StringIO(data), orient="split")
     pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning == "custom" else "none"
     nx_G, pos, cluster_labels = utils.build_clustered_network(
-        df, group, attribute1, attribute2, clustering_method,
+        df, group, attribute1, attribute2, number_cluster,
         pruning=pruning_param, layout=layout
     )
     elements = utils.cy_elements_from_graph(nx_G, pos)
