@@ -33,38 +33,7 @@ These analytical features offered by *HINA* allow for easy access to critical me
 Citation
 ========
 
-.. If you use **PANINIpy** in your research or projects, please cite it as follows:
-
-.. **BibTeX Format**
-
-.. For BibTeX users, include the following entry in the bibliography file:
-
-.. .. code-block:: bibtex
-
-..     @article{Kirkley2024,
-..         doi = {10.21105/joss.07312},
-..         url = {https://doi.org/10.21105/joss.07312},
-..         year = {2024},
-..         publisher = {The Open Journal},
-..         volume = {9},
-..         number = {103},
-..         pages = {7312},
-..         author = {Alec Kirkley and Baiyue He},
-..         title = {PANINIpy: Package of Algorithms for Nonparametric Inference with Networks In Python},
-..         journal = {Journal of Open Source Software}
-..     }
-
-.. **APA Format**
-
-.. For APA users, cite as:
-
-.. Kirkley, A., & He, B. (2024). PANINIpy: Package of Algorithms for Nonparametric Inference with Networks In Python. Journal of Open Source Software, 9(103), 7312, https://doi.org/10.21105/joss.07312
-
-.. **How to Cite**
-
-.. To reference **PANINIpy**, one can use either the BibTeX or APA format provided above. Please ensure that the citation includes the DOI and the link to the official article for clarity and accessibility.
-
-.. For more details, visit the official article published in the `Journal of Open Source Software <https://doi.org/10.21105/joss.07312>`_.
+If you use **HINA** in your research or projects, please cite it as follows:
 
 .. toctree::
    :maxdepth: 2
@@ -82,6 +51,7 @@ Citation
    Modules/dyad
    Modules/mesoscale
    Modules/visualization
+   Modules/dashboard
 
 
 .. Attribution

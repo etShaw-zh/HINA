@@ -160,9 +160,9 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 Example Output
 --------------
 
-.. code-block:: console
-
-    *SHOW PLOTS OF OUTPUT HERE!*
+.. image:: Figures/visualization_demo.png
+   :alt: visualization Demo
+   :align: center
 
 Paper Source
 ============
