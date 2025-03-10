@@ -1,4 +1,4 @@
-individual
+Individual
 ++++++++++++
 
 Tutorial

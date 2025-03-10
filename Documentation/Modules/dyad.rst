@@ -1,4 +1,4 @@
-dyad
+Dyad
 +++++
 
 Tutorial

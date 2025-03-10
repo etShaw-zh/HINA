@@ -1,4 +1,4 @@
-visualization
+Visualization
 +++++++++++++
 
 Tutorial
@@ -143,33 +143,57 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 
     plot_HINA(df, attribute_1='student id', attribute_2='task', group='All', layout='spring')
 
-**Step 4: Plot the bipartite network of students and tasks in group 5**
+**Step 4: Plot the bipartite network of students and tasks in group 1**
 
 .. code-block:: python
 
     plot_HINA(df, attribute_1='student id', attribute_2='task', group='Group 1', layout='spring')
 
-**Step 5: Plot bipartite clusters inferred using MDL method**
+**Step 5: Plot bipartite fixed number of clusters using MDL method**
+
+.. code-block:: python
+
+   G = get_bipartite(df,'student id','task')
+   community_labels,cr = bipartite_communities(G, fix_B=5)
+   plot_bipartite_clusters(G,community_labels, node_labels='Both Sets', edge_labels=True)
+
+**Step 6: Plot bipartite clusters inferred using MDL method**
 
 .. code-block:: python
 
    G = get_bipartite(df,'student id','task')
    community_labels,cr = bipartite_communities(G)
-   plot_bipartite_clusters(G,community_labels)
+   plot_bipartite_clusters(G,community_labels, node_labels='Both Sets', edge_labels=True)
 
 Example Output
 --------------
 .. image:: Figures/visualization_demo_1.png
-   :alt: visualization Demo
-   :align: center
+    :alt: visualization Demo
+    :align: center
+    :width: 50%
+
+Bipartite network of students and tasks with all groups.
 
 .. image:: Figures/visualization_demo_2.png
    :alt: visualization Demo
    :align: center
+   :width: 50%
 
-.. image:: Figures/visualization_demo.png
+Bipartite network of students and tasks with Groups 1.
+
+.. image:: Figures/visualization_demo_3.png
    :alt: visualization Demo
    :align: center
+   :width: 50%
+
+Bipartite network of students and tasks with five fixed number of clusters.
+
+.. image:: Figures/visualization_demo_4.png
+   :alt: visualization Demo
+   :align: center
+   :width: 50%
+
+Bipartite network of students and tasks with inferred number of clusters.
 
 Paper Source
 ============
