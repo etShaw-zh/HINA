@@ -19,17 +19,17 @@ The MDL bipartite community detection method bipartite_communities (custom devel
     \mathcal{L}(b) = \log N_1 + \log {N_1-1\choose B-1} + \log {N_1\choose n_1,...,n_B} + \log{BN_2+W-1\choose W} + \sum_{r=1}^{B}\sum_{j=1}^{N_2} \log{n_r+w_{rj}-1\choose w_{rj}},
 
 where: 
-- :math:`b' is a partition of the nodes in the first node set into :math:`B' non-empty communities such that :math:`b_i' is the community of node :math:`i'
-- :math:`N_1' and :math:`N_2' are the sizes of the first node set and second node set respectively
-- :math:`n_r' is the size of community :math:`r\in \{1,...,B\}'
-- :math:`W' is the total weight of the edges in the bipartite graph
-- :math:`w_{rj}' is the total weight of the edges from nodes in community :math:`r' to node :math:`j' in the second node set
+    - :math:`b` is a partition of the nodes in the first node set into :math:`B` non-empty communities such that :math:`b_i` is the community of node :math:`i`
+    - :math:`N_1` and :math:`N_2` are the sizes of the first node set and second node set respectively
+    - :math:`n_r` is the size of community :math:`r \in \{1, \dots, B\}`
+    - :math:`W` is the total weight of the edges in the bipartite graph
+    - :math:`w_{rj}` is the total weight of the edges from nodes in community :math:`r` to node :math:`j` in the second node set
 
 The method optimizes this MDL objective approximately using a fast agglomerative scheme in which we start with every node in its own cluster and iteratively merge the pair of communities that produces the greatest decrease to the description length until all nodes are grouped together. Afterwards, we scan over all solution candidates to identify the MDL-optimal partition.
 
 Inputs for bipartite_communities:
 
-- **G**: A bipartite network represented as a set of tuples `(i,j,w)' representing edge between nodes `i' and `j' of weight/frequency `w'.
+- **G**: A bipartite network represented as a set of tuples :math:`(i,j,w)` representing edge between nodes :math:`i` and :math:`j` of weight/frequency :math:`w`.
 - **fix_B**: Fixes the number of clusters at specified value (optional, if `None`, the algorithm determines it automatically).
 
 Outputs include:

@@ -135,7 +135,7 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 
 .. code-block:: python
 
-    df = pd.read_csv('synthetic_data_simple.csv')
+    df = pd.read_csv('synthetic_data.csv')
 
 **Step 3: Plot the bipartite network of students and tasks in all groups**
 
@@ -147,7 +147,7 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 
 .. code-block:: python
 
-    plot_HINA(df, attribute_1='student id', attribute_2='task', group=5, layout='spring')
+    plot_HINA(df, attribute_1='student id', attribute_2='task', group='Group 1', layout='spring')
 
 **Step 5: Plot bipartite clusters inferred using MDL method**
 
@@ -159,6 +159,13 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 
 Example Output
 --------------
+.. image:: Figures/visualization_demo_1.png
+   :alt: visualization Demo
+   :align: center
+
+.. image:: Figures/visualization_demo_2.png
+   :alt: visualization Demo
+   :align: center
 
 .. image:: Figures/visualization_demo.png
    :alt: visualization Demo
