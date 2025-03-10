@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import axios from "axios";
 import CytoscapeComponent from "react-cytoscapejs";
 import {
@@ -23,37 +23,8 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
 import * as XLSX from "xlsx";
+import { IconArrowsSort, IconSortAscending, IconSortDescending, IconDownload } from "@tabler/icons-react";
 
-interface QDData {
-  quantity: Record<string, number>;
-  diversity: Record<string, number>;
-}
-
-interface DyadicAnalysisData {
-  significant_edges: [string, string, number][];
-  pruned_edges: [string, string, number][];
-}
-
-interface ClusterLabelsData {
-  [node: string]: string;
-}
-
-const LAYOUT_OPTIONS = [
-  { value: "spring", label: "Spring" },
-  { value: "bipartite", label: "Bipartite" },
-  { value: "circular", label: "Circular" },
-];
-
-const PRUNING_OPTIONS = [
-  { value: "none", label: "No Pruning" },
-  { value: "custom", label: "Custom Pruning" },
-];
-
-const DEG_OPTIONS = [
-    { value: "Set 1", label: "Set 1" },
-    { value: "Set 2", label: "Set 2" },
-    { value: "none", label: "None" },
-];
 
 export function Webinterface() {
   const [opened, { toggle }] = useDisclosure();
@@ -75,6 +46,43 @@ export function Webinterface() {
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>("node-level");
   const cyRef = useRef<any>(null);
+  interface QDData {
+  quantity: Record<string, number>;
+  diversity: Record<string, number>;
+}
+
+  interface DyadicAnalysisData {
+    significant_edges: [string, string, number][];
+    pruned_edges: [string, string, number][];
+  }
+
+  interface ClusterLabelsData {
+    [node: string]: string;
+  }
+
+  type SortConfig = { key: string; direction: "asc" | "desc" } | null;
+
+  const [qdSortConfig, setQdSortConfig] = useState<SortConfig>(null);
+  const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
+  const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
+  const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
+
+  const LAYOUT_OPTIONS = [
+    { value: "spring", label: "Spring" },
+    { value: "bipartite", label: "Bipartite" },
+    { value: "circular", label: "Circular" },
+  ];
+
+  const PRUNING_OPTIONS = [
+    { value: "none", label: "No Pruning" },
+    { value: "custom", label: "Custom Pruning" },
+  ];
+
+  const DEG_OPTIONS = [
+      { value: "Set 1", label: "Set 1" },
+      { value: "Set 2", label: "Set 2" },
+      { value: "none", label: "None" },
+  ];
 
   // Handle file upload using Mantine's FileInput component
   const handleFileUpload = async (file: File | null) => {
@@ -226,6 +234,118 @@ export function Webinterface() {
     }
   };
 
+  // Compute sorted data for Node-Level table
+  const qdTableData = useMemo(() => {
+    if (!qdData) return [];
+    const data = Object.keys(qdData.quantity).map((key) => ({
+      Attribute: key,
+      Quantity: qdData.quantity[key],
+      Diversity: qdData.diversity[key],
+    }));
+    if (qdSortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[qdSortConfig.key] < b[qdSortConfig.key]) {
+          return qdSortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[qdSortConfig.key] > b[qdSortConfig.key]) {
+          return qdSortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [qdData, qdSortConfig]);
+
+  // Compute sorted data for Dyadic Analysis Significant Edges table
+  const dyadicSigTableData = useMemo(() => {
+    if (!dyadicAnalysis) return [];
+    const data = dyadicAnalysis.significant_edges.map((edge) => ({
+      "Node 1": edge[0],
+      "Node 2": edge[1],
+      Weight: edge[2],
+    }));
+    if (dyadicSigSortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[dyadicSigSortConfig.key] < b[dyadicSigSortConfig.key]) {
+          return dyadicSigSortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[dyadicSigSortConfig.key] > b[dyadicSigSortConfig.key]) {
+          return dyadicSigSortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [dyadicAnalysis, dyadicSigSortConfig]);
+
+  // Compute sorted data for Dyadic Analysis Pruned Edges table
+  const dyadicPrunedTableData = useMemo(() => {
+    if (!dyadicAnalysis) return [];
+    const data = dyadicAnalysis.pruned_edges.map((edge) => ({
+      "Node 1": edge[0],
+      "Node 2": edge[1],
+      Weight: edge[2],
+    }));
+    if (dyadicPrunedSortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[dyadicPrunedSortConfig.key] < b[dyadicPrunedSortConfig.key]) {
+          return dyadicPrunedSortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[dyadicPrunedSortConfig.key] > b[dyadicPrunedSortConfig.key]) {
+          return dyadicPrunedSortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [dyadicAnalysis, dyadicPrunedSortConfig]);
+
+  // Compute sorted data for Cluster Labels table
+  const clusterTableData = useMemo(() => {
+    if (!clusterLabels) return [];
+    const data = Object.keys(clusterLabels).map((node) => ({
+      Node: node,
+      "Cluster Label": clusterLabels[node],
+    }));
+    if (clusterSortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[clusterSortConfig.key] < b[clusterSortConfig.key]) {
+          return clusterSortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[clusterSortConfig.key] > b[clusterSortConfig.key]) {
+          return clusterSortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [clusterLabels, clusterSortConfig]);
+
+  // Determine if the current active tab has exportable data
+  const hasExportData = useMemo(() => {
+    if (activeTab === "node-level") {
+      return !!qdData;
+    } else if (activeTab === "dyadic") {
+      return !!dyadicAnalysis;
+    } else if (activeTab === "cluster") {
+      return !!clusterLabels;
+    }
+    return false;
+  }, [activeTab, qdData, dyadicAnalysis, clusterLabels]);
+
+  // Helper function to toggle sort for a given key and config state setter
+  const toggleSort = (
+    key: string,
+    sortConfig: SortConfig,
+    setSortConfig: React.Dispatch<React.SetStateAction<SortConfig>>
+  ) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   useEffect(() => {
     if (!cyRef.current) return;
     const cy = cyRef.current;
@@ -240,6 +360,7 @@ export function Webinterface() {
       cy.removeListener("tap", "node", handleTap);
     };
   }, [elements]);
+
 
   return (
     <AppShell
@@ -441,17 +562,59 @@ export function Webinterface() {
                             <Table highlightOnHover withTableBorder withColumnBorders>
                               <Table.Thead>
                                 <Table.Tr>
-                                  <Table.Th style={{ textAlign: "center" }}>{attr1 || "Attribute 1"}</Table.Th>
-                                  <Table.Th style={{ textAlign: "center" }}>Quantity</Table.Th>
-                                  <Table.Th style={{ textAlign: "center" }}>Diversity</Table.Th>
+                                  <Table.Th
+                                    style={{ textAlign: "center", cursor: "pointer" }}
+                                    onClick={() => toggleSort("Attribute", qdSortConfig, setQdSortConfig)}
+                                  >
+                                    {attr1 || "Attribute 1"}{" "}
+                                    {qdSortConfig?.key === "Attribute" ? (
+                                      qdSortConfig.direction === "asc" ? (
+                                        <IconSortAscending size={14} />
+                                      ) : (
+                                        <IconSortDescending size={14} />
+                                      )
+                                    ) : (
+                                      <IconArrowsSort size={14} />
+                                    )}
+                                  </Table.Th>
+                                  <Table.Th
+                                    style={{ textAlign: "center", cursor: "pointer" }}
+                                    onClick={() => toggleSort("Quantity", qdSortConfig, setQdSortConfig)}
+                                  >
+                                    Quantity{" "}
+                                    {qdSortConfig?.key === "Quantity" ? (
+                                      qdSortConfig.direction === "asc" ? (
+                                        <IconSortAscending size={14} />
+                                      ) : (
+                                        <IconSortDescending size={14} />
+                                      )
+                                    ) : (
+                                      <IconArrowsSort size={14} />
+                                    )}
+                                  </Table.Th>
+                                  <Table.Th
+                                    style={{ textAlign: "center", cursor: "pointer" }}
+                                    onClick={() => toggleSort("Diversity", qdSortConfig, setQdSortConfig)}
+                                  >
+                                    Diversity{" "}
+                                    {qdSortConfig?.key === "Diversity" ? (
+                                      qdSortConfig.direction === "asc" ? (
+                                        <IconSortAscending size={14} />
+                                      ) : (
+                                        <IconSortDescending size={14} />
+                                      )
+                                    ) : (
+                                      <IconArrowsSort size={14} />
+                                    )}
+                                  </Table.Th>
                                 </Table.Tr>
                               </Table.Thead>
                               <Table.Tbody>
-                                {Object.keys(qdData.quantity || {}).map((key) => (
-                                  <Table.Tr key={key}>
-                                    <Table.Td style={{ textAlign: "center" }}>{key}</Table.Td>
-                                    <Table.Td style={{ textAlign: "center" }}>{qdData.quantity[key]}</Table.Td>
-                                    <Table.Td style={{ textAlign: "center" }}>{qdData.diversity[key]}</Table.Td>
+                                {qdTableData.map((row, idx) => (
+                                  <Table.Tr key={idx}>
+                                    <Table.Td style={{ textAlign: "center" }}>{row.Attribute}</Table.Td>
+                                    <Table.Td style={{ textAlign: "center" }}>{row.Quantity}</Table.Td>
+                                    <Table.Td style={{ textAlign: "center" }}>{row.Diversity}</Table.Td>
                                   </Table.Tr>
                                 ))}
                               </Table.Tbody>
@@ -474,17 +637,38 @@ export function Webinterface() {
                                 <Table highlightOnHover withTableBorder withColumnBorders>
                                   <Table.Thead>
                                     <Table.Tr>
-                                      <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
-                                      <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
-                                      <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
+                                      {["Node 1", "Node 2", "Weight"].map((col) => (
+                                        <Table.Th
+                                          key={col}
+                                          style={{ textAlign: "center", cursor: "pointer" }}
+                                          onClick={() =>
+                                            toggleSort(
+                                              col,
+                                              dyadicSigSortConfig,
+                                              setDyadicSigSortConfig
+                                            )
+                                          }
+                                        >
+                                          {col}{" "}
+                                          {dyadicSigSortConfig?.key === col ? (
+                                            dyadicSigSortConfig.direction === "asc" ? (
+                                              <IconSortAscending size={14} />
+                                            ) : (
+                                              <IconSortDescending size={14} />
+                                            )
+                                          ) : (
+                                            <IconArrowsSort size={14} />
+                                          )}
+                                        </Table.Th>
+                                      ))}
                                     </Table.Tr>
                                   </Table.Thead>
                                   <Table.Tbody>
-                                    {dyadicAnalysis.significant_edges.map((edge, idx) => (
+                                    {dyadicSigTableData.map((row, idx) => (
                                       <Table.Tr key={idx}>
-                                        <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 1"]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 2"]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row.Weight}</Table.Td>
                                       </Table.Tr>
                                     ))}
                                   </Table.Tbody>
@@ -502,17 +686,38 @@ export function Webinterface() {
                                 <Table highlightOnHover withTableBorder withColumnBorders>
                                   <Table.Thead>
                                     <Table.Tr>
-                                      <Table.Th style={{ textAlign: "center" }}>Node 1</Table.Th>
-                                      <Table.Th style={{ textAlign: "center" }}>Node 2</Table.Th>
-                                      <Table.Th style={{ textAlign: "center" }}>Weight</Table.Th>
+                                      {["Node 1", "Node 2", "Weight"].map((col) => (
+                                        <Table.Th
+                                          key={col}
+                                          style={{ textAlign: "center", cursor: "pointer" }}
+                                          onClick={() =>
+                                            toggleSort(
+                                              col,
+                                              dyadicPrunedSortConfig,
+                                              setDyadicPrunedSortConfig
+                                            )
+                                          }
+                                        >
+                                          {col}{" "}
+                                          {dyadicPrunedSortConfig?.key === col ? (
+                                            dyadicPrunedSortConfig.direction === "asc" ? (
+                                              <IconSortAscending size={14} />
+                                            ) : (
+                                              <IconSortDescending size={14} />
+                                            )
+                                          ) : (
+                                            <IconArrowsSort size={14} />
+                                          )}
+                                        </Table.Th>
+                                      ))}
                                     </Table.Tr>
                                   </Table.Thead>
                                   <Table.Tbody>
-                                    {dyadicAnalysis.pruned_edges.map((edge, idx) => (
+                                    {dyadicPrunedTableData.map((row, idx) => (
                                       <Table.Tr key={idx}>
-                                        <Table.Td style={{ textAlign: "center" }}>{edge[0]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{edge[1]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{edge[2]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 1"]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 2"]}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row.Weight}</Table.Td>
                                       </Table.Tr>
                                     ))}
                                   </Table.Tbody>
@@ -533,15 +738,37 @@ export function Webinterface() {
                             <Table highlightOnHover withTableBorder withColumnBorders>
                               <Table.Thead>
                                 <Table.Tr>
-                                  <Table.Th style={{ textAlign: "center" }}>Node</Table.Th>
-                                  <Table.Th style={{ textAlign: "center" }}>Cluster Label</Table.Th>
+                                  {["Node", "Cluster Label"].map((col) => (
+                                    <Table.Th
+                                      key={col}
+                                      style={{ textAlign: "center", cursor: "pointer" }}
+                                      onClick={() =>
+                                        toggleSort(
+                                          col,
+                                          clusterSortConfig,
+                                          setClusterSortConfig
+                                        )
+                                      }
+                                    >
+                                      {col}{" "}
+                                      {clusterSortConfig?.key === col ? (
+                                        clusterSortConfig.direction === "asc" ? (
+                                          <IconSortAscending size={14} />
+                                        ) : (
+                                          <IconSortDescending size={14} />
+                                        )
+                                      ) : (
+                                        <IconArrowsSort size={14} />
+                                      )}
+                                    </Table.Th>
+                                  ))}
                                 </Table.Tr>
                               </Table.Thead>
                               <Table.Tbody>
-                                {Object.keys(clusterLabels).map((node) => (
-                                  <Table.Tr key={node}>
-                                    <Table.Td style={{ textAlign: "center" }}>{node}</Table.Td>
-                                    <Table.Td style={{ textAlign: "center" }}>{clusterLabels[node]}</Table.Td>
+                                {clusterTableData.map((row, idx) => (
+                                  <Table.Tr key={idx}>
+                                    <Table.Td style={{ textAlign: "center" }}>{row.Node}</Table.Td>
+                                    <Table.Td style={{ textAlign: "center" }}>{row["Cluster Label"]}</Table.Td>
                                   </Table.Tr>
                                 ))}
                               </Table.Tbody>
@@ -554,9 +781,15 @@ export function Webinterface() {
                     </Tabs>
 
                     {/* Export Button */}
-                    {qdData && (
-                      <Group mt="md">
-                        <Button onClick={exportToXLSX}>Export Results</Button>
+                    {hasExportData && (
+                      <Group mt="md" p={10}>
+                        <Button 
+                          rightSection={<IconDownload size={14} />}
+                          gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
+                          onClick={exportToXLSX}
+                        >
+                          Export Results
+                        </Button>
                       </Group>
                     )}
                   </Paper>
