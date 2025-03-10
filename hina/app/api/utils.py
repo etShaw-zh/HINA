@@ -38,62 +38,52 @@ def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute
     """
     Build a NetworkX graph for the HINA network.
     """
+
     if group != 'All':
         df = df[df['group'] == group]
     
-    G = nx.Graph()
-    for _, row in df.iterrows():
-        n1 = str(row[attribute_1])
-        n2 = str(row[attribute_2])
-        weight = row.get('task weight', 1)
-        G.add_node(n1)
-        G.add_node(n2)
-        G.add_edge(n1, n2, weight=weight)
+    G_edges = get_bipartite(df, attribute_1, attribute_2)
+    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
     
     if pruning != "none":
-        edge_tuples = [order_edge(u, v, df, attribute_1, attribute_2, d['weight'])
-                       for u, v, d in G.edges(data=True)]
         if isinstance(pruning, dict):
-            significant_edges = prune_edges(edge_tuples, **pruning)
+            significant_edges = prune_edges(G_edges_ordered, **pruning)
         else:
-            significant_edges = prune_edges(edge_tuples)
+            significant_edges = prune_edges(G_edges_ordered)
         significant_edges = significant_edges or set()
-        pruned_edges = [edge for edge in edge_tuples if edge not in significant_edges]
-        G_new = nx.Graph()
-        for u, v, w in significant_edges:
-            G_new.add_edge(u, v, weight=w)
-        G = G_new
-    else:
-        # No pruning applied
-        pass
+        G_edges_ordered = list(significant_edges)
+
+    nx_G = nx.Graph()
+    for edge in G_edges_ordered:
+        nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
 
     # Assign node types and colors
-    for node in G.nodes():
+    for node in nx_G.nodes():
         if node in df[attribute_1].astype(str).values:
-            G.nodes[node]['type'] = 'attribute_1'
-            G.nodes[node]['color'] = 'grey'
+            nx_G.nodes[node]['type'] = 'attribute_1'
+            nx_G.nodes[node]['color'] = 'grey'
         elif node in df[attribute_2].astype(str).values:
-            G.nodes[node]['type'] = 'attribute_2'
-            G.nodes[node]['color'] = 'blue'
+            nx_G.nodes[node]['type'] = 'attribute_2'
+            nx_G.nodes[node]['color'] = 'blue'
         else:
-            G.nodes[node]['type'] = 'unknown'
-            G.nodes[node]['color'] = 'black'
+            nx_G.nodes[node]['type'] = 'unknown'
+            nx_G.nodes[node]['color'] = 'black'
 
-    for u, v, d in G.edges(data=True):
+    for u, v, d in nx_G.edges(data=True):
         d['label'] = str(d.get('weight', ''))
 
     if layout == 'bipartite':
-        attribute_1_nodes = {n for n, d in G.nodes(data=True) if d['type'] == 'attribute_1'}
-        if not nx.is_bipartite(G):
+        attribute_1_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'attribute_1'}
+        if not nx.is_bipartite(nx_G):
             raise ValueError("The graph is not bipartite; check the input data.")
-        pos = nx.bipartite_layout(G, attribute_1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
+        pos = nx.bipartite_layout(nx_G, attribute_1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
     elif layout == 'spring':
-        pos = nx.spring_layout(G, k=0.2)
+        pos = nx.spring_layout(nx_G, k=0.2)
     elif layout == 'circular':
-        pos = nx.circular_layout(G)
+        pos = nx.circular_layout(nx_G)
     else:
         raise ValueError(f"Unsupported layout: {layout}")
-    return G, pos
+    return nx_G, pos
 
 def cy_elements_from_graph(G: nx.Graph, pos: dict):
     """
@@ -138,7 +128,7 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         df = df[df['group'] == group]
     
     G_edges = get_bipartite(df, attribute_1, attribute_2)
-    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, float(w)) for u, v, w in G_edges]
+    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
     
     if pruning != "none":
         if isinstance(pruning, dict):
@@ -156,7 +146,7 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
     
     nx_G = nx.Graph()
     for edge in G_edges_ordered:
-        nx_G.add_edge(edge[0], edge[1], weight=float(edge[2]))
+        nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
     
     # Determine which nodes belong to each attribute
     attr1_nodes = set(df[attribute_1].astype(str).values)
