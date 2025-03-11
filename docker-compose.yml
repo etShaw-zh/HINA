@@ -16,3 +16,12 @@ services:
       - ./hina/app/frontend:/app  
     ports:
       - "3000:3000"
+      
+  hina-dashboard:
+    container_name: hina-dashboard
+    build:
+      context: .
+      dockerfile: Dockerfile.hina-dashboard
+    ports:
+      - "8000:8000"
+      - "3000:3000"
