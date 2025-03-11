@@ -21,8 +21,10 @@ vendor/
 build/
 dist/
 
-# Environment variables
+# Local configuration files
+*.log
 .env
+.git/
 
 # Docker files
 .dockerignore

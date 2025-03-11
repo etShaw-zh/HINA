@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='hina',
-    version='0.4.6',
+    version='0.4.7',
     description='Heterogenous Interaction Network Analysis in Python',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
@@ -19,11 +19,13 @@ setup(
         "numpy>=1.24, <2.0",    
         "pandas>=2.2",
         "scipy>=1.10",
-        "scikit-network==0.32.1",
+        "python-multipart>=0.0.18",
         "dash<=3.0.0",
         "dash-cytoscape>=1.0.2",
         "matplotlib>=3.8.4",
-        "networkx>=3.0"
+        "networkx>=3.0",
+        "fastapi>=0.111.0",
+        "uvicorn>=0.30.0"
     ],
     extras_require={
         "dev": ["pytest"],  
