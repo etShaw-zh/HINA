@@ -23,7 +23,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
 import * as XLSX from "xlsx";
-import { IconArrowsSort, IconSortAscending, IconSortDescending, IconDownload } from "@tabler/icons-react";
+import { IconArrowsSort, IconSortAscending, IconSortDescending, IconDownload, IconRefresh, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 
 
 export function Webinterface() {
@@ -445,8 +445,22 @@ export function Webinterface() {
                     />
                 </Group>
                 <Group mt="md">
-                  <Button onClick={updateHinaNetwork}>Update HINA Network</Button>
-                  <Button onClick={updateClusteredNetwork}>Update Clustered Network</Button>
+                  <Button
+                    rightSection={<IconRefresh size={14} />}
+                    variant="gradient"
+                    gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
+                    onClick={updateHinaNetwork}
+                  >
+                    Update HINA Network
+                  </Button>
+                  <Button
+                    rightSection={<IconRefresh size={14} />}
+                    variant="gradient"
+                    gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                    onClick={updateClusteredNetwork}
+                  >
+                    Update Clustered Network
+                  </Button>
                 </Group>
               </Paper>   
             )}
@@ -510,7 +524,13 @@ export function Webinterface() {
                   <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
                     <Menu shadow="md" width={100} trigger="click-hover" openDelay={100} closeDelay={400}>
                       <Menu.Target>
-                        <Button>Save</Button>
+                        <Button
+                          rightSection={<IconDownload size={14} />}
+                          variant="gradient"
+                          gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
+                        >
+                          Save
+                        </Button>
                       </Menu.Target>
                       <Menu.Dropdown>
                         <Menu.Item onClick={() => handleSave(true)}>
@@ -533,10 +553,20 @@ export function Webinterface() {
                       flexDirection: "column",
                     }}
                   >
-                    <Button onClick={zoomIn} style={{ fontSize: "24px", margin: "2px" }}>
+                    <Button
+                      // rightSection={<IconZoomIn size={14} />}
+                      variant="gradient"
+                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                      onClick={zoomIn} style={{ fontSize: "24px", margin: "2px" }}
+                    >
                       +
                     </Button>
-                    <Button onClick={zoomOut} style={{ fontSize: "24px", margin: "2px" }}>
+                    <Button
+                      // rightSection={<IconZoomOut size={14} />}
+                      variant="gradient"
+                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                      onClick={zoomOut} style={{ fontSize: "24px", margin: "2px" }}
+                    >
                       –
                     </Button>
                   </div>
@@ -785,6 +815,7 @@ export function Webinterface() {
                       <Group mt="md" p={10}>
                         <Button 
                           rightSection={<IconDownload size={14} />}
+                          variant="gradient"
                           gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
                           onClick={exportToXLSX}
                         >

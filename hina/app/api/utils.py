@@ -138,8 +138,13 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         significant_edges = significant_edges or set()
         G_edges_ordered = list(significant_edges)
     
-    if not number_cluster is None:
-        number_cluster = int(number_cluster)
+    if number_cluster not in (None, "", "none"):
+        try:
+            number_cluster = int(number_cluster)
+        except ValueError:
+            number_cluster = None
+    else:
+        number_cluster = None
     
     # Run community detection (clustering)
     cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
