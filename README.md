@@ -38,7 +38,7 @@ pip install hina
 ### [visualization](https://hina.readthedocs.io/en/latest/Modules/visualization.html)
 
 - **Visualization**: Provides network visualization functions for networks at the group level or cohort level that enable the user to easily project the heterogeneous interaction network onto any subset of node types (e.g. students, tasks, behavioral codes). These methods allow for the inclusion of various metadata such as inferred student clusters or contribution metrics, as well as pruning of the interaction network to identify significant interaction structure. Also enables visualization with Sankey diagrams for an alternative representation of the weighted networks. These visualizations come together with a web-based interface that enables interactions and user engagement. New package contributions can incorporate other relevant metadata for visualization, as well as other preprocessing tools for augmenting or modifying the network structure to highlight particular features.
-- **Web Interface**: Includes a web-based interface for engaging with the visualizations.
+- **HINA Dashboard**: Includes a web-based interface with dual functionalities: 1) It can be deployed as a web-based analytical tool to conduct HINA through the drag-and-drop approach. 2) It can also be used as a learning analytics dashboard directly, allowing teachers and students to visualize, interpret, and communicate the HINA results effectively. This dual functionality supports both data analysis and the sharing of actionable results with teachers and students in an interactive and user-friendly manner.
 - **Extensibility**: Easily incorporate additional measures, clustering methods, or visualizations.
 
 
