@@ -90,7 +90,7 @@ export function Webinterface() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await axios.post("http://localhost:8000/upload", formData, {
+      const res = await axios.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       const groupOptions: string[] = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
@@ -125,7 +125,7 @@ export function Webinterface() {
     params.append("fix_deg", fixDeg);
     params.append("layout", layout);
     try {
-      const res = await axios.post("http://localhost:8000/build-hina-network", params);
+      const res = await axios.post("/build-hina-network", params);
       setElements(res.data.elements);
       if (res.data.dyadic_analysis) {
         setDyadicAnalysis(res.data.dyadic_analysis);
@@ -153,7 +153,7 @@ export function Webinterface() {
     params.append("layout", layout);
     console.log("number_cluster", numberCluster)
     try {
-      const res = await axios.post("http://localhost:8000/build-cluster-network", params);
+      const res = await axios.post("/build-cluster-network", params);
       setElements(res.data.elements);
       if (res.data.cluster_labels) {
         setClusterLabels(res.data.cluster_labels);
@@ -174,7 +174,7 @@ export function Webinterface() {
     params.append("attribute1", attr1);
     params.append("attribute2", attr2);
     try {
-      const res = await axios.post("http://localhost:8000/quantity-diversity", params);
+      const res = await axios.post("/quantity-diversity", params);
       setQdData(res.data);
     } catch (error) {
       console.error("Error computing Quantity & Diversity:", error);
