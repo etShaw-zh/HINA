@@ -5,20 +5,18 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-
 COPY . .
-
 RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 WORKDIR /app/hina/app/frontend
 RUN yarn install --ignore-platform
+RUN yarn build
 
 WORKDIR /app
-
 COPY nginx.conf /app/nginx.conf
-
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 
 EXPOSE 8080
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
+
