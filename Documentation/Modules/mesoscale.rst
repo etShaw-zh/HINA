@@ -95,7 +95,7 @@ This example demonstrates how to use `bipartite_communities` for clustering node
 .. code-block:: python
 
     import pandas as pd
-    from hina.individual import get_bipartite
+    from hina.construction.network_construct import get_bipartite
     from hina.mesoscale.clustering import bipartite_communities
 
 **Step 2: Define the bipartite graph**

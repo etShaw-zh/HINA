@@ -115,7 +115,8 @@ This example demonstrates how to use the `quantity_and_diversity` function to co
 .. code-block:: python
 
     import pandas as pd
-    from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
+    from hina.construction.network_construct import get_bipartite
+    from hina.individual.quantity_diversity import quantity_and_diversity
 
 **Step 2: Define the dataset**
 

@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
 from hina.mesoscale.clustering import bipartite_communities
-from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
+from hina.construction.network_construct import get_bipartite
 
 def parse_contents(encoded_contents: str) -> pd.DataFrame:
     """

@@ -11,7 +11,7 @@ Source Code
   import matplotlib.pyplot as plt
   import matplotlib.colors as mcolors
   from hina.dyad.significant_edges import prune_edges
-  from hina.individual.quantity_diversity import get_bipartite
+  from hina.construction.network_construct import get_bipartite
 
 .. _plot-hina:
 

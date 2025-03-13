@@ -1,21 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from hina.individual.quantity_diversity import get_bipartite, quantity_and_diversity
-
-def test_get_bipartite_simple():
-    data = {'student': ['A', 'B', 'A', 'C'], 'task': ['X', 'Y', 'X', 'Z']}
-    df = pd.DataFrame(data)
-    result = get_bipartite(df, 'student', 'task')
-    expected = {('A', 'X', 2), ('B', 'Y', 1), ('C', 'Z', 1)}
-    assert result == expected
-
-def test_get_bipartite_composite():
-    data = {'student': ['A', 'B', 'A', 'C'], 'task1': ['X', 'Y', 'X', 'Z'], 'task2': [1, 2, 1, 3]}
-    df = pd.DataFrame(data)
-    result = get_bipartite(df, 'student', ('task1', 'task2'))
-    expected = {('A', ('X', 1), 2), ('B', ('Y', 2), 1), ('C', ('Z', 3), 1)}
-    assert result == expected
+from hina.individual.quantity_diversity import quantity_and_diversity
 
 def test_quantity_and_diversity():
     data = {'student': ['A', 'B', 'A', 'B'], 'task': ['X', 'Y', 'X', 'Z']}
