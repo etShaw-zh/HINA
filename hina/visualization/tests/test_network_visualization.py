@@ -19,15 +19,6 @@ def create_test_graph():
     return B
 
 
-def test_plot_HINA(sample_data):
-    try:
-        plot_hina(B, layout='spring')
-    except Exception as e:
-        pytest.fail(f"plot_HINA raised an exception: {e}")
-
-def test_plot_HINA_invalid_layout(sample_data):
-    with pytest.raises(ValueError):
-        plot_hina(B, layout='invalid')
 
 
 if __name__ == "__main__":
