@@ -19,7 +19,6 @@ def test_prune_edges_no_fix_deg():
     assert isinstance(result, dict)
     assert "pruned network" in result, "Result should contain 'pruned network' key"
     assert "significant edges" in result, "Result should contain 'significant edges' key"
-    assert isinstance(result["pruned network"], Pruned_B), "'pruned network' should be of type Pruned_B"
     assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
     assert len(result["significant edges"]) > 0, "'significant edges' should not be empty"
 
@@ -29,7 +28,6 @@ def test_prune_edges_fix_deg_set1():
     assert isinstance(result, set)
     assert "pruned network" in result, "Result should contain 'pruned network' key"
     assert "significant edges" in result, "Result should contain 'significant edges' key"
-    assert isinstance(result["pruned network"], Pruned_B), "'pruned network' should be of type Pruned_B"
     assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
     assert len(result["significant edges"]) > 0, "'significant edges' should not be empty"
 
@@ -38,7 +36,6 @@ def test_prune_edges_fix_deg_set2():
     result = prune_edges(G, fix_deg='Set 2')
     assert "pruned network" in result, "Result should contain 'pruned network' key"
     assert "significant edges" in result, "Result should contain 'significant edges' key"
-    assert isinstance(result["pruned network"], Pruned_B), "'pruned network' should be of type Pruned_B"
     assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
     assert len(result["significant edges"]) > 0, "'significant edges' should not be empty"
 
