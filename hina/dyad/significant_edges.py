@@ -1,56 +1,85 @@
 import scipy.stats as stats
+import networkx as nx 
+def prune_edges(B,fix_deg='None',alpha=0.05):
+    """
+    Prunes edges in a bipartite graph to retain only those that are statistically significant under a null model.
 
-def prune_edges(G,alpha=0.05,fix_deg='Set 1'):
+    This function identifies and retains edges whose weights are statistically significant based on a binomial distribution
+    under a null model. The null model can either fix the degrees of a specified node set (e.g., 'student', 'task') or assume
+    no fixed degrees. The significance level is controlled by the `alpha` parameter.
+
+    Parameters:
+    -----------
+    B : networkx.Graph
+        A bipartite graph with weighted edges. Nodes are expected to have a 'bipartite' attribute indicating their partition.
+    fix_deg : str, optional
+        Specifies the node set whose degrees are fixed in the null model.  For example, if analyzing student 
+        involvement in tasks B(student, tasks), you might fix the degrees of the 'student' node set. 
+        This ensures the null model preserves the degree distribution of the specified node set.
+        If 'None', no degrees are fixed, and the null model assumes random edge weights. Default is 'None'.
+    alpha : float, optional
+        The significance level for determining statistical significance. Edges with weights below the threshold determined
+        by this value are pruned. Default is 0.05.
+
+    Returns:
+    --------
+    dict
+        A dictionary containing two keys:
+        - 'pruned network': A networkx.Graph object representing the pruned graph with only statistically significant edges.
+        - 'significant edges': A set of tuples representing the statistically significant edges, where each tuple is of the
+          form (node1, node2, weight).
     """
-    compute edges that are statistically significant in a null model where degree
-        of nodes in the set specified are fixed, as in Feng et al 2023   
-    inputs:
-        G is a set of tuples (i,j,w)
-        alpha is desired significance level
-        fix_deg fixes degrees of desired node set
-            options are: 'None', 'Set 1', 'Set 2'
-    returns:
-        subset of G corresponding to statistically significant edges under the null model
-    """
-    if not G:
+    
+    G_info = set([(i,j,w['weight'])for i,j,w in B.edges(data=True)])
+    
+    if not G_info:
 
         return set()
 
-    if len(G) == 1:
+    if len(G_info) == 1:
 
-        return set(G)
-    
-    set1,set2 = set([e[0] for e in G]),set([e[1] for e in G])
+        return set(G_info)
+
+    set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
     N1,N2 = len(set1),len(set2)
+
+    if fix_deg == 'None':
+
+        E = sum(e[-1] for e in G_info)
+        p = 1./(N1*N2) 
+        weight_threshold = stats.binom.ppf(1-alpha, E, p) 
+
+        pruned_edges = set([e for e in G_info if e[-1] >= weight_threshold])
+
+    else:
+        nodes = {i for i, attr in B.nodes(data=True) if attr.get('bipartite') == fix_deg}
+        N_other = len(set(B.nodes) - nodes)
+        
+        degs = {i: 0 for i in nodes}
+        for i, j, w in G_info:
+            if i in nodes:
+                degs[i] += w
+            if j in nodes:
+                degs[j] += w
+
+        pruned_edges = set()
+        for i, j, w in G_info:
+            if i in nodes:
+                p = 1.0 / N_other  
+                threshold = stats.binom.ppf(1 - alpha, degs[i], p)
+                if w >= threshold:
+                    pruned_edges.add((i, j, w))
+            elif j in nodes:
+                p = 1.0 / N_other
+                threshold = stats.binom.ppf(1 - alpha, degs[j], p)
+                if w >= threshold:
+                    pruned_edges.add((i, j, w))
     
-    if fix_deg is None:
+    Pruned_B = nx.Graph()    
+    edgelist = [[i[0] ,i[1],{'weight':i[2]}]for i in pruned_edges]
+    Pruned_B.add_edges_from(edgelist)
+    for i in B.nodes():
+        Pruned_B.add_node(i, **B.nodes[i])
 
-        E = sum(e[-1] for e in G)
-        p = 1./(N1*N2)
-        weight_threshold = stats.binom.ppf(1-alpha, E, p)
-
-        return set([e for e in G if e[-1] > weight_threshold])
-
-    if fix_deg == 'Set 1':
-
-        degs = {}
-        for e in G:
-            i = e[0]
-            if not(i in degs): degs[i] = 0
-            degs[i] += e[-1]
-
-        p = 1./N2
-
-        return set([e for e in G if e[-1] > stats.binom.ppf(1-alpha, degs[e[0]], p)])
-
-    if fix_deg == 'Set 2':
-
-        degs = {}
-        for e in G:
-            i = e[1]
-            if not(i in degs): degs[i] = 0
-            degs[i] += e[-1]
-
-        p = 1./N1
-
-        return set([e for e in G if e[-1] > stats.binom.ppf(1-alpha, degs[e[1]], p)])
+    results = {"pruned network": Pruned_B, "significant edges":pruned_edges}
+    return results 
