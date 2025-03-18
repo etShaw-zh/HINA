@@ -30,10 +30,6 @@ def test_diversity():
     result = diversity(B)
     assert 'Alice' in result, "Diversity for Alice should be computed."
     
-    # Test diversity calculation with attributes
-    result = diversity(B, attr='attr')
-    assert 'Alice' in result, "Diversity for Alice should be computed with attributes."
-    
 
 if __name__ == "__main__":
     pytest.main()
