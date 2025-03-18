@@ -16,20 +16,31 @@ def create_test_graph():
 def test_prune_edges_no_fix_deg():
     G = create_test_graph()
     result = prune_edges(G)
-    assert isinstance(result, set)
-    assert len(result) > 0
+    assert isinstance(result, dict)
+    assert "pruned network" in result, "Result should contain 'pruned network' key"
+    assert "significant edges" in result, "Result should contain 'significant edges' key"
+    assert isinstance(result["pruned network"], Pruned_B), "'pruned network' should be of type Pruned_B"
+    assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
+    assert len(result["significant edges"]) > 0, "'significant edges' should not be empty"
 
 def test_prune_edges_fix_deg_set1():
     G = create_test_graph()
     result = prune_edges(G, fix_deg='Set 1')
     assert isinstance(result, set)
-    assert len(result) > 0
+    assert "pruned network" in result, "Result should contain 'pruned network' key"
+    assert "significant edges" in result, "Result should contain 'significant edges' key"
+    assert isinstance(result["pruned network"], Pruned_B), "'pruned network' should be of type Pruned_B"
+    assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
+    assert len(result["significant edges"]) > 0, "'significant edges' should not be empty"
 
 def test_prune_edges_fix_deg_set2():
     G = create_test_graph()
     result = prune_edges(G, fix_deg='Set 2')
-    assert isinstance(result, set)
-    assert len(result) > 0
+    assert "pruned network" in result, "Result should contain 'pruned network' key"
+    assert "significant edges" in result, "Result should contain 'significant edges' key"
+    assert isinstance(result["pruned network"], Pruned_B), "'pruned network' should be of type Pruned_B"
+    assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
+    assert len(result["significant edges"]) > 0, "'significant edges' should not be empty"
 
 if __name__ == "__main__":
     pytest.main()
