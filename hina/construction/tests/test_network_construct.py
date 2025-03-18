@@ -4,10 +4,7 @@ import networkx as nx
 from hina.construction.network_construct import get_bipartite, get_tripartite
 
 def test_get_bipartite():
-    """
-    Test the `get_bipartite` function to ensure it correctly constructs a bipartite graph
-    with the expected nodes, edges, and attributes.
-    """
+    
     # Create a sample DataFrame
     data = {
         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
@@ -49,10 +46,7 @@ def test_get_bipartite():
         assert B[u][v] == expected_attrs, f"Edge attributes for ({u}, {v}) are incorrect."
 
 def test_get_tripartite():
-    """
-    Test the `get_tripartite` function to ensure it correctly constructs a tripartite graph
-    with the expected nodes, edges, and attributes.
-    """
+    
     # Create a sample DataFrame
     data = {
         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
