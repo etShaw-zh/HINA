@@ -20,7 +20,8 @@ def test_hina_communities():
     G = create_test_graph()
     results = hina_communities(G)
     
-    # Validate the structure of the returned results
+    # Validate the structure of the returned 
+results
     assert isinstance(results, dict)
     assert 'number of communities' in results
     assert 'node communities' in results
