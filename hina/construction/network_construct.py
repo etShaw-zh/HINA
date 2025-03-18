@@ -1,4 +1,5 @@
 import networkx as nx 
+import pandas as pd 
 from collections import Counter
 
 def get_bipartite(df,student_col,object_col,attr_col = None,group_col = None):
