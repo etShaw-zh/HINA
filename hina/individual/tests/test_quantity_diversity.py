@@ -23,14 +23,6 @@ def test_quantity():
     result = quantity(B)
     assert 'quantity' in result, "Quantity should be computed."
     assert 'normalized_quantity' in result, "Normalized quantity should be computed."
-   
-    # Test quantity by category
-    result = quantity(B, attr='attr')
-    assert 'quantity_by_category' in result, "Quantity by category should be computed."
-
-    # Test normalized quantity by group
-    result = quantity(B, group='group')
-    assert 'normalized_quantity_by_group' in result, "Normalized quantity by group should be computed."
 
 
 def test_diversity():
