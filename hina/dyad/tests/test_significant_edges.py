@@ -1,4 +1,5 @@
 import pytest
+import networkx as nx
 from hina.dyad.significant_edges import prune_edges
 
 def create_test_graph():
@@ -14,19 +15,19 @@ def create_test_graph():
 
 def test_prune_edges_no_fix_deg():
     G = create_test_graph()
-    result = prune_edges(G, alpha, fix_deg=None)
+    result = prune_edges(G)
     assert isinstance(result, set)
     assert len(result) > 0
 
 def test_prune_edges_fix_deg_set1():
     G = create_test_graph()
-    result = prune_edges(G, alpha, fix_deg='Set 1')
+    result = prune_edges(G, fix_deg='Set 1')
     assert isinstance(result, set)
     assert len(result) > 0
 
 def test_prune_edges_fix_deg_set2():
     G = create_test_graph()
-    result = prune_edges(G, alpha, fix_deg='Set 2')
+    result = prune_edges(G, fix_deg='Set 2')
     assert isinstance(result, set)
     assert len(result) > 0
 
