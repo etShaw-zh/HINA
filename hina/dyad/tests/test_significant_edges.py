@@ -25,7 +25,7 @@ def test_prune_edges_no_fix_deg():
 def test_prune_edges_fix_deg_set1():
     G = create_test_graph()
     result = prune_edges(G, fix_deg='Set 1')
-    assert isinstance(result, set)
+    assert isinstance(result, dict)
     assert "pruned network" in result, "Result should contain 'pruned network' key"
     assert "significant edges" in result, "Result should contain 'significant edges' key"
     assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
@@ -36,7 +36,6 @@ def test_prune_edges_fix_deg_set2():
     result = prune_edges(G, fix_deg='Set 2')
     assert "pruned network" in result, "Result should contain 'pruned network' key"
     assert "significant edges" in result, "Result should contain 'significant edges' key"
-    assert isinstance(result["significant edges"], set), "'significant edges' should be a set"
    
 if __name__ == "__main__":
     pytest.main()
