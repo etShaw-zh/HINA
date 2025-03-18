@@ -1,7 +1,7 @@
 import pytest
 import networkx as nx
 import numpy as np
-from hina.analysis.metrics import quantity, diversity
+from hina.individual.quantity_diversity import quantity, diversity
 
 def test_quantity():
     """
