@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import loggamma
 import heapq
+import networkx as nx
 from collections import Counter
 from collections import defaultdict
 
