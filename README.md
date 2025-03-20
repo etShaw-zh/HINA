@@ -41,7 +41,7 @@ pip install hina
 
 ### [Dashboard](https://hina.readthedocs.io/en/latest/Modules/dashboard.html)
 
-- **HINA Dashboard**: Includes a web-based interface that can serve dual purposes: 1) It serves as a web-based analytical tool for conducting HINA using an intuitive drag-and-drop approach, enabling users to conduct the individual-, dyadic- and mesoscale-level analysis without programming. 2) It also functions as a learning analytics dashboard, allowing teachers and students to visualize, interpret, and communicate HINA results effectively. This dual functionality supports both data analysis and the sharing of actionable insights in an interactive and user-friendly manner, making it a versatile tool for both data analytics and teaching implementation.
+- **HINA Dashboard**: Includes a web-based interface that serves dual purposes: 1) It serves as a web-based analytical tool for conducting HINA using an intuitive drag-and-drop approach, enabling users to conduct the individual-, dyadic- and mesoscale-level analysis without programming. 2) It also functions as a learning analytics dashboard, allowing teachers and students to visualize, interpret, and communicate HINA results effectively. This dual functionality supports both data analysis and the sharing of actionable insights in an interactive and user-friendly manner, making it a versatile tool for both data analytics and teaching implementation.
 
 - **Extensibility**: Easily incorporate additional measures, clustering methods, or visualizations.
 
