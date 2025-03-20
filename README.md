@@ -37,7 +37,7 @@ pip install hina
 
 ### [visualization](https://hina.readthedocs.io/en/latest/Modules/visualization.html)
 
-- **Visualization**: Provides network visualization functions for networks at the group level or cohort level that enable the user to easily project the heterogeneous interaction network onto any subset of node types (e.g. students, tasks, behavioral codes). These methods allow for the inclusion of various metadata such as inferred student clusters or contribution metrics, as well as pruning of the interaction network to identify significant interaction structure. Also enables visualization with Sankey diagrams for an alternative representation of the weighted networks. New package contributions can incorporate other relevant metadata for visualization, as well as other preprocessing tools for augmenting or modifying the network structure to highlight particular features.
+- **Visualization**: Provides network visualization functions for networks at the group level or cohort level that enable the user to easily project the heterogeneous interaction network onto any subset of node types (e.g. students, tasks, behavioral codes). These methods allow for the inclusion of various metadata such as inferred student clusters or contribution metrics, as well as pruning of the interaction network to identify significant interaction structure. New package contributions can incorporate other relevant metadata for visualization, as well as other preprocessing tools for augmenting or modifying the network structure to highlight particular features.
 
 ### [Dashboard](https://hina.readthedocs.io/en/latest/Modules/dashboard.html)
 
