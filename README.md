@@ -61,6 +61,12 @@ Distributed under the MIT License. See LICENSE for more information.
 HINA/
 ├── __init__.py
 │
+├── construction/                    # Construct bipartite & tripartite networks
+│   ├── __init__.py
+│   ├── network_construct.py
+│   └── tests/
+│       ├── __init__.py
+│       └── test_network_construct.py
 ├── individual/                      # Node-level analysis: quantity & diversity
 │   ├── __init__.py
 │   ├── quantity_diversity.py
@@ -126,4 +132,7 @@ HINA/
 │
 ├── data/                             # Sample datasets
 │   ├── __init__.py
-│   └── synthetic_data.csv
+│   ├── synthetic_data.csv
+│   └── example_dataset.xlsx
+
+
