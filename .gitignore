@@ -37,3 +37,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Ignore Python package build info
+*.egg-info/
