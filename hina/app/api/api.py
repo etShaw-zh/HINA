@@ -26,7 +26,7 @@ async def upload_file(file: UploadFile = File(...)):
     contents = await file.read()
     # Encode the file contents in base64 (without header)
     encoded = contents 
-    df = utils.parse_contents(base64.b64encode(encoded).decode('utf-8'))
+    df = utils.parse_contents(base64.b64encode(encoded).decode('utf-8'), file.filename)
     groups = list(df['group'].unique()) if 'group' in df.columns else ["All"]
     return {
         "columns": df.columns.tolist(),

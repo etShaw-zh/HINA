@@ -5,15 +5,22 @@ import networkx as nx
 import numpy as np
 import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
-from hina.mesoscale.clustering import bipartite_communities
+# from hina.mesoscale import bipartite_communities
+from hina.mesoscale import hina_communities
 from hina.construction.network_construct import get_bipartite
 
-def parse_contents(encoded_contents: str) -> pd.DataFrame:
+def parse_contents(encoded_contents: str, filename: str) -> pd.DataFrame:
     """
-    Decode a base64-encoded CSV string and return a pandas DataFrame.
+    Decode a base64-encoded file content and return a pandas DataFrame.
+    Supports both CSV and XLSX formats.
     """
     decoded = base64.b64decode(encoded_contents)
-    return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+    if filename.lower().endswith('.csv'):
+        return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+    elif filename.lower().endswith('.xlsx'):
+        return pd.read_excel(io.BytesIO(decoded))
+    else:
+        raise ValueError("Unsupported file format. Please upload a .csv or .xlsx file")
 
 def order_edge(u, v, df: pd.DataFrame, attribute_1: str, attribute_2: str, weight):
     """

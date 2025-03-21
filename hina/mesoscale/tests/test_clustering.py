@@ -1,6 +1,6 @@
 import pytest
 import networkx as nx
-from hina.mesoscale.clustering import hina_communities
+from hina.mesoscale import hina_communities
 
 def create_test_graph():
     B = nx.Graph()

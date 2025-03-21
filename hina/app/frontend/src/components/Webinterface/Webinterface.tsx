@@ -376,8 +376,9 @@ export function Webinterface() {
           {/* File Upload and Attribute Set Section */}
           <Paper withBorder shadow="sm" p="md" mb="md" style={{ width: "100%" }}>
             <FileInput
-              label="Upload CSV File"
-              placeholder="Select CSV file"
+              label="Upload File"
+              placeholder="Select CSV/XLSX file"
+              accept=".csv,.xlsx"
               onChange={handleFileUpload}
               mb="md"
             />

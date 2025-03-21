@@ -25,7 +25,8 @@ setup(
         "matplotlib>=3.8.4",
         "networkx>=3.0",
         "fastapi>=0.111.0",
-        "uvicorn>=0.30.0"
+        "uvicorn>=0.30.0",
+        "openpyxl>=3.1.5",
     ],
     extras_require={
         "dev": ["pytest"],  
