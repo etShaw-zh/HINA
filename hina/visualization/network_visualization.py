@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
-
 import networkx as nx
 import matplotlib.pyplot as plt
 
