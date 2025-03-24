@@ -58,18 +58,18 @@ def plot_hina(B, layout='bipartite', group_name = [None, None], pruning_kwargs=N
     if group_name is not None:
         
         G_sub = nx.Graph()
-        u_nodes = [i for i, j in G.nodes(data=True) if j.get(group_name[0]) == group_name[1]]
+        u_nodes = [i for i, j in B.nodes(data=True) if j.get(group_name[0]) == group_name[1]]
         for u_node in u_nodes:
-            G_sub.add_node(u_node, **G.nodes[u_node])
+            G_sub.add_node(u_node, **B.nodes[u_node])
         v_nodes = set()
         for u_node in u_nodes:
-            for v_node in G.neighbors(u_node):
+            for v_node in B.neighbors(u_node):
                 v_nodes.add(v_node)
-                G_sub.add_node(v_node, **G.nodes[v_node])
+                G_sub.add_node(v_node, **B.nodes[v_node])
         for u_node in u_nodes:
-            for v_node in G.neighbors(u_node):
-                if G.has_edge(u_node, v_node):
-                    G_sub.add_edge(u_node, v_node, **G.edges[u_node, v_node])
+            for v_node in B.neighbors(u_node):
+                if B.has_edge(u_node, v_node):
+                    G_sub.add_edge(u_node, v_node, **B.edges[u_node, v_node])
         B = G_sub
         
     v = set()

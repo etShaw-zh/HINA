@@ -25,17 +25,23 @@ import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
 import * as XLSX from "xlsx";
 import { IconArrowsSort, IconSortAscending, IconSortDescending, IconDownload, IconRefresh, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 
+// For local development
+axios.defaults.baseURL = 'http://localhost:8000';
 
 export function Webinterface() {
   const [opened, { toggle }] = useDisclosure();
   const [uploadedData, setUploadedData] = useState<string | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
   const [elements, setElements] = useState<any[]>([]);
+  const [groupCol, setGroupCol] = useState<string>("none");
   const [group, setGroup] = useState<string>("All");
   const [groups, setGroups] = useState<string[]>([]);
-  const [attr1, setAttr1] = useState<string>("");
-  const [attr2, setAttr2] = useState<string>("");
+  const [student, setStudent] = useState<string>("");
+  const [object1, setObject1] = useState<string>("");
+  const [object2, setObject2] = useState<string>("");
+  const [attr, setAttr] = useState<string>("none");
   const [numberCluster, setNumberCluster] = useState<string>("");
+  const [cluster, setCluster] = useState<string>("");
   const [pruning, setPruning] = useState<string>("none");
   const [alpha, setAlpha] = useState<number>(0.05);
   const [fixDeg, setFixDeg] = useState<string>("Set 1");
@@ -117,15 +123,23 @@ export function Webinterface() {
     if (!uploadedData) return;
     const params = new URLSearchParams();
     params.append("data", uploadedData);
+    params.append("group_col", groupCol); 
     params.append("group", group);
-    params.append("attribute1", attr1);
-    params.append("attribute2", attr2);
+    params.append("student_col", student);  
+    params.append("object1_col", object1);  
+    params.append("attr_col", attr); 
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
     params.append("fix_deg", fixDeg);
-    params.append("layout", layout);
+    params.append("layout", layout);  
+
     try {
+      console.log("Sending build-hina-network request with params:", {
+        group, student_col: student, object1_col: object1, 
+        group_col: groupCol, attr_col: attr, pruning
+      });
       const res = await axios.post("/build-hina-network", params);
+      console.log("Received response:", res.data);
       setElements(res.data.elements);
       if (res.data.dyadic_analysis) {
         setDyadicAnalysis(res.data.dyadic_analysis);
@@ -135,6 +149,7 @@ export function Webinterface() {
       fetchQuantityAndDiversity();
     } catch (error) {
       console.error("Error updating HINA network:", error);
+      console.error("Error details:", error.response?.data || error.message)
     }
   };
 
@@ -144,8 +159,8 @@ export function Webinterface() {
     const params = new URLSearchParams();
     params.append("data", uploadedData);
     params.append("group", group);
-    params.append("attribute1", attr1);
-    params.append("attribute2", attr2);
+    params.append("student_col", student);  
+    params.append("object1_col", object1);  
     params.append("number_cluster", numberCluster);
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
@@ -171,8 +186,8 @@ export function Webinterface() {
     if (!uploadedData) return;
     const params = new URLSearchParams();
     params.append("data", uploadedData);
-    params.append("attribute1", attr1);
-    params.append("attribute2", attr2);
+    params.append("student_col", student);  
+    params.append("object1_col", object1);
     try {
       const res = await axios.post("/quantity-diversity", params);
       setQdData(res.data);
@@ -386,23 +401,52 @@ export function Webinterface() {
               <Paper withBorder shadow="sm" p="md" mb="md">
                 <Group grow>
                   <Select
+                    label="Student Column"
+                    value={student}
+                    onChange={(value) => setStudent(value || "")}
+                    data={columns}
+                  />
+                  <Select
+                    label="Object 1 Column"
+                    value={object1}
+                    onChange={(value) => setObject1(value || "")}
+                    data={columns}
+                  />
+                  <Select
+                    label="Object 2 Column (Only for Tripartite Analysis)"
+                    withAsterisk
+                    value={object2}
+                    onChange={(value) => setObject2(value || "")}
+                    data={columns}
+                  />
+                </Group>
+                <Group grow mt="md" mb="md">
+                  <Select
+                    label="Object Attribute (Optional)"
+                    withAsterisk
+                    value={attr}
+                    onChange={(value) => setAttr(value || "none")}
+                    data={columns}
+                  />
+                  <Select
+                    label="Group Column (Optional)"
+                    withAsterisk
+                    value={groupCol}
+                    onChange={(value) => setGroupCol(value || "none")}
+                    data={columns}
+                  />
+                  <Select
                     label="Group"
                     value={group}
                     onChange={(value) => setGroup(value || "All")}
                     data={["All", ...groups.filter((g) => g !== "All")]}
                   />
                   <Select
-                    label="Attribute 1"
-                    value={attr1}
-                    onChange={(value) => setAttr1(value || "")}
-                    data={columns}
-                  />
-                  <Select
-                    label="Attribute 2"
-                    value={attr2}
-                    onChange={(value) => setAttr2(value || "")}
-                    data={columns}
-                  />
+                    label="Cluster"
+                    value={cluster}
+                    onChange={(value) => setCluster(value || "All")}
+                    data={["All", ...groups.filter((g) => g !== "All")]}
+                  />                
                 </Group>
                 <Group grow mt="md" mb="md">
                     <Select

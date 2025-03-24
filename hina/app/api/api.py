@@ -37,36 +37,37 @@ async def upload_file(file: UploadFile = File(...)):
 @app.post("/build-hina-network")
 async def build_hina_network_endpoint(
     data: str = Form(...),
+    group_col: str = Form(None),  
     group: str = Form(...),
-    attribute1: str = Form(...),
-    attribute2: str = Form(...),
-    pruning: str = Form(...),  # "none" or "custom"
+    student_col: str = Form(...),  
+    object1_col: str = Form(...),  
+    attr_col: str = Form(None),   
+    pruning: str = Form(...),     # "none" or "custom"
     alpha: float = Form(0.05),
     fix_deg: str = Form("Set 1"),
-    layout: str = Form("spring")
+    layout: str = Form("bipartite")
 ):
+    attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
+    group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
     df = pd.read_json(StringIO(data), orient="split")
-    G_full, pos_full = utils.build_hina_network(df, group, attribute1, attribute2, pruning="none", layout=layout)
-    original_edges = [utils.order_edge(u, v, df, attribute1, attribute2, d['weight'])
-                    for u, v, d in G_full.edges(data=True)]
-    
-    if pruning != "none":
-        pruning_param = {"alpha": alpha, "fix_deg": fix_deg}  # use custom params
-        significant_edges = utils.prune_edges(original_edges, **pruning_param) or []
-        pruned_edges = [edge for edge in original_edges if edge not in significant_edges]
-        G, pos = utils.build_hina_network(df, group, attribute1, attribute2, pruning_param, layout)
-    else:
-        significant_edges = original_edges
-        pruned_edges = []
-        G, pos = G_full, pos_full
 
-    elements = utils.cy_elements_from_graph(G, pos)
+    pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning == "custom" else "none"
+
+    nx_G, pos, significant_edges = utils.build_hina_network(
+        df=df, 
+        group_col=group_col, 
+        group=group, 
+        student_col=student_col, 
+        object1_col=object1_col, 
+        attr_col=attr_col,
+        pruning=pruning_param, 
+        layout=layout
+    )
+    elements = utils.cy_elements_from_graph(nx_G, pos)
+    
     return {
         "elements": elements,
-        "dyadic_analysis": {
-            "significant_edges": significant_edges,
-            "pruned_edges": pruned_edges
-        }
+        "significant_edges": significant_edges
     }
 
 
@@ -76,7 +77,7 @@ async def build_cluster_network_endpoint(
     group: str = Form(...),
     attribute1: str = Form(...),
     attribute2: str = Form(...),
-    pruning: str = Form(...),
+    pruning: str = Form(...), # "none" or "custom"
     alpha: float = Form(0.05),
     fix_deg: str = Form("Set 1"),
     layout: str = Form("spring"),

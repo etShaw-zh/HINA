@@ -22,75 +22,182 @@ def parse_contents(encoded_contents: str, filename: str) -> pd.DataFrame:
     else:
         raise ValueError("Unsupported file format. Please upload a .csv or .xlsx file")
 
-def order_edge(u, v, df: pd.DataFrame, attribute_1: str, attribute_2: str, weight):
+def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight):
     """
     Given two node identifiers u and v (which may be of any type), force
-    the edge tuple to have the node from attribute_1 always first and the node
-    from attribute_2 always second. If both nodes belong to the same attribute,
+    the edge tuple to have the node from student_col always first and the node
+    from object_col always second. If both nodes belong to the same attribute,
     they are sorted lexicographically.
+    
+    Parameters:
+    -----------
+    u, v : any
+        Node identifiers from the graph
+    df : pandas.DataFrame
+        The input DataFrame containing the data
+    student_col : str
+        The column name in the DataFrame representing student nodes
+    object_col : str
+        The column name in the DataFrame representing object nodes
+    weight : int
+        The weight of the edge
+        
+    Returns:
+    --------
+    tuple
+        (student_node, object_node, weight) or sorted nodes with weight if ambiguous
     """
     u_str = str(u)
     v_str = str(v)
-    a1_nodes = set(df[attribute_1].astype(str).values)
-    a2_nodes = set(df[attribute_2].astype(str).values)
-    if u_str in a1_nodes and v_str in a2_nodes:
+    student_nodes = set(df[student_col].astype(str).values)
+    object_nodes = set(df[object_col].astype(str).values)
+    
+    if u_str in student_nodes and v_str in object_nodes:
         return (u_str, v_str, weight)
-    elif u_str in a2_nodes and v_str in a1_nodes:
+    elif u_str in object_nodes and v_str in student_nodes:
         return (v_str, u_str, weight)
     else:
         # If both nodes are in the same attribute or ambiguous, sort lexicographically.
         return tuple(sorted([u_str, v_str])) + (weight,)
+        
+# def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, pruning, layout: str):
+#     """
+#     Build a NetworkX graph for the HINA network.
+#     """
 
-def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, pruning, layout: str):
+#     if group != 'All':
+#         df = df[df['group'] == group]
+    
+#     G_edges = get_bipartite(df, attribute_1, attribute_2)
+#     G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
+    
+#     if pruning != "none":
+#         if isinstance(pruning, dict):
+#             significant_edges = prune_edges(G_edges_ordered, **pruning)
+#         else:
+#             significant_edges = prune_edges(G_edges_ordered)
+#         significant_edges = significant_edges or set()
+#         G_edges_ordered = list(significant_edges)
+
+#     nx_G = nx.Graph()
+#     for edge in G_edges_ordered:
+#         nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
+
+#     # Assign node types and colors
+#     for node in nx_G.nodes():
+#         if node in df[attribute_1].astype(str).values:
+#             nx_G.nodes[node]['type'] = 'attribute_1'
+#             nx_G.nodes[node]['color'] = 'grey'
+#         elif node in df[attribute_2].astype(str).values:
+#             nx_G.nodes[node]['type'] = 'attribute_2'
+#             nx_G.nodes[node]['color'] = 'blue'
+#         else:
+#             nx_G.nodes[node]['type'] = 'unknown'
+#             nx_G.nodes[node]['color'] = 'black'
+
+#     for u, v, d in nx_G.edges(data=True):
+#         d['label'] = str(d.get('weight', ''))
+
+#     if layout == 'bipartite':
+#         attribute_1_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'attribute_1'}
+#         if not nx.is_bipartite(nx_G):
+#             raise ValueError("The graph is not bipartite; check the input data.")
+#         pos = nx.bipartite_layout(nx_G, attribute_1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
+#     elif layout == 'spring':
+#         pos = nx.spring_layout(nx_G, k=0.2)
+#     elif layout == 'circular':
+#         pos = nx.circular_layout(nx_G)
+#     else:
+#         raise ValueError(f"Unsupported layout: {layout}")
+#     return nx_G, pos, G_edges_ordered
+
+def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, attr_col: str, pruning, layout: str):
     """
     Build a NetworkX graph for the HINA network.
+    
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        The input DataFrame containing the data to construct the bipartite graph.
+    group_col : str
+        The column name in the DataFrame representing group information for student nodes.
+    group : str
+        The specific group to filter by, or 'All' to include all groups.
+    student_col : str
+        The column name in the DataFrame representing student nodes.
+    object1_col : str
+        The column name in the DataFrame representing the studied object nodes.
+    attr_col : str
+        The column name in the DataFrame representing attributes for object nodes.
+    pruning : str or dict
+        Controls edge pruning strategy. "none" for no pruning, or a dictionary with 
+        parameters for the prune_edges function.
+    layout : str
+        Layout for node positioning: "bipartite", "spring", or "circular".
+    
+    Returns:
+    --------
+    tuple
+        (nx_G, pos, G_edges_ordered) - The network graph, node positions, and edge list.
     """
+    # Filter by group 
+    if group != 'All' and group_col in df.columns:
+        df = df[df[group_col] == group]
+    
+    # Create the bipartite graph
+    B = get_bipartite(df, student_col, object1_col, attr_col, group_col)
+    G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in B.edges(data=True)]
 
-    if group != 'All':
-        df = df[df['group'] == group]
-    
-    G_edges = get_bipartite(df, attribute_1, attribute_2)
-    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
-    
+    # Prune edges 
     if pruning != "none":
         if isinstance(pruning, dict):
-            significant_edges = prune_edges(G_edges_ordered, **pruning)
+            significant_edges_result = prune_edges(B, **pruning)
         else:
-            significant_edges = prune_edges(G_edges_ordered)
-        significant_edges = significant_edges or set()
+            significant_edges_result = prune_edges(B)
+        
+        if isinstance(significant_edges_result, dict) and "significant edges" in significant_edges_result:
+            significant_edges = significant_edges_result["significant edges"]
+        else:
+            significant_edges = significant_edges_result or set()
+            
         G_edges_ordered = list(significant_edges)
-
+    
+    # Create a new graph with the significant edges
     nx_G = nx.Graph()
     for edge in G_edges_ordered:
         nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
-
+    
     # Assign node types and colors
     for node in nx_G.nodes():
-        if node in df[attribute_1].astype(str).values:
-            nx_G.nodes[node]['type'] = 'attribute_1'
+        node_str = str(node)
+        if node_str in df[student_col].astype(str).values:
+            nx_G.nodes[node]['type'] = 'student'
             nx_G.nodes[node]['color'] = 'grey'
-        elif node in df[attribute_2].astype(str).values:
-            nx_G.nodes[node]['type'] = 'attribute_2'
+        elif node_str in df[object1_col].astype(str).values:
+            nx_G.nodes[node]['type'] = 'object'
             nx_G.nodes[node]['color'] = 'blue'
         else:
             nx_G.nodes[node]['type'] = 'unknown'
             nx_G.nodes[node]['color'] = 'black'
-
+    
+    # Add edge labels
     for u, v, d in nx_G.edges(data=True):
         d['label'] = str(d.get('weight', ''))
-
+    
+    # Set the layout
     if layout == 'bipartite':
-        attribute_1_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'attribute_1'}
+        student_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'student'}
         if not nx.is_bipartite(nx_G):
             raise ValueError("The graph is not bipartite; check the input data.")
-        pos = nx.bipartite_layout(nx_G, attribute_1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
+        pos = nx.bipartite_layout(nx_G, student_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
     elif layout == 'spring':
         pos = nx.spring_layout(nx_G, k=0.2)
     elif layout == 'circular':
         pos = nx.circular_layout(nx_G)
     else:
         raise ValueError(f"Unsupported layout: {layout}")
-    return nx_G, pos
+    
+    return nx_G, pos, G_edges_ordered
 
 def cy_elements_from_graph(G: nx.Graph, pos: dict):
     """
