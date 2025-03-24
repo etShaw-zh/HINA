@@ -59,7 +59,7 @@ export function Webinterface() {
 
   interface DyadicAnalysisData {
     significant_edges: [string, string, number][];
-    pruned_edges: [string, string, number][];
+    // pruned_edges: [string, string, number][];
   }
 
   interface ClusterLabelsData {
@@ -70,7 +70,7 @@ export function Webinterface() {
 
   const [qdSortConfig, setQdSortConfig] = useState<SortConfig>(null);
   const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
-  const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
+  // const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
   const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
 
   const LAYOUT_OPTIONS = [
@@ -141,12 +141,12 @@ export function Webinterface() {
       const res = await axios.post("/build-hina-network", params);
       console.log("Received response:", res.data);
       setElements(res.data.elements);
-      if (res.data.dyadic_analysis) {
-        setDyadicAnalysis(res.data.dyadic_analysis);
+      if (res.data.significant_edges) {
+        setDyadicAnalysis(res.data.significant_edges);
       } else {
         setDyadicAnalysis(null);
       }
-      fetchQuantityAndDiversity();
+      // fetchQuantityAndDiversity();
     } catch (error) {
       console.error("Error updating HINA network:", error);
       console.error("Error details:", error.response?.data || error.message)
@@ -221,17 +221,17 @@ export function Webinterface() {
       if (!dyadicAnalysis) return;
       const sigData = [
         ["Node 1", "Node 2", "Weight"],
-        ...dyadicAnalysis.significant_edges.map((edge) => [edge[0], edge[1], edge[2]]),
+        ...dyadicAnalysis.map((edge) => [edge[0], edge[1], edge[2]]),
       ];
       const wsSig = XLSX.utils.aoa_to_sheet(sigData);
       XLSX.utils.book_append_sheet(wb, wsSig, "Significant Edges");
 
-      const prunedData = [
-        ["Node 1", "Node 2", "Weight"],
-        ...dyadicAnalysis.pruned_edges.map((edge) => [edge[0], edge[1], edge[2]]),
-      ];
-      const wsPruned = XLSX.utils.aoa_to_sheet(prunedData);
-      XLSX.utils.book_append_sheet(wb, wsPruned, "Pruned Edges");
+      // const prunedData = [
+      //   ["Node 1", "Node 2", "Weight"],
+      //   ...dyadicAnalysis.pruned_edges.map((edge) => [edge[0], edge[1], edge[2]]),
+      // ];
+      // const wsPruned = XLSX.utils.aoa_to_sheet(prunedData);
+      // XLSX.utils.book_append_sheet(wb, wsPruned, "Pruned Edges");
 
       XLSX.writeFile(wb, "dyadic_analysis.xlsx");
     } else if (activeTab === "cluster") {
@@ -274,7 +274,8 @@ export function Webinterface() {
   // Compute sorted data for Dyadic Analysis Significant Edges table
   const dyadicSigTableData = useMemo(() => {
     if (!dyadicAnalysis) return [];
-    const data = dyadicAnalysis.significant_edges.map((edge) => ({
+    console.log("dyadicAnalysis", Array.isArray(dyadicAnalysis) )
+    const data = dyadicAnalysis.map((edge) => ({
       "Node 1": edge[0],
       "Node 2": edge[1],
       Weight: edge[2],
@@ -294,26 +295,26 @@ export function Webinterface() {
   }, [dyadicAnalysis, dyadicSigSortConfig]);
 
   // Compute sorted data for Dyadic Analysis Pruned Edges table
-  const dyadicPrunedTableData = useMemo(() => {
-    if (!dyadicAnalysis) return [];
-    const data = dyadicAnalysis.pruned_edges.map((edge) => ({
-      "Node 1": edge[0],
-      "Node 2": edge[1],
-      Weight: edge[2],
-    }));
-    if (dyadicPrunedSortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[dyadicPrunedSortConfig.key] < b[dyadicPrunedSortConfig.key]) {
-          return dyadicPrunedSortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[dyadicPrunedSortConfig.key] > b[dyadicPrunedSortConfig.key]) {
-          return dyadicPrunedSortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
-  }, [dyadicAnalysis, dyadicPrunedSortConfig]);
+  // const dyadicPrunedTableData = useMemo(() => {
+  //   if (!dyadicAnalysis) return [];
+  //   const data = dyadicAnalysis.pruned_edges.map((edge) => ({
+  //     "Node 1": edge[0],
+  //     "Node 2": edge[1],
+  //     Weight: edge[2],
+  //   }));
+  //   if (dyadicPrunedSortConfig !== null) {
+  //     data.sort((a, b) => {
+  //       if (a[dyadicPrunedSortConfig.key] < b[dyadicPrunedSortConfig.key]) {
+  //         return dyadicPrunedSortConfig.direction === "asc" ? -1 : 1;
+  //       }
+  //       if (a[dyadicPrunedSortConfig.key] > b[dyadicPrunedSortConfig.key]) {
+  //         return dyadicPrunedSortConfig.direction === "asc" ? 1 : -1;
+  //       }
+  //       return 0;
+  //     });
+  //   }
+  //   return data;
+  // }, [dyadicAnalysis, dyadicPrunedSortConfig]);
 
   // Compute sorted data for Cluster Labels table
   const clusterTableData = useMemo(() => {
@@ -705,7 +706,7 @@ export function Webinterface() {
                             <Accordion.Item value="sig">
                               <Accordion.Control>
                                 <Title order={4}>
-                                  Significant Edges ({dyadicAnalysis.significant_edges.length})
+                                  Significant Edges ({dyadicAnalysis.length})
                                 </Title>
                               </Accordion.Control>
                               <Accordion.Panel>
@@ -751,7 +752,7 @@ export function Webinterface() {
                               </Accordion.Panel>
                             </Accordion.Item>
 
-                            <Accordion.Item value="pruned">
+                            {/* <Accordion.Item value="pruned">
                               <Accordion.Control>
                                 <Title order={4}>
                                   Pruned Edges ({dyadicAnalysis.pruned_edges.length})
@@ -798,7 +799,7 @@ export function Webinterface() {
                                   </Table.Tbody>
                                 </Table>
                               </Accordion.Panel>
-                            </Accordion.Item>
+                            </Accordion.Item> */}
                           </Accordion>
                         ) : (
                           <Text>No Dyadic analysis data available.</Text>
