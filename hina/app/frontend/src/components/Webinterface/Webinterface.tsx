@@ -90,6 +90,27 @@ export function Webinterface() {
       { value: "none", label: "None" },
   ];
 
+  // Update groups based on the uploaded data and group column
+  const updateGroups = (data: string, groupColumn: string) => {
+    if (!data || groupColumn === "none") {
+      setGroups(["All"]);
+      return;
+    }
+    try {
+      const df = JSON.parse(data);
+      const columnValues = df.data.map((row: any, index: number) => {
+        const colIndex = df.columns.indexOf(groupColumn);
+        return colIndex >= 0 ? String(row[colIndex]) : undefined;
+      }).filter((value: any) => value !== undefined);      
+      const uniqueValues = [...new Set(columnValues)];
+      const groupOptions: string[] = ["All", ...uniqueValues.filter((g: string) => g !== "All")];
+      setGroups(groupOptions);
+    } catch (error) {
+      console.error("Error updating groups:", error);
+      setGroups(["All"]);
+    }
+  };
+  
   // Handle file upload using Mantine's FileInput component
   const handleFileUpload = async (file: File | null) => {
     if (!file) return;
@@ -98,11 +119,11 @@ export function Webinterface() {
     try {
       const res = await axios.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      });
-      const groupOptions: string[] = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
-      setGroups(groupOptions);
+      });      
       setColumns(res.data.columns);
       setUploadedData(res.data.data);
+      const defaultGroups = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
+      setGroups(defaultGroups);
     } catch (error) {
       console.error("Error during file upload:", error);
     }
@@ -274,7 +295,6 @@ export function Webinterface() {
   // Compute sorted data for Dyadic Analysis Significant Edges table
   const dyadicSigTableData = useMemo(() => {
     if (!dyadicAnalysis) return [];
-    console.log("dyadicAnalysis", Array.isArray(dyadicAnalysis) )
     const data = dyadicAnalysis.map((edge) => ({
       "Node 1": edge[0],
       "Node 2": edge[1],
@@ -377,6 +397,11 @@ export function Webinterface() {
     };
   }, [elements]);
 
+  useEffect(() => {
+    if (uploadedData && groupCol !== "none") {
+      updateGroups(uploadedData, groupCol);
+    }
+  }, [groupCol, uploadedData]);
 
   return (
     <AppShell
