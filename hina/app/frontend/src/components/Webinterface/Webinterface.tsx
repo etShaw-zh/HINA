@@ -52,11 +52,14 @@ export function Webinterface() {
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>("node-level");
   const cyRef = useRef<any>(null);
+  
   interface QDData {
-  quantity: Record<string, number>;
-  diversity: Record<string, number>;
-}
-
+    quantity: Record<string, number>;
+    normalized_quantity: Record<string, number>;
+    diversity: Record<string, number>;
+    quantity_by_category?: Record<string, Record<string, number>>;
+    normalized_quantity_by_group?: Record<string, number>;
+  }
   interface DyadicAnalysisData {
     significant_edges: [string, string, number][];
     // pruned_edges: [string, string, number][];
@@ -68,7 +71,11 @@ export function Webinterface() {
 
   type SortConfig = { key: string; direction: "asc" | "desc" } | null;
 
-  const [qdSortConfig, setQdSortConfig] = useState<SortConfig>(null);
+  const [quantitySortConfig, setQuantitySortConfig] = useState<SortConfig>(null);
+  const [diversitySortConfig, setDiversitySortConfig] = useState<SortConfig>(null);
+  const [normalizedQuantitySortConfig, setNormalizedQuantitySortConfig] = useState<SortConfig>(null);
+  const [categoryQuantitySortConfig, setCategoryQuantitySortConfig] = useState<SortConfig>(null);
+  const [normalizedGroupSortConfig, setNormalizedGroupSortConfig] = useState<SortConfig>(null);  
   const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
   // const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
   const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
@@ -167,7 +174,7 @@ export function Webinterface() {
       } else {
         setDyadicAnalysis(null);
       }
-      // fetchQuantityAndDiversity();
+      fetchQuantityAndDiversity();
     } catch (error) {
       console.error("Error updating HINA network:", error);
       console.error("Error details:", error.response?.data || error.message)
@@ -202,20 +209,28 @@ export function Webinterface() {
     }
   };
 
-  // Fetch Quantity & Diversity data endpoint
-  const fetchQuantityAndDiversity = async () => {
-    if (!uploadedData) return;
-    const params = new URLSearchParams();
-    params.append("data", uploadedData);
-    params.append("student_col", student);  
-    params.append("object1_col", object1);
-    try {
-      const res = await axios.post("/quantity-diversity", params);
-      setQdData(res.data);
-    } catch (error) {
-      console.error("Error computing Quantity & Diversity:", error);
-    }
-  };
+// Fetch Quantity & Diversity data endpoint
+const fetchQuantityAndDiversity = async () => {
+  if (!uploadedData) return;
+  const params = new URLSearchParams();
+  params.append("data", uploadedData);
+  params.append("student_col", student);
+  params.append("object1_col", object1);
+  params.append("object2_col", object2);
+  params.append("attr_col", attr || "");
+  params.append("group_col", groupCol || "");
+  
+  try {
+    console.log("Fetching quantity-diversity with params:", {
+      student, object1, object2, attr, groupCol
+    });
+    const res = await axios.post("/quantity-diversity", params);
+    console.log("Quantity-diversity response:", res.data);
+    setQdData(res.data);
+  } catch (error) {
+    console.error("Error computing Quantity & Diversity:", error);
+  }
+};
 
   // Zoom functions
   const zoomIn = () => setZoom((prevZoom) => Math.min(prevZoom * 1.2, 3));
@@ -227,16 +242,64 @@ export function Webinterface() {
 
     if (activeTab === "node-level") {
       if (!qdData) return;
-      const nodeLevelData = [
-        ["Attribute", "Quantity", "Diversity"],
+      
+      // Quantity
+      const quantityData = [
+        ["Student", "Quantity"],
         ...Object.keys(qdData.quantity).map((key) => [
           key,
-          qdData.quantity[key],
           qdData.diversity[key],
         ]),
       ];
-      const wsNode = XLSX.utils.aoa_to_sheet(nodeLevelData);
-      XLSX.utils.book_append_sheet(wb, wsNode, "Quantity & Diversity");
+      const wsQuantity = XLSX.utils.aoa_to_sheet(quantityData);
+      XLSX.utils.book_append_sheet(wb, wsQuantity, "Quantity");
+
+      // Diversity
+      const diversityData = [
+        ["Student", "Diversity"],
+        ...Object.keys(qdData.diversity).map((key) => [
+          key,
+          qdData.diversity[key],
+        ]),
+      ];
+      const wsDiversity = XLSX.utils.aoa_to_sheet(diversityData);
+      XLSX.utils.book_append_sheet(wb, wsDiversity, "Diversity");
+      
+      // Normalized quantity
+      const normalizedData = [
+        ["Student", "Normalized Quantity"],
+        ...Object.entries(qdData.normalized_quantity).map(([key, value]) => [
+          key, value
+        ]),
+      ];
+      const wsNorm = XLSX.utils.aoa_to_sheet(normalizedData);
+      XLSX.utils.book_append_sheet(wb, wsNorm, "Normalized Quantity");
+      
+      if (qdData.quantity_by_category) {
+        const categoryData = [
+          ["Node", "Category", "Value"],
+        ];
+        
+        Object.entries(qdData.quantity_by_category).forEach(([node, categories]) => {
+          Object.entries(categories).forEach(([category, value]) => {
+            categoryData.push([node, category, value]);
+          });
+        });
+        
+        const wsCat = XLSX.utils.aoa_to_sheet(categoryData);
+        XLSX.utils.book_append_sheet(wb, wsCat, "Quantity by Category");
+      }
+      
+      if (qdData.normalized_quantity_by_group) {
+        const groupData = [
+          ["Student", "Normalized by Group"],
+          ...Object.entries(qdData.normalized_quantity_by_group).map(([key, value]) => [
+            key, value
+          ]),
+        ];
+        const wsGroup = XLSX.utils.aoa_to_sheet(groupData);
+        XLSX.utils.book_append_sheet(wb, wsGroup, "Normalized by Group");
+      }
       XLSX.writeFile(wb, "quantity_and_diversity.xlsx");
     } else if (activeTab === "dyadic") {
       if (!dyadicAnalysis) return;
@@ -271,26 +334,117 @@ export function Webinterface() {
   };
 
   // Compute sorted data for Node-Level table
-  const qdTableData = useMemo(() => {
-    if (!qdData) return [];
-    const data = Object.keys(qdData.quantity).map((key) => ({
-      Attribute: key,
-      Quantity: qdData.quantity[key],
-      Diversity: qdData.diversity[key],
+  const quantityTableData = useMemo(() => {
+    if (!qdData?.quantity) return [];
+    const data = Object.entries(qdData.quantity).map(([key, value]) => ({
+      Student: key,
+      Quantity: value
     }));
-    if (qdSortConfig !== null) {
+    if (quantitySortConfig !== null) {
       data.sort((a, b) => {
-        if (a[qdSortConfig.key] < b[qdSortConfig.key]) {
-          return qdSortConfig.direction === "asc" ? -1 : 1;
+        if (a[quantitySortConfig.key] < b[quantitySortConfig.key]) {
+          return quantitySortConfig.direction === "asc" ? -1 : 1;
         }
-        if (a[qdSortConfig.key] > b[qdSortConfig.key]) {
-          return qdSortConfig.direction === "asc" ? 1 : -1;
+        if (a[quantitySortConfig.key] > b[quantitySortConfig.key]) {
+          return quantitySortConfig.direction === "asc" ? 1 : -1;
         }
         return 0;
       });
     }
     return data;
-  }, [qdData, qdSortConfig]);
+  }, [qdData?.quantity, quantitySortConfig]);
+
+  // Sorted data for Diversity table
+  const diversityTableData = useMemo(() => {
+    if (!qdData?.diversity) return [];
+    const data = Object.entries(qdData.diversity).map(([key, value]) => ({
+      Student: key,
+      Diversity: value
+    }));
+    if (diversitySortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[diversitySortConfig.key] < b[diversitySortConfig.key]) {
+          return diversitySortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[diversitySortConfig.key] > b[diversitySortConfig.key]) {
+          return diversitySortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [qdData?.diversity, diversitySortConfig]);
+
+  // Sorted data for Normalized Quantity table
+  const normalizedQuantityTableData = useMemo(() => {
+    if (!qdData?.normalized_quantity) return [];
+    const data = Object.entries(qdData.normalized_quantity).map(([key, value]) => ({
+      Student: key,
+      "Normalized Quantity": value
+    }));
+    if (normalizedQuantitySortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[normalizedQuantitySortConfig.key] < b[normalizedQuantitySortConfig.key]) {
+          return normalizedQuantitySortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[normalizedQuantitySortConfig.key] > b[normalizedQuantitySortConfig.key]) {
+          return normalizedQuantitySortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [qdData?.normalized_quantity, normalizedQuantitySortConfig]);
+
+  // Sorted data for Category Quantity table
+  const categoryQuantityTableData = useMemo(() => {
+    if (!qdData?.quantity_by_category) return [];
+    const data: { Student: string; Category: string; Value: number }[] = [];
+    
+    Object.entries(qdData.quantity_by_category).forEach(([node, categories]) => {
+      Object.entries(categories).forEach(([category, value]) => {
+        data.push({
+          Student: node,
+          Category: category,
+          Value: value as number
+        });
+      });
+    });
+    
+    if (categoryQuantitySortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[categoryQuantitySortConfig.key] < b[categoryQuantitySortConfig.key]) {
+          return categoryQuantitySortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[categoryQuantitySortConfig.key] > b[categoryQuantitySortConfig.key]) {
+          return categoryQuantitySortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [qdData?.quantity_by_category, categoryQuantitySortConfig]);
+
+  // Sorted data for Normalized Quantity by Group table
+  const normalizedGroupTableData = useMemo(() => {
+    if (!qdData?.normalized_quantity_by_group) return [];
+    const data = Object.entries(qdData.normalized_quantity_by_group).map(([key, value]) => ({
+      Student: key,
+      "Normalized Quantity": value
+    }));
+    if (normalizedGroupSortConfig !== null) {
+      data.sort((a, b) => {
+        if (a[normalizedGroupSortConfig.key] < b[normalizedGroupSortConfig.key]) {
+          return normalizedGroupSortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[normalizedGroupSortConfig.key] > b[normalizedGroupSortConfig.key]) {
+          return normalizedGroupSortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return data;
+  }, [qdData?.normalized_quantity_by_group, normalizedGroupSortConfig]);
 
   // Compute sorted data for Dyadic Analysis Significant Edges table
   const dyadicSigTableData = useMemo(() => {
@@ -647,7 +801,7 @@ export function Webinterface() {
               <Grid.Col span={4}>
                 {/* Right Panel for Analytical Results */}
                 <ScrollArea h={700}>
-                  <Paper withBorder shadow="sm" style={{ flex: 1, height: "1200px"}}>
+                  <Paper withBorder shadow="sm">
                     <Tabs value={activeTab} onChange={setActiveTab}>
                       <Tabs.List>
                         <Tabs.Tab value="node-level">Node-Level</Tabs.Tab>
@@ -657,70 +811,220 @@ export function Webinterface() {
 
                       {/* Node-Level Tab Content */}
                       <Tabs.Panel value="node-level">
-                        {qdData && (
-                          <Paper withBorder shadow="sm" p="md">
-                            <Title order={3}>Quantity & Diversity Data for {attr1}</Title>
-                            <Table highlightOnHover withTableBorder withColumnBorders>
-                              <Table.Thead>
-                                <Table.Tr>
-                                  <Table.Th
-                                    style={{ textAlign: "center", cursor: "pointer" }}
-                                    onClick={() => toggleSort("Attribute", qdSortConfig, setQdSortConfig)}
-                                  >
-                                    {attr1 || "Attribute 1"}{" "}
-                                    {qdSortConfig?.key === "Attribute" ? (
-                                      qdSortConfig.direction === "asc" ? (
-                                        <IconSortAscending size={14} />
-                                      ) : (
-                                        <IconSortDescending size={14} />
-                                      )
-                                    ) : (
-                                      <IconArrowsSort size={14} />
-                                    )}
-                                  </Table.Th>
-                                  <Table.Th
-                                    style={{ textAlign: "center", cursor: "pointer" }}
-                                    onClick={() => toggleSort("Quantity", qdSortConfig, setQdSortConfig)}
-                                  >
-                                    Quantity{" "}
-                                    {qdSortConfig?.key === "Quantity" ? (
-                                      qdSortConfig.direction === "asc" ? (
-                                        <IconSortAscending size={14} />
-                                      ) : (
-                                        <IconSortDescending size={14} />
-                                      )
-                                    ) : (
-                                      <IconArrowsSort size={14} />
-                                    )}
-                                  </Table.Th>
-                                  <Table.Th
-                                    style={{ textAlign: "center", cursor: "pointer" }}
-                                    onClick={() => toggleSort("Diversity", qdSortConfig, setQdSortConfig)}
-                                  >
-                                    Diversity{" "}
-                                    {qdSortConfig?.key === "Diversity" ? (
-                                      qdSortConfig.direction === "asc" ? (
-                                        <IconSortAscending size={14} />
-                                      ) : (
-                                        <IconSortDescending size={14} />
-                                      )
-                                    ) : (
-                                      <IconArrowsSort size={14} />
-                                    )}
-                                  </Table.Th>
-                                </Table.Tr>
-                              </Table.Thead>
-                              <Table.Tbody>
-                                {qdTableData.map((row, idx) => (
-                                  <Table.Tr key={idx}>
-                                    <Table.Td style={{ textAlign: "center" }}>{row.Attribute}</Table.Td>
-                                    <Table.Td style={{ textAlign: "center" }}>{row.Quantity}</Table.Td>
-                                    <Table.Td style={{ textAlign: "center" }}>{row.Diversity}</Table.Td>
-                                  </Table.Tr>
-                                ))}
-                              </Table.Tbody>
-                            </Table>
-                          </Paper>
+                        {activeTab === "node-level" && qdData && (
+                          <Accordion transitionDuration={500}>
+
+                            {/* Quantity Table */}
+                            <Accordion.Item value="quantity">
+                              <Accordion.Control>
+                                <Title order={4}>Quantity</Title>
+                              </Accordion.Control>
+                              <Accordion.Panel>
+                                <Table highlightOnHover withTableBorder withColumnBorders>
+                                  <Table.Thead>
+                                    <Table.Tr>
+                                      {["Student", "Quantity"].map((col) => (
+                                        <Table.Th
+                                          key={col}
+                                          style={{ textAlign: col === "Quantity" ? "center" : "left", cursor: "pointer" }}
+                                          onClick={() => toggleSort(col, quantitySortConfig, setQuantitySortConfig)}
+                                        >
+                                          {col}{" "}
+                                          {quantitySortConfig?.key === col ? (
+                                            quantitySortConfig.direction === "asc" ? (
+                                              <IconSortAscending size={14} />
+                                            ) : (
+                                              <IconSortDescending size={14} />
+                                            )
+                                          ) : (
+                                            <IconArrowsSort size={14} />
+                                          )}
+                                        </Table.Th>
+                                      ))}
+                                    </Table.Tr>
+                                  </Table.Thead>
+                                  <Table.Tbody>
+                                    {quantityTableData.map((row, idx) => (
+                                      <Table.Tr key={idx}>
+                                        <Table.Td>{row.Student}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row.Quantity.toFixed(2)}</Table.Td>
+                                      </Table.Tr>
+                                    ))}
+                                  </Table.Tbody>
+                                </Table>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+
+                            {/* Diversity Table */}
+                            <Accordion.Item value="diversity">
+                              <Accordion.Control>
+                                <Title order={4}>Diversity</Title>
+                              </Accordion.Control>
+                              <Accordion.Panel>
+                                <Table highlightOnHover withTableBorder withColumnBorders>
+                                  <Table.Thead>
+                                    <Table.Tr>
+                                      {["Student", "Diversity"].map((col) => (
+                                        <Table.Th
+                                          key={col}
+                                          style={{ textAlign: col === "Diversity" ? "center" : "left", cursor: "pointer" }}
+                                          onClick={() => toggleSort(col, diversitySortConfig, setDiversitySortConfig)}
+                                        >
+                                          {col}{" "}
+                                          {diversitySortConfig?.key === col ? (
+                                            diversitySortConfig.direction === "asc" ? (
+                                              <IconSortAscending size={14} />
+                                            ) : (
+                                              <IconSortDescending size={14} />
+                                            )
+                                          ) : (
+                                            <IconArrowsSort size={14} />
+                                          )}
+                                        </Table.Th>
+                                      ))}
+                                    </Table.Tr>
+                                  </Table.Thead>
+                                  <Table.Tbody>
+                                    {diversityTableData.map((row, idx) => (
+                                      <Table.Tr key={idx}>
+                                        <Table.Td>{row.Student}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row.Diversity.toFixed(4)}</Table.Td>
+                                      </Table.Tr>
+                                    ))}
+                                  </Table.Tbody>
+                                </Table>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+
+                            {/* Normalized Quantity Table */}
+                            <Accordion.Item value="normalized-quantity">
+                              <Accordion.Control>
+                                <Title order={4}>Normalized Quantity</Title>
+                              </Accordion.Control>
+                              <Accordion.Panel>
+                                <Table highlightOnHover withTableBorder withColumnBorders>
+                                  <Table.Thead>
+                                    <Table.Tr>
+                                      {["Student", "Normalized Quantity"].map((col) => (
+                                        <Table.Th
+                                          key={col}
+                                          style={{ textAlign: col === "Normalized Quantity" ? "center" : "left", cursor: "pointer" }}
+                                          onClick={() => toggleSort(col, normalizedQuantitySortConfig, setNormalizedQuantitySortConfig)}
+                                        >
+                                          {col}{" "}
+                                          {normalizedQuantitySortConfig?.key === col ? (
+                                            normalizedQuantitySortConfig.direction === "asc" ? (
+                                              <IconSortAscending size={14} />
+                                            ) : (
+                                              <IconSortDescending size={14} />
+                                            )
+                                          ) : (
+                                            <IconArrowsSort size={14} />
+                                          )}
+                                        </Table.Th>
+                                      ))}
+                                    </Table.Tr>
+                                  </Table.Thead>
+                                  <Table.Tbody>
+                                    {normalizedQuantityTableData.map((row, idx) => (
+                                      <Table.Tr key={idx}>
+                                        <Table.Td>{row.Student}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row["Normalized Quantity"].toFixed(4)}</Table.Td>
+                                      </Table.Tr>
+                                    ))}
+                                  </Table.Tbody>
+                                </Table>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+
+                            {/* Quantity by Category Table */}
+                            {qdData.quantity_by_category && (
+                              <Accordion.Item value="quantity-by-category">
+                                <Accordion.Control>
+                                  <Title order={4}>Quantity by Category</Title>
+                                </Accordion.Control>
+                                <Accordion.Panel>
+                                  <Table highlightOnHover withTableBorder withColumnBorders>
+                                    <Table.Thead>
+                                      <Table.Tr>
+                                        {["Student", "Category", "Value"].map((col) => (
+                                          <Table.Th
+                                            key={col}
+                                            style={{ textAlign: col === "Value" ? "center" : "left", cursor: "pointer" }}
+                                            onClick={() => toggleSort(col, categoryQuantitySortConfig, setCategoryQuantitySortConfig)}
+                                          >
+                                            {col}{" "}
+                                            {categoryQuantitySortConfig?.key === col ? (
+                                              categoryQuantitySortConfig.direction === "asc" ? (
+                                                <IconSortAscending size={14} />
+                                              ) : (
+                                                <IconSortDescending size={14} />
+                                              )
+                                            ) : (
+                                              <IconArrowsSort size={14} />
+                                            )}
+                                          </Table.Th>
+                                        ))}
+                                      </Table.Tr>
+                                    </Table.Thead>
+                                    <Table.Tbody>
+                                      {categoryQuantityTableData.map((row, idx) => (
+                                        <Table.Tr key={`cat-${idx}`}>
+                                          <Table.Td>{row.Student}</Table.Td>
+                                          <Table.Td>{row.Category}</Table.Td>
+                                          <Table.Td style={{ textAlign: "center" }}>{row.Value.toFixed(2)}</Table.Td>
+                                        </Table.Tr>
+                                      ))}
+                                    </Table.Tbody>
+                                  </Table>
+                                </Accordion.Panel>
+                              </Accordion.Item>
+                            )}
+
+                            {/* Normalized Quantity by Group Table */}
+                            {qdData.normalized_quantity_by_group && (
+                              <Accordion.Item value="normalized-by-group">
+                                <Accordion.Control>
+                                  <Title order={4}>Normalized Quantity by Group</Title>
+                                </Accordion.Control>
+                                <Accordion.Panel>
+                                  <Table highlightOnHover withTableBorder withColumnBorders>
+                                    <Table.Thead>
+                                      <Table.Tr>
+                                        {["Student", "Normalized Quantity"].map((col) => (
+                                          <Table.Th
+                                            key={col}
+                                            style={{ textAlign: col === "Normalized Quantity" ? "center" : "left", cursor: "pointer" }}
+                                            onClick={() => toggleSort(col, normalizedGroupSortConfig, setNormalizedGroupSortConfig)}
+                                          >
+                                            {col}{" "}
+                                            {normalizedGroupSortConfig?.key === col ? (
+                                              normalizedGroupSortConfig.direction === "asc" ? (
+                                                <IconSortAscending size={14} />
+                                              ) : (
+                                                <IconSortDescending size={14} />
+                                              )
+                                            ) : (
+                                              <IconArrowsSort size={14} />
+                                            )}
+                                          </Table.Th>
+                                        ))}
+                                      </Table.Tr>
+                                    </Table.Thead>
+                                    <Table.Tbody>
+                                      {normalizedGroupTableData.map((row, idx) => (
+                                        <Table.Tr key={idx}>
+                                          <Table.Td>{row.Student}</Table.Td>
+                                          <Table.Td style={{ textAlign: "center" }}>{row["Normalized Quantity"].toFixed(4)}</Table.Td>
+                                        </Table.Tr>
+                                      ))}
+                                    </Table.Tbody>
+                                  </Table>
+                                </Accordion.Panel>
+                              </Accordion.Item>
+                            )}
+
+                          </Accordion>
                         )}
                       </Tabs.Panel>
 

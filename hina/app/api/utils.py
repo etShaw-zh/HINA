@@ -7,7 +7,8 @@ import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
 # from hina.mesoscale import bipartite_communities
 from hina.mesoscale import hina_communities
-from hina.construction.network_construct import get_bipartite
+from hina.construction import get_bipartite, get_tripartite
+from hina.individual import quantity, diversity
 
 def parse_contents(encoded_contents: str, filename: str) -> pd.DataFrame:
     """
