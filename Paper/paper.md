@@ -43,7 +43,7 @@ provide learning performance indices, identify clusters, and generate dashboard 
 such as students’ interactions with learning objects [@feng2025analyzing] or students’ affiliations with different 
 coded behaviors [@feng2024heterogenous]. These heterogenous interactions can be modelled with **heterogenous 
 interaction networks (HIN)** that consist of different sets of nodes, with edges only connecting nodes between different sets. 
-Examples of heterogenous interaction networks in learning analytics are presented in Figure 1 below {fig:examples}. HINA offers a set of flexible and 
+Examples of heterogenous interaction networks in learning analytics are presented in Figure 1 below. HINA offers a set of flexible and 
 adaptive methods to model a wide variety of interactions that can occur during learning processes in individual and collaborative learning contexts.  
 
 <p align="center">
@@ -106,7 +106,7 @@ provides a more specialized experience than existing packages for general networ
 
   - Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure [@feng2024heterogenous], 
     to automatically learn the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. Utilizes a novel method
-    based on data compression for parsimonious inference. If the input is a tripartite representation of heterogenous interaction network,
+    based on data compression for parsimonious inference. If the input is a tripartite representation of heterogeneous interaction network,
     the function also returns the projected bipartite networks of the related constructs of individuals within each cluster.  
 
 - **Network visualization** (hina.visualization) 
@@ -132,4 +132,4 @@ This work was supported by the Research Grants Council of Hong Kong under
 ECS Grant No. 27605223 (Shihui Feng) and HKU Institute of Data Science Seed Fund Grant No. IDS-RSF2023-0006 (Shihui Feng, Alec Kirkley). 
 
 # References
-[rMarkdown](https://github.com/baiyueh/HINA/blob/fb162c11dfef1189c430bce55277d19160372bef/Paper/paper.bib))
+[rMarkdown](https://github.com/baiyueh/HINA/blob/fb162c11dfef1189c430bce55277d19160372bef/Paper/paper.bib)
