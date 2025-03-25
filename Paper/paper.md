@@ -35,13 +35,13 @@ bibliography: paper.bib
 
 # Summary
 Learning analytics is a scientific field created in response to the need for deriving meaningful insights from learning process data, 
-to understand how learning occurs and to optimize learning design [@Gašević:2015]. **HINA** is a learning analytics tool that 
+to understand how learning occurs and to optimize learning design [@gavsevic2015let]. **HINA** is a learning analytics tool that 
 models and analyzes the relationships among different types of learning process data to uncover hidden learning strategies, 
 provide learning performance indices, identify clusters, and generate dashboard visualizations.  
 
 **Heterogenous interactions** refer to the connections that occur between different types of entities during learning processes, 
-such as students’ interactions with learning objects [@Feng:2025] or students’ affiliations with different 
-coded behaviors [@Feng:2024]. These heterogenous interactions can be modelled with **heterogenous 
+such as students’ interactions with learning objects [@feng2025analyzing] or students’ affiliations with different 
+coded behaviors [@feng2024heterogenous]. These heterogenous interactions can be modelled with **heterogenous 
 interaction networks (HIN)** that consist of different sets of nodes, with edges only connecting nodes between different sets. 
 Examples of heterogenous interaction networks in learning analytics are presented in Figure 1 below {fig:examples}. HINA offers a set of flexible and 
 adaptive methods to model a wide variety of interactions that can occur during learning processes in individual and collaborative learning contexts.  
@@ -56,7 +56,7 @@ adaptive methods to model a wide variety of interactions that can occur during l
 # Statement of need
 
 Constructivism theory of learning emphasizes that learning occurs through students’ active interactions with 
-various aspects of their environment [@Vygotsky:1978] [@Piaget:1976]. Students’ interactions with their learning environment—for example, 
+various aspects of their environment [@vygotsky1978mind] [@piaget1976piaget]. Students’ interactions with their learning environment—for example, 
 engagement with designed learning artefacts or with coded latent constructs—are inherently heterogenous, and can be captured using multimodal process data. 
 HINA offers analytical modules to model these heterogenous interactions and address questions at multiple levels of interest, for example: 
 
@@ -72,14 +72,14 @@ formats that are tailored for learning analytics applications and implementation
 
 These analytical features offered by HINA can analyze multimodal process data to address a wide range of research questions in 
 learning analytics. For example, studies can explore how  to gauge individual contribution based on the interactions between students and 
-learning artefacts [@Feng:2025], identify subgroups of students who share similar learning strategies based on their associations with 
-behavioral and cognitive constructs during learning processes [@Feng:2024], uncover significant associations among behavioral engagement in 
-different modalities [@Feng:2024], or design learning analytics dashboards for the visualization of heterogenous engagement to support teaching and learning practices [@Feng:2025].  
+learning artefacts [@feng2025analyzing], identify subgroups of students who share similar learning strategies based on their associations with 
+behavioral and cognitive constructs during learning processes [@feng2024heterogenous], uncover significant associations among behavioral engagement in 
+different modalities [@feng2024heterogenous], or design learning analytics dashboards for the visualization of heterogenous engagement to support teaching and learning practices [@feng2025analyzing].  
  
 
 **HINA** tailors its methods—which include brand-new algorithms for pruning, clustering, and visualization in the HIN setting—specifically for 
 learning analytics researchers and teachers working with HINs derived from learning process data. This makes HINA a unique contribution to the software space that 
-provides a more specialized experience than existing packages for general network analysis [@Hagberg:2008] [@Csardi:2006] or network inference [@Peixoto:2017] [@Kirkley:2024].  
+provides a more specialized experience than existing packages for general network analysis [@hagberg2008exploring] [@csardi2006igraph] or network inference [@peixoto2017graph] [@kirkley2024paninipy].  
 
 
 # Current Modules 
@@ -92,7 +92,7 @@ provides a more specialized experience than existing packages for general networ
 
 - **Individual-level analysis** (hina.individual) 
 
-  - Provides functions to compute the node-level measures of [@Feng:2025] gauging the quantity and diversity
+  - Provides functions to compute the node-level measures of [@feng2025analyzing] gauging the quantity and diversity
     of individuals’ connections to different learning constructs. Students’ group information and construct attributes
     can be flexibly manipulated for different applications. 
  
@@ -100,11 +100,11 @@ provides a more specialized experience than existing packages for general networ
 - **Dyadic-level analysis** (hina.dyad) 
 
   - Provides methods to identify statistically significant edges in the heterogeneous interaction
-    network relative to different null models of interaction structure [@Feng:2025], which can be specified by the user.  
+    network relative to different null models of interaction structure [@feng2025analyzing], which can be specified by the user.  
 
 - **Mesoscale clustering** (hina.mesoscale) 
 
-  - Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure [@Feng:2024], 
+  - Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure [@feng2024heterogenous], 
     to automatically learn the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. Utilizes a novel method
     based on data compression for parsimonious inference. If the input is a tripartite representation of heterogenous interaction network,
     the function also returns the projected bipartite networks of the related constructs of individuals within each cluster.  
