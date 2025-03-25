@@ -125,7 +125,6 @@ provides a more specialized experience than existing packages for general networ
     This dual functionality supports both data analysis and the sharing of actionable insights in an interactive and user-friendly manner,
     making it a versatile tool for both data analytics and teaching practice. 
 
-# Citations
 
 # Acknowledgements
 
@@ -133,3 +132,4 @@ This work was supported by the Research Grants Council of Hong Kong under
 ECS Grant No. 27605223 (Shihui Feng) and HKU Institute of Data Science Seed Fund Grant No. IDS-RSF2023-0006 (Shihui Feng, Alec Kirkley). 
 
 # References
+[rMarkdown](https://github.com/baiyueh/HINA/blob/fb162c11dfef1189c430bce55277d19160372bef/Paper/paper.bib))
