@@ -45,7 +45,7 @@ Examples of heterogenous interaction networks in learning analytics are presente
 adaptive methods to model a wide variety of interactions that can occur during learning processes in individual and collaborative learning contexts.  
 
 <p align="center">
-  <img src="https://github.com/your-username/your-repo/blob/main/images/figure.png?raw=true" width="50%">
+  <img src="https://github.com/your-username/your-repo/blob/main/images/figure](https://github.com/baiyueh/HINA/blob/c247df0e80af4ce18627a7f266fbe393a6cc92db/Paper/Examples.png?raw=true" width="50%">
   <br>
   <em> Figure 1. Examples of heterogenous interaction networks for learning in HINA. <b>formatting</b></em>
 </p>
