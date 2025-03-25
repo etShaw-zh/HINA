@@ -1,4 +1,4 @@
-
+---
 title: '**HINA: A Learning Analytics Tool for Heterogenous Interaction Network Analysis in Python**'
 
 tags:
@@ -32,7 +32,7 @@ affiliations:
 
 date: 23 March, 2025
 bibliography: paper.bib
-
+---
 
 
 # Summary
@@ -134,4 +134,5 @@ This work was supported by the Research Grants Council of Hong Kong under
 ECS Grant No. 27605223 (Shihui Feng) and HKU Institute of Data Science Seed Fund Grant No. IDS-RSF2023-0006 (Shihui Feng, Alec Kirkley). 
 
 # References
-[rMarkdown](https://github.com/baiyueh/HINA/blob/fb162c11dfef1189c430bce55277d19160372bef/Paper/paper.bib)
+```
+```
