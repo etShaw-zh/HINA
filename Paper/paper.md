@@ -14,8 +14,10 @@ authors:
     affiliation: "1, 2"
     corresponding: true
   - name: Baiyue He
+    orcid: 0009-0007-9787-9726
     affiliation: 2
   - name: Alec Kirkley 
+    orcid: 0000-0001-9966-0807
     affiliation: 2,3,4
     
 affiliations:
