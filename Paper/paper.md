@@ -6,7 +6,8 @@ tags:
   - Learning Analytics
   - Heterogenous Interactions 
   - Complex Networks 
-  - Dashboard 
+  - Dashboard
+    
 authors:
   - name: Shihui Feng 
     orcid: 0000-0002-5572-276X
