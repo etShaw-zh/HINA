@@ -84,15 +84,15 @@ provides a more specialized experience than existing packages for general networ
 - Network construction (hina.construction)  
 
   - Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples in Figure 1A, 1B)
-  - directly from input learning process data. The methods in this module are designed to handle the typical
-  - data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
+    directly from input learning process data. The methods in this module are designed to handle the typical
+    data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
 
 - Individual-level analysis (hina.individual) 
 
   - Provides functions to compute the node-level measures of [@Feng:2025] gauging the quantity and diversity
-  - of individuals’ connections to different learning constructs. Students’ group information and construct attributes
-  - can be flexibly manipulated for different applications. 
+    of individuals’ connections to different learning constructs. Students’ group information and construct attributes
+    can be flexibly manipulated for different applications. 
  
 
 - Dyadic-level analysis (hina.dyad) 
@@ -116,9 +116,10 @@ provides a more specialized experience than existing packages for general networ
 
 - Dashboard deployment (hina.app) 
   - Provides functions to deploy a dashboard that includes a web-based interface serving multiple purposes.
-    1) The dashboard serves as a web-based tool for conducting learning analytics with HINA using an intuitive user interface,
-    2) enabling users to conduct the individual-, dyadic- and mesoscale-level analysis available in the package without any programming.
-    3) The dashboard also allows teachers and students to visualize, interpret, and communicate HINA results effectively.
+    1. The dashboard serves as a web-based tool for conducting learning analytics with HINA using an intuitive user interface,
+       enabling users to conduct the individual-, dyadic- and mesoscale-level analysis available in the package without any programming.
+    2. The dashboard also allows teachers and students to visualize, interpret, and communicate HINA results effectively.
+    
     This dual functionality supports both data analysis and the sharing of actionable insights in an interactive and user-friendly manner,
     making it a versatile tool for both data analytics and teaching practice. 
 
