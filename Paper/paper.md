@@ -48,12 +48,7 @@ interaction networks (HIN)** that consist of different sets of nodes, with edges
 Examples of heterogenous interaction networks in learning analytics are presented in Figure 1 below. HINA offers a set of flexible and 
 adaptive methods to model a wide variety of interactions that can occur during learning processes in individual and collaborative learning contexts.  
 
-<p align="center">
-  <img src="https://github.com/baiyueh/HINA/blob/c247df0e80af4ce18627a7f266fbe393a6cc92db/Paper/Examples.png?raw=true" width="50%">
-  <br>
-  <em> Figure 1.<b> Examples of heterogenous interaction networks for learning in HINA.</b></em>
-</p>
-
+<img src="Examples.png" width="50%">
 
 # Statement of need
 
