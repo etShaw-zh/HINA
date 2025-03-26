@@ -186,5 +186,5 @@ def diversity(B, attr=None):
             diversity[i] /= np.log(N) 
         else:
             diversaity[i] = 0  
-
-    return diversity
+    diversity_df = pd.DataFrame.from_dict(diversity, orient='index', columns=['diversity'])
+    return diversity, diversity_df
