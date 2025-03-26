@@ -11,14 +11,14 @@ tags:
 authors:
   - name: Shihui Feng 
     orcid: 0000-0002-5572-276X
-    affiliation: "1, 2"
+    affiliation: "1,2"
     corresponding: true
   - name: Baiyue He
     orcid: 0009-0007-9787-9726
     affiliation: 2
   - name: Alec Kirkley 
     orcid: 0000-0001-9966-0807
-    affiliation: 2,3,4
+    affiliation: "2,3,4"
     
 affiliations:
  - name: Faculty of Education, University of Hong Kong, Hong Kong, China 
@@ -30,7 +30,7 @@ affiliations:
  - name: Urban Systems Institute, University of Hong Kong, Hong Kong, China
    index: 4
 
-date: 23 March, 2025
+date: 23 March 2025
 bibliography: paper.bib
 ---
 
