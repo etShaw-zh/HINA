@@ -42,7 +42,8 @@ def quantity(B, attr = None, group = None, return_type='all'):
         - 'quantity_by_category': A dictionary mapping (node, category) tuples to their total edge weight.
         - 'normalized_quantity_by_group': A dictionary mapping each node to its normalized edge weight within its group.
 
-   
+   dataframe
+       A dataframe containing all available quantities of each student node
     """
 
     W = sum(data['weight'] for _, _, data in B.edges(data=True))
