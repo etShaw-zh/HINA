@@ -1,6 +1,7 @@
 import networkx as nx 
 from collections import defaultdict
 import numpy as np 
+import pandas as pd 
 
 def quantity(B, attr = None, group = None, return_type='all'):
     
@@ -154,7 +155,8 @@ def diversity(B, attr=None):
         where 0 indicates no diversity (all connections of an indivdiual to a single category) 
         and 1 indicates maximum diversity (evenly distributed
         connections across all categories).
-
+     dataframe
+       A dataframe containing diversity value of each student node
     """
   
     v = set()
