@@ -79,6 +79,32 @@ def quantity(B, attr = None, group = None, return_type='all'):
         k: v / group_sums[B.nodes[k][group]] if group_sums[B.nodes[k][group]] != 0 else 0
         for k, v in quantity.items() if group in B.nodes[k]
     }
+
+     # organize the results into a dataframe for return 
+    quantity_df = pd.DataFrame.from_dict(quantity, orient='index', columns=['quantity'])
+    normalized_df = pd.DataFrame.from_dict(normalized_quantity,\
+                                           orient='index', columns=['normalized_quantity'])
+    result_df = quantity_df.join([normalized_df])
+    
+    if group is not None:
+        group_df = pd.DataFrame.from_dict(normalized_quantity_by_group, 
+                                        orient='index', 
+                                        columns=['normalized_quantity_by_group'])
+        result_df = result_df.join(group_df)
+
+    if attr is not None:
+        category_data = []
+        for (id_category, category), value in quantity_by_category.items():
+            category_data.append({
+                'username': id_category,
+                'category': category,
+                'quantity_by_category': value
+            })
+        category_df = pd.DataFrame(category_data)
+        category_pivot = category_df.pivot(index='username', columns='category', values='quantity_by_category')
+        category_pivot.columns = [f'quantity_{col}' for col in category_pivot.columns]
+        
+        result_df = result_df.join(category_pivot)
     
     results = {'quantity': quantity,'normalized_quantity': normalized_quantity,}
     
@@ -96,7 +122,7 @@ def quantity(B, attr = None, group = None, return_type='all'):
     elif return_type == 'normalized_quantity_by_group':
         return {'normalized_quantity_by_group': results['normalized_quantity_by_group']}
     else:
-        return results
+        return results, result_df 
 
 
 
