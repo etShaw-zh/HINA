@@ -18,7 +18,8 @@ import {
   Col,
   ScrollArea,
   Accordion,
-  Menu 
+  Menu,
+  ActionIcon
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
@@ -31,6 +32,7 @@ axios.defaults.baseURL = 'http://localhost:8000';
 export function Webinterface() {
   const [opened, { toggle }] = useDisclosure();
   const [uploadedData, setUploadedData] = useState<string | null>(null);
+  const [initialRenderDone, setInitialRenderDone] = useState(false);
   const [columns, setColumns] = useState<string[]>([]);
   const [elements, setElements] = useState<any[]>([]);
   const [groupCol, setGroupCol] = useState<string>("none");
@@ -46,7 +48,7 @@ export function Webinterface() {
   const [alpha, setAlpha] = useState<number>(0.05);
   const [fixDeg, setFixDeg] = useState<string>("Set 1");
   const [layout, setLayout] = useState<string>("bipartite");
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(0.5);
   const [qdData, setQdData] = useState<QDData | null>(null);
   const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
@@ -233,8 +235,31 @@ const fetchQuantityAndDiversity = async () => {
 };
 
   // Zoom functions
-  const zoomIn = () => setZoom((prevZoom) => Math.min(prevZoom * 1.2, 3));
-  const zoomOut = () => setZoom((prevZoom) => Math.max(prevZoom / 1.2, 0.1));
+  const zoomIn = () => {
+    if (cyRef.current) {
+      const currentZoom = cyRef.current.zoom();
+      const newZoom = Math.min(currentZoom * 1.2, 3);
+      cyRef.current.zoom(newZoom);
+      setZoom(newZoom);
+    }
+  };  
+
+  const zoomOut = () => {
+    if (cyRef.current) {
+      const currentZoom = cyRef.current.zoom();
+      const newZoom = Math.max(currentZoom / 1.2, 0.1);
+      cyRef.current.zoom(newZoom);
+      setZoom(newZoom);
+    }
+  };
+
+  const resetView = () => {
+    if (cyRef.current) {
+      cyRef.current.fit();
+      cyRef.current.center();
+      setZoom(cyRef.current.zoom());
+    }
+  };
 
   // Export to XLSX
   const exportToXLSX = () => {
@@ -536,6 +561,39 @@ const fetchQuantityAndDiversity = async () => {
     setSortConfig({ key, direction });
   };
 
+  const handleGroupChange = (value: string | null) => {
+    const newValue = value || "All";
+    setGroup(newValue);
+    if (uploadedData) {
+      const params = new URLSearchParams();
+      params.append("data", uploadedData);
+      params.append("group_col", groupCol); 
+      params.append("group", newValue);  
+      params.append("student_col", student);  
+      params.append("object1_col", object1);  
+      params.append("attr_col", attr); 
+      params.append("pruning", pruning);
+      params.append("alpha", alpha.toString());
+      params.append("fix_deg", fixDeg);
+      params.append("layout", layout);  
+  
+      axios.post("/build-hina-network", params)
+        .then(res => {
+          setElements(res.data.elements);
+          if (res.data.significant_edges) {
+            setDyadicAnalysis(res.data.significant_edges);
+          } else {
+            setDyadicAnalysis(null);
+          }
+          fetchQuantityAndDiversity();
+        })
+        .catch(error => {
+          console.error("Error updating HINA network:", error);
+        });
+    }
+  };
+  
+
   useEffect(() => {
     if (!cyRef.current) return;
     const cy = cyRef.current;
@@ -556,6 +614,12 @@ const fetchQuantityAndDiversity = async () => {
       updateGroups(uploadedData, groupCol);
     }
   }, [groupCol, uploadedData]);
+
+  useEffect(() => {
+    if (elements.length > 0) {
+      setInitialRenderDone(false); 
+    }
+  }, [elements]);
 
   return (
     <AppShell
@@ -614,19 +678,7 @@ const fetchQuantityAndDiversity = async () => {
                     value={groupCol}
                     onChange={(value) => setGroupCol(value || "none")}
                     data={columns}
-                  />
-                  <Select
-                    label="Group"
-                    value={group}
-                    onChange={(value) => setGroup(value || "All")}
-                    data={["All", ...groups.filter((g) => g !== "All")]}
-                  />
-                  <Select
-                    label="Cluster"
-                    value={cluster}
-                    onChange={(value) => setCluster(value || "All")}
-                    data={["All", ...groups.filter((g) => g !== "All")]}
-                  />                
+                  />           
                 </Group>
                 <Group grow mt="md" mb="md">
                     <Select
@@ -687,6 +739,24 @@ const fetchQuantityAndDiversity = async () => {
                     Update Clustered Network
                   </Button>
                 </Group>
+                <Group grow>
+                  {groups.length > 1 && elements.length > 0 && (
+                  <Select
+                    label="Group"
+                    value={group}
+                    onChange={handleGroupChange}
+                    data={groups}
+                  />
+                  )}
+                  {groups.length > 1 && elements.length > 0 && (
+                  <Select
+                    label="Cluster"
+                    value={cluster}
+                    onChange={(value) => setCluster(value || "All")}
+                    data={groups}
+                  />
+                  )}
+                </Group>
               </Paper>   
             )}
             <Grid>
@@ -702,7 +772,7 @@ const fetchQuantityAndDiversity = async () => {
                     elements={elements}
                     style={{ width: "100%", height: "100%" }}
                     layout={{ name: "preset" }}
-                    zoom={zoom}
+                    // zoom={zoom}
                     userZoomingEnabled={false}
                     userPanningEnabled={true}
                     stylesheet={[
@@ -743,6 +813,14 @@ const fetchQuantityAndDiversity = async () => {
                     ]}
                     cy={(cy) => {
                       cyRef.current = cy;
+                      if (!initialRenderDone && elements.length > 0) {
+                        setTimeout(() => {
+                          cy.fit();
+                          cy.center();
+                          setZoom(cy.zoom());
+                          setInitialRenderDone(true); 
+                        }, 100);
+                      }
                     }}
                   />
 
@@ -778,22 +856,36 @@ const fetchQuantityAndDiversity = async () => {
                       flexDirection: "column",
                     }}
                   >
-                    <Button
-                      // rightSection={<IconZoomIn size={14} />}
+                    <ActionIcon
                       variant="gradient"
                       gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
-                      onClick={zoomIn} style={{ fontSize: "24px", margin: "2px" }}
+                      onClick={resetView} 
+                      size="xl"
+                      radius="lg"  
+                      mb="xs"                    
                     >
-                      +
-                    </Button>
-                    <Button
-                      // rightSection={<IconZoomOut size={14} />}
+                      Reset
+                    </ActionIcon>
+                    <ActionIcon
                       variant="gradient"
                       gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
-                      onClick={zoomOut} style={{ fontSize: "24px", margin: "2px" }}
+                      onClick={zoomIn} 
+                      size="xl"  
+                      radius="lg"
+                      mb="xs"                    
                     >
-                      –
-                    </Button>
+                      <IconZoomIn />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="gradient"
+                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                      onClick={zoomOut} 
+                      size="xl"  
+                      radius="lg"
+                      mb="xs"                    
+                    >
+                      <IconZoomOut />
+                    </ActionIcon>
                   </div>
                 </Paper>
               </Grid.Col>

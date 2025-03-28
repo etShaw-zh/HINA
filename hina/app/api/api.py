@@ -115,9 +115,9 @@ async def quantity_diversity_endpoint(
             B = utils.get_bipartite(df, student_col, object1_col, attr_col, group_col)
         
         # Get all quantities
-        quantity_results = utils.quantity(B, attr=attr_col, group=group_col, return_type='all')
+        quantity_results, _ = utils.quantity(B, attr=attr_col, group=group_col, return_type='all')
         # Get diversity
-        diversity_results = utils.diversity(B, attr=attr_col)
+        diversity_results, _ = utils.diversity(B, attr=attr_col)
         
         response = {
             "quantity": quantity_results.get('quantity', {}),
