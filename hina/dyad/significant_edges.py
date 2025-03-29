@@ -43,7 +43,7 @@ def prune_edges(B,fix_deg='None',alpha=0.05):
     set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
     N1,N2 = len(set1),len(set2)
 
-    if fix_deg == 'None':
+    if fix_deg in ["None", "none", "null", "undefined", "", None]:
 
         E = sum(e[-1] for e in G_info)
         p = 1./(N1*N2) 

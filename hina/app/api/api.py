@@ -44,14 +44,14 @@ async def build_hina_network_endpoint(
     attr_col: str = Form(None),   
     pruning: str = Form(...),     # "none" or "custom"
     alpha: float = Form(0.05),
-    fix_deg: str = Form("Set 1"),
+    fix_deg: str = Form(None),
     layout: str = Form("bipartite")
 ):
     attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
     group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
     df = pd.read_json(StringIO(data), orient="split")
 
-    pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning == "custom" else "none"
+    pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
 
     nx_G, pos, significant_edges = utils.build_hina_network(
         df=df, 
@@ -84,7 +84,7 @@ async def build_cluster_network_endpoint(
     number_cluster: str = Form(None)
 ):
     df = pd.read_json(StringIO(data), orient="split")
-    pruning_param = {"alpha": alpha, "fix_deg": fix_deg} if pruning == "custom" else "none"
+    pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
     nx_G, pos, cluster_labels = utils.build_clustered_network(
         df, group, attribute1, attribute2, number_cluster,
         pruning=pruning_param, layout=layout

@@ -93,11 +93,36 @@ export function Webinterface() {
     { value: "custom", label: "Custom Pruning" },
   ];
 
-  const DEG_OPTIONS = [
-      { value: "Set 1", label: "Set 1" },
-      { value: "Set 2", label: "Set 2" },
-      { value: "none", label: "None" },
-  ];
+  const DEG_OPTIONS = useMemo(() => {
+    const options = [
+      { value: "none", label: "None" }
+    ];
+    
+    if (student) {
+      options.push({ value: "student_column", label: `Student: ${student}` });
+    }
+    
+    if (object1) {
+      options.push({ value: "object1_column", label: `Object 1: ${object1}` });
+    }
+    
+    if (object2) {
+      options.push({ value: "object2_column", label: `Object 2: ${object2}` });
+    }
+    return options;
+  }, [student, object1, object2]);
+  
+  // Filter available columns for each dropdown
+  const getAvailableColumns = (currentField: string): string[] => {
+    const selectedValues = [
+      currentField !== 'student' ? student : null,
+      currentField !== 'object1' ? object1 : null,
+      currentField !== 'object2' ? object2 : null,
+      currentField !== 'attr' ? (attr !== 'none' ? attr : null) : null,
+      currentField !== 'groupCol' ? (groupCol !== 'none' ? groupCol : null) : null
+    ].filter(Boolean) as string[];
+    return columns.filter(col => !selectedValues.includes(col));
+  };
 
   // Update groups based on the uploaded data and group column
   const updateGroups = (data: string, groupColumn: string) => {
@@ -152,6 +177,14 @@ export function Webinterface() {
   const updateHinaNetwork = async () => {
     if (!uploadedData) return;
     const params = new URLSearchParams();
+    let fixDegValue = fixDeg;
+    if (fixDeg === "student_column") {
+        fixDegValue = student;
+    } else if (fixDeg === "object1_column") {
+        fixDegValue = object1;
+    } else if (fixDeg === "object2_column") {
+        fixDegValue = object2;
+    }
     params.append("data", uploadedData);
     params.append("group_col", groupCol); 
     params.append("group", group);
@@ -160,7 +193,7 @@ export function Webinterface() {
     params.append("attr_col", attr); 
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
-    params.append("fix_deg", fixDeg);
+    params.append("fix_deg", fixDegValue);
     params.append("layout", layout);  
 
     try {
@@ -580,6 +613,7 @@ const fetchQuantityAndDiversity = async () => {
       axios.post("/build-hina-network", params)
         .then(res => {
           setElements(res.data.elements);
+          console.log( "Received response:", res.data.elements);
           if (res.data.significant_edges) {
             setDyadicAnalysis(res.data.significant_edges);
           } else {
@@ -621,6 +655,12 @@ const fetchQuantityAndDiversity = async () => {
     }
   }, [elements]);
 
+  useEffect(() => {
+    if (!["none", student, object1, object2].includes(fixDeg)) {
+      setFixDeg("none");
+    }
+  }, [student, object1, object2]);
+
   return (
     <AppShell
       padding="md"
@@ -648,37 +688,44 @@ const fetchQuantityAndDiversity = async () => {
                     label="Student Column"
                     value={student}
                     onChange={(value) => setStudent(value || "")}
-                    data={columns}
+                    data={Array.from(new Set([...getAvailableColumns('student'), ...(student ? [student] : [])]))}
                   />
                   <Select
                     label="Object 1 Column"
                     value={object1}
                     onChange={(value) => setObject1(value || "")}
-                    data={columns}
+                    data={Array.from(new Set([...getAvailableColumns('object1'), ...(object1 ? [object1] : [])]))}
                   />
                   <Select
                     label="Object 2 Column (Only for Tripartite Analysis)"
                     withAsterisk
                     value={object2}
                     onChange={(value) => setObject2(value || "")}
-                    data={columns}
+                    data={Array.from(new Set([...getAvailableColumns('object2'), ...(object2 ? [object2] : [])]))}
                   />
                 </Group>
+
                 <Group grow mt="md" mb="md">
                   <Select
                     label="Object Attribute (Optional)"
                     withAsterisk
                     value={attr}
                     onChange={(value) => setAttr(value || "none")}
-                    data={columns}
+                    data={[{value: "none", label: "None"}].concat(
+                      Array.from(new Set([...getAvailableColumns('attr'), ...(attr && attr !== "none" ? [attr] : [])]))
+                      .map(col => ({value: col, label: col}))
+                    )}
                   />
                   <Select
                     label="Group Column (Optional)"
                     withAsterisk
                     value={groupCol}
                     onChange={(value) => setGroupCol(value || "none")}
-                    data={columns}
-                  />           
+                    data={[{value: "none", label: "None"}].concat(
+                      Array.from(new Set([...getAvailableColumns('groupCol'), ...(groupCol && groupCol !== "none" ? [groupCol] : [])]))
+                      .map(col => ({value: col, label: col}))
+                    )}
+                  />
                 </Group>
                 <Group grow mt="md" mb="md">
                     <Select
@@ -700,7 +747,7 @@ const fetchQuantityAndDiversity = async () => {
                         <Select
                         label="Fix Deg"
                         value={fixDeg}
-                        onChange={(value) => setFixDeg(value || "Set 1")}
+                        onChange={(value) => setFixDeg(value || "None")}
                         data={DEG_OPTIONS}
                         />
                     </>
@@ -760,7 +807,6 @@ const fetchQuantityAndDiversity = async () => {
               </Paper>   
             )}
             <Grid>
-
               <Grid.Col span={8}>
                 {/* Left Panel for Network Visualization */}
                 <Paper

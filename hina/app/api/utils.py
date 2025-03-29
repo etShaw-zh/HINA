@@ -148,6 +148,11 @@ def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col
     # Create the bipartite graph
     B = get_bipartite(df, student_col, object1_col, attr_col, group_col)
     G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in B.edges(data=True)]
+    # Debug 
+    print("\n=== Bipartite Graph Nodes ===")
+    for i, attr in B.nodes(data=True):
+        print(f"Node: {i}, Bipartite: {attr.get('bipartite')}")
+    print("\n=== Bipartite Graph Edges ===")
 
     # Prune edges 
     if pruning != "none":
@@ -155,7 +160,6 @@ def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col
             significant_edges_result = prune_edges(B, **pruning)
         else:
             significant_edges_result = prune_edges(B)
-        
         if isinstance(significant_edges_result, dict) and "significant edges" in significant_edges_result:
             significant_edges = significant_edges_result["significant edges"]
         else:
