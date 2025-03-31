@@ -40,7 +40,7 @@ export function Webinterface() {
   const [groups, setGroups] = useState<string[]>([]);
   const [student, setStudent] = useState<string>("");
   const [object1, setObject1] = useState<string>("");
-  const [object2, setObject2] = useState<string>("");
+  const [object2, setObject2] = useState<string>("none");
   const [attr, setAttr] = useState<string>("none");
   const [numberCluster, setNumberCluster] = useState<string>("");
   const [cluster, setCluster] = useState<string>("");
@@ -190,6 +190,7 @@ export function Webinterface() {
     params.append("group", group);
     params.append("student_col", student);  
     params.append("object1_col", object1);  
+    params.append("object2_col", object2); 
     params.append("attr_col", attr); 
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
@@ -198,7 +199,7 @@ export function Webinterface() {
 
     try {
       console.log("Sending build-hina-network request with params:", {
-        group, student_col: student, object1_col: object1, 
+        group, student_col: student, object1_col: object1, object2_col: object2,
         group_col: groupCol, attr_col: attr, pruning
       });
       const res = await axios.post("/build-hina-network", params);
@@ -700,8 +701,11 @@ const fetchQuantityAndDiversity = async () => {
                     label="Object 2 Column (Only for Tripartite Analysis)"
                     withAsterisk
                     value={object2}
-                    onChange={(value) => setObject2(value || "")}
-                    data={Array.from(new Set([...getAvailableColumns('object2'), ...(object2 ? [object2] : [])]))}
+                    onChange={(value) => setObject2(value || "none")}
+                    data={[{value: "none", label: "None"}].concat(
+                      Array.from(new Set([...getAvailableColumns('object2'), ...(object2 && object2 !== "none" ? [object2] : [])]))
+                      .map(col => ({value: col, label: col}))
+                    )}
                   />
                 </Group>
 

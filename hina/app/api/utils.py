@@ -112,9 +112,9 @@ def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight
 #         raise ValueError(f"Unsupported layout: {layout}")
 #     return nx_G, pos, G_edges_ordered
 
-def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, attr_col: str, pruning, layout: str):
+def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str):
     """
-    Build a NetworkX graph for the HINA network.
+    Build a NetworkX graph for the HINA network, supporting both bipartite and tripartite networks.
     
     Parameters:
     -----------
@@ -145,21 +145,32 @@ def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col
     if group != 'All' and group_col in df.columns:
         df = df[df[group_col] == group]
     
-    # Create the bipartite graph
-    B = get_bipartite(df, student_col, object1_col, attr_col, group_col)
-    G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in B.edges(data=True)]
-    # Debug 
-    print("\n=== Bipartite Graph Nodes ===")
-    for i, attr in B.nodes(data=True):
-        print(f"Node: {i}, Bipartite: {attr.get('bipartite')}")
-    print("\n=== Bipartite Graph Edges ===")
+    # Create the bipartite/tripartite graph
+    is_tripartite = object2_col is not None and object2_col not in ['none', 'null', 'undefined', '']
+    if is_tripartite:
+        G = get_tripartite(df, student_col, object1_col, object2_col, group_col)
+        # Debug 
+        print("\n=== Tripartite Graph Nodes ===")
+        for i, attr in G.nodes(data=True):
+            print(f"Node: {i}, Tripartite: {attr.get('tripartite')}")
+        print("\n=== Tripartite Graph Edges ===")
+    else:
+        G = get_bipartite(df, student_col, object1_col, attr_col, group_col)
+        # Debug 
+        print("\n=== Bipartite Graph Nodes ===")
+        for i, attr in G.nodes(data=True):
+            print(f"Node: {i}, Bipartite: {attr.get('bipartite')}")
+        print("\n=== Bipartite Graph Edges ===")
+        
+    G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in G.edges(data=True)]
+
 
     # Prune edges 
     if pruning != "none":
         if isinstance(pruning, dict):
-            significant_edges_result = prune_edges(B, **pruning)
+            significant_edges_result = prune_edges(G, **pruning)
         else:
-            significant_edges_result = prune_edges(B)
+            significant_edges_result = prune_edges(G)
         if isinstance(significant_edges_result, dict) and "significant edges" in significant_edges_result:
             significant_edges = significant_edges_result["significant edges"]
         else:
@@ -175,11 +186,19 @@ def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col
     # Assign node types and colors
     for node in nx_G.nodes():
         node_str = str(node)
+        if is_tripartite and "**" in node_str:
+            parts = node_str.split("**")
+            if len(parts) == 2:
+                obj1_val, obj2_val = parts
+                if obj1_val in df[object1_col].astype(str).values and obj2_val in df[object2_col].astype(str).values:
+                    nx_G.nodes[node]['type'] = 'object1_object2'
+                    nx_G.nodes[node]['color'] = 'green'
+                    continue
         if node_str in df[student_col].astype(str).values:
             nx_G.nodes[node]['type'] = 'student'
             nx_G.nodes[node]['color'] = 'grey'
         elif node_str in df[object1_col].astype(str).values:
-            nx_G.nodes[node]['type'] = 'object'
+            nx_G.nodes[node]['type'] = 'object1'
             nx_G.nodes[node]['color'] = 'blue'
         else:
             nx_G.nodes[node]['type'] = 'unknown'

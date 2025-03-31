@@ -40,15 +40,18 @@ async def build_hina_network_endpoint(
     group_col: str = Form(None),  
     group: str = Form(...),
     student_col: str = Form(...),  
-    object1_col: str = Form(...),  
+    object1_col: str = Form(...), 
+    object2_col: str = Form(None),  
     attr_col: str = Form(None),   
     pruning: str = Form(...),     # "none" or "custom"
     alpha: float = Form(0.05),
     fix_deg: str = Form(None),
     layout: str = Form("bipartite")
 ):
+    object2_col = None if object2_col in ["none", "null", "undefined", ""] else object2_col
     attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
     group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
+    
     df = pd.read_json(StringIO(data), orient="split")
 
     pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
@@ -59,6 +62,7 @@ async def build_hina_network_endpoint(
         group=group, 
         student_col=student_col, 
         object1_col=object1_col, 
+        object2_col=object2_col,
         attr_col=attr_col,
         pruning=pruning_param, 
         layout=layout
