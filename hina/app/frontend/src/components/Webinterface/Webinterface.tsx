@@ -225,6 +225,7 @@ export function Webinterface() {
     params.append("group", group);
     params.append("student_col", student);  
     params.append("object1_col", object1);  
+    params.append("object2_col", object2); 
     params.append("number_cluster", numberCluster);
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());

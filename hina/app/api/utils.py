@@ -111,40 +111,7 @@ def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight
 #     else:
 #         raise ValueError(f"Unsupported layout: {layout}")
 #     return nx_G, pos, G_edges_ordered
-
-def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str):
-    """
-    Build a NetworkX graph for the HINA network, supporting both bipartite and tripartite networks.
-    
-    Parameters:
-    -----------
-    df : pandas.DataFrame
-        The input DataFrame containing the data to construct the bipartite graph.
-    group_col : str
-        The column name in the DataFrame representing group information for student nodes.
-    group : str
-        The specific group to filter by, or 'All' to include all groups.
-    student_col : str
-        The column name in the DataFrame representing student nodes.
-    object1_col : str
-        The column name in the DataFrame representing the studied object nodes.
-    attr_col : str
-        The column name in the DataFrame representing attributes for object nodes.
-    pruning : str or dict
-        Controls edge pruning strategy. "none" for no pruning, or a dictionary with 
-        parameters for the prune_edges function.
-    layout : str
-        Layout for node positioning: "bipartite", "spring", or "circular".
-    
-    Returns:
-    --------
-    tuple
-        (nx_G, pos, G_edges_ordered) - The network graph, node positions, and edge list.
-    """
-    # Filter by group 
-    if group != 'All' and group_col in df.columns:
-        df = df[df[group_col] == group]
-    
+def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning):
     # Create the bipartite/tripartite graph
     is_tripartite = object2_col is not None and object2_col not in ['none', 'null', 'undefined', '']
     if is_tripartite:
@@ -207,7 +174,43 @@ def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col
     # Add edge labels
     for u, v, d in nx_G.edges(data=True):
         d['label'] = str(d.get('weight', ''))
+
+    return nx_G, G_edges_ordered
     
+def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str):
+    """
+    Build a NetworkX graph for the HINA network, supporting both bipartite and tripartite networks.
+    
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        The input DataFrame containing the data to construct the bipartite graph.
+    group_col : str
+        The column name in the DataFrame representing group information for student nodes.
+    group : str
+        The specific group to filter by, or 'All' to include all groups.
+    student_col : str
+        The column name in the DataFrame representing student nodes.
+    object1_col : str
+        The column name in the DataFrame representing the studied object nodes.
+    attr_col : str
+        The column name in the DataFrame representing attributes for object nodes.
+    pruning : str or dict
+        Controls edge pruning strategy. "none" for no pruning, or a dictionary with 
+        parameters for the prune_edges function.
+    layout : str
+        Layout for node positioning: "bipartite", "spring", or "circular".
+    
+    Returns:
+    --------
+    tuple
+        (nx_G, pos, G_edges_ordered) - The network graph, node positions, and edge list.
+    """
+    # Filter by group 
+    if group != 'All' and group_col in df.columns:
+        df = df[df[group_col] == group]
+
+    nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
     # Set the layout
     if layout == 'bipartite':
         student_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'student'}
@@ -253,28 +256,29 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
         })
     return elements
 
-def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, 
-                            number_cluster=None, pruning="none", layout="bipartite"):
+# def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, 
+#                             number_cluster=None, pruning="none", layout="bipartite"):
+def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str, number_cluster=None):
     """
-    Build a clustered network using get_bipartite and bipartite_communities.
+    Build a clustered network using get_bipartite/get_tripartite and hina_communities.
     
     Colors:
       - Nodes in attribute_1 are colored based on their community using TABLEAU_COLORS.
       - Nodes in attribute_2 are fixed as blue.
     """
-    if group != 'All':
-        df = df[df['group'] == group]
+    nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
+
     
-    G_edges = get_bipartite(df, attribute_1, attribute_2)
-    G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
+    # G_edges = get_bipartite(df, attribute_1, attribute_2)
+    # G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
     
-    if pruning != "none":
-        if isinstance(pruning, dict):
-            significant_edges = prune_edges(G_edges_ordered, **pruning)
-        else:
-            significant_edges = prune_edges(G_edges_ordered)
-        significant_edges = significant_edges or set()
-        G_edges_ordered = list(significant_edges)
+    # if pruning != "none":
+    #     if isinstance(pruning, dict):
+    #         significant_edges = prune_edges(G_edges_ordered, **pruning)
+    #     else:
+    #         significant_edges = prune_edges(G_edges_ordered)
+    #     significant_edges = significant_edges or set()
+    #     G_edges_ordered = list(significant_edges)
     
     if number_cluster not in (None, "", "none"):
         try:
@@ -285,7 +289,12 @@ def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attr
         number_cluster = None
     
     # Run community detection (clustering)
-    cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
+    node_bipartite_list = [x for x in [data for n, data in nx_G.nodes(data=True)]]
+    print('node_bipartite_list', node_bipartite_list)
+
+    cluster_result = hina_communities(nx_G, fix_B=number_cluster)
+    print('cluster_result', cluster_result)
+    # cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
     
     nx_G = nx.Graph()
     for edge in G_edges_ordered:

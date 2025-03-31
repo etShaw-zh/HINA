@@ -78,25 +78,38 @@ async def build_hina_network_endpoint(
 @app.post("/build-cluster-network")
 async def build_cluster_network_endpoint(
     data: str = Form(...),
-    group: str = Form(...),
-    attribute1: str = Form(...),
-    attribute2: str = Form(...),
-    pruning: str = Form(...), # "none" or "custom"
+    group_col: str = Form(None),  
+    student_col: str = Form(...),  
+    object1_col: str = Form(...), 
+    object2_col: str = Form(None),  
+    attr_col: str = Form(None),   
+    pruning: str = Form(...),     # "none" or "custom"
     alpha: float = Form(0.05),
-    fix_deg: str = Form("Set 1"),
-    layout: str = Form("spring"),
+    fix_deg: str = Form(None),
+    layout: str = Form("bipartite"),
     number_cluster: str = Form(None)
 ):
+    attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
+    group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
+    
     df = pd.read_json(StringIO(data), orient="split")
     pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
-    nx_G, pos, cluster_labels = utils.build_clustered_network(
-        df, group, attribute1, attribute2, number_cluster,
-        pruning=pruning_param, layout=layout
+
+    nx_G, pos, cluster_result = utils.build_clustered_network(
+        df=df, 
+        group_col=group_col, 
+        student_col=student_col, 
+        object1_col=object1_col, 
+        object2_col=object2_col,
+        attr_col=attr_col,
+        pruning=pruning_param, 
+        layout=layout,
+        number_cluster=number_cluster
     )
     elements = utils.cy_elements_from_graph(nx_G, pos)
     return {
         "elements": elements,
-        "cluster_labels": cluster_labels
+        "cluster_result": cluster_result
     }
 
 @app.post("/quantity-diversity")
