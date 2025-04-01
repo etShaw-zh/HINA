@@ -43,13 +43,14 @@ def hina_communities(G,fix_B=None):
     v = set()
     node_bipartite_list = [x for x in [data['bipartite'] for n, data in G.nodes(data=True)]\
                      if not (x in v or v.add(x))]
-
-    if fix_B == None:
-        set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
-    elif fix_B == node_bipartite_list[0]:
-        set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
-    elif fix_B == node_bipartite_list[1]:
-        set2,set1 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+    # if fix_B == None:
+    #     set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+    #     print('set1,set2',set1,set2)
+    # elif fix_B == node_bipartite_list[0]:
+    #     set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+    # elif fix_B == node_bipartite_list[1]:
+    #     set2,set1 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+    set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
 
     
     N1,N2 = len(set1),len(set2)
@@ -147,7 +148,10 @@ def hina_communities(G,fix_B=None):
         if B == fix_B:
             community_labels = {str(i[0]):str(i[1]) for i in node2cluster.items()}
             Hmdl = H
-            return community_labels,Hmdl/H0
+            results = {'number of communities': len(set(community_labels.values())), \
+               "node communities": community_labels, "community structure quality value":Hmdl/H0,\
+               'updated graph object':G}
+            return results
 
 
     best_ind = np.argmin(Hs)

@@ -131,7 +131,6 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         
     G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in G.edges(data=True)]
 
-
     # Prune edges 
     if pruning != "none":
         if isinstance(pruning, dict):
@@ -147,8 +146,16 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
     
     # Create a new graph with the significant edges
     nx_G = nx.Graph()
+    for node, attrs in G.nodes(data=True):
+        node_str = str(node)
+        nx_G.add_node(node_str, **attrs) 
+    
     for edge in G_edges_ordered:
         nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
+    
+    for node in list(nx_G.nodes()):
+        if nx_G.degree(node) == 0:
+            nx_G.remove_node(node)
     
     # Assign node types and colors
     for node in nx_G.nodes():
@@ -294,50 +301,28 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
 
     cluster_result = hina_communities(nx_G, fix_B=number_cluster)
     print('cluster_result', cluster_result)
+    cluster_labels = cluster_result['node communities']
+    compression_ratio = cluster_result['community structure quality value']
     # cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
-    
-    nx_G = nx.Graph()
-    for edge in G_edges_ordered:
-        nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
-    
-    # Determine which nodes belong to each attribute
-    attr1_nodes = set(df[attribute_1].astype(str).values)
-    attr2_nodes = set(df[attribute_2].astype(str).values)
-    for node in nx_G.nodes():
-        if node in attr1_nodes:
-            nx_G.nodes[node]['type'] = 'attribute_1'
-        elif node in attr2_nodes:
-            nx_G.nodes[node]['type'] = 'attribute_2'
-        else:
-            nx_G.nodes[node]['type'] = 'unknown'
     
     for node in nx_G.nodes():
         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
     
-    # Build color mapping for attribute_1 nodes based on community labels.
+    # Build color mapping for student nodes based on community labels.
     communities = sorted({nx_G.nodes[node]['cluster'] 
                           for node in nx_G.nodes() 
-                          if nx_G.nodes[node]['type'] == 'attribute_1'})
+                          if nx_G.nodes[node]['type'] == 'student'})
     comm_colors = dict(zip(communities, list(mcolors.TABLEAU_COLORS.values())[:len(communities)]))
-    
-    for node in nx_G.nodes():
-        if nx_G.nodes[node]['type'] == 'attribute_1':
-            cluster_label = nx_G.nodes[node]['cluster']
-            nx_G.nodes[node]['color'] = comm_colors.get(cluster_label, 'grey')
-        elif nx_G.nodes[node]['type'] == 'attribute_2':
-            nx_G.nodes[node]['color'] = 'blue'
-        else:
-            nx_G.nodes[node]['color'] = 'black'
-    
-    for u, v, d in nx_G.edges(data=True):
-        d['label'] = str(d.get('weight', ''))
-    
+    student_nodes = set(df[student_col].astype(str).values)
+    object1_nodes = set(df[object1_col].astype(str).values)
+    # object2_nodes = set(df[object2_col].astype(str).values)
+
     offset = np.random.rand() * np.pi
     radius = 1 # radius of the circle 20/3 * radius/noise_scale
     noise_scale = 0.16 
     # For nodes in attribute_1: position based on community label.
     set1_pos = {}
-    for node in attr1_nodes.intersection(set(nx_G.nodes())):
+    for node in student_nodes.intersection(set(nx_G.nodes())):
         comm = nx_G.nodes[node].get('cluster', "-1")
         comm_index = communities.index(comm) if comm in communities else 0
         angle = 2 * np.pi * comm_index / len(communities) + offset
@@ -346,10 +331,10 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
         set1_pos[node] = (x, y)
     # For nodes in attribute_2: arrange in a circle (half radius)
     set2_pos = {}
-    for node in attr2_nodes.intersection(set(nx_G.nodes())):
-        attr2_list = sorted(list(attr2_nodes.intersection(set(nx_G.nodes()))))
-        num_s2 = len(attr2_list)
-        index = attr2_list.index(node)
+    for node in object1_nodes.intersection(set(nx_G.nodes())):
+        object1_list = sorted(list(object1_nodes.intersection(set(nx_G.nodes()))))
+        num_s2 = len(object1_list)
+        index = object1_list.index(node)
         angle = 2 * np.pi * index / num_s2 + offset
         x = 0.5 * radius * np.cos(angle)
         y = 0.5 * radius * np.sin(angle)
