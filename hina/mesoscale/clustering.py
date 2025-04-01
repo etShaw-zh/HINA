@@ -191,8 +191,22 @@ def hina_communities(G,fix_B=None):
     if any(j.get('tripartite') == True for i, j in G.nodes(data=True)):
         for i, g in sub_Gs.items():
             objects_objects = [[j,w['weight']] for i,j,w in g.edges(data=True)]
-            attr_names = list(set([j['bipartite'] for i, j in g.nodes(data=True)]))[1]
-            attr1, attr2 = list(set([j['bipartite'] for i, j in T.nodes(data=True)]))[1].strip("()").split(",")
+            bipartite_attrs = list(set([j['bipartite'] for i, j in g.nodes(data=True)]))
+            combined_attr = None
+            student_attr = None
+            for attr in bipartite_attrs:
+                if isinstance(attr, str) and '(' in attr and ')' in attr and ',' in attr:
+                    combined_attr = attr
+                else:
+                    student_attr = attr            
+            if combined_attr:
+                attr1, attr2 = combined_attr.strip("()").split(",")
+                attr1 = attr1.strip()
+                attr2 = attr2.strip()
+            else:
+                attr_str = bipartite_attrs[0] if isinstance(bipartite_attrs[0], str) else bipartite_attrs[1]
+                attr1, attr2 = attr_str.strip("()").split(",")        
+
             pair_count = defaultdict(int)
             for n in objects_objects:
                 pair = tuple(item.replace(' ', '') for item in n[0].split('**'))

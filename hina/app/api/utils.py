@@ -241,6 +241,7 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
     elements = []
     for node, data in G.nodes(data=True):
         node_str = str(node)
+        print('node_str', node_str)
         x = pos[node][0] * 400 + 300
         y = pos[node][1] * 400 + 300
         elements.append({
@@ -265,6 +266,81 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
 
 # def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, 
 #                             number_cluster=None, pruning="none", layout="bipartite"):
+# def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str, number_cluster=None):
+#     """
+#     Build a clustered network using get_bipartite/get_tripartite and hina_communities.
+    
+#     Colors:
+#       - Nodes in attribute_1 are colored based on their community using TABLEAU_COLORS.
+#       - Nodes in attribute_2 are fixed as blue.
+#     """
+#     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
+
+#     if number_cluster not in (None, "", "none"):
+#         try:
+#             number_cluster = int(number_cluster)
+#         except ValueError:
+#             number_cluster = None
+#     else:
+#         number_cluster = None
+    
+#     # Run community detection (clustering)
+#     node_bipartite_list = [x for x in [data for n, data in nx_G.nodes(data=True)]]
+#     print('node_bipartite_list', node_bipartite_list)
+
+#     cluster_result = hina_communities(nx_G, fix_B=number_cluster)
+#     print('cluster_result', cluster_result)
+#     cluster_labels = cluster_result['node communities']
+#     compression_ratio = cluster_result['community structure quality value']
+#     # cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
+    
+#     for node in nx_G.nodes():
+#         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
+    
+#     # Build color mapping for student nodes based on community labels.
+#     communities = sorted({nx_G.nodes[node]['cluster'] 
+#                           for node in nx_G.nodes() 
+#                           if nx_G.nodes[node]['type'] == 'student'})
+#     comm_colors = dict(zip(communities, list(mcolors.TABLEAU_COLORS.values())[:len(communities)]))
+#     student_nodes = set(df[student_col].astype(str).values)
+#     object1_nodes = set(df[object1_col].astype(str).values)
+#     # object2_nodes = set(df[object2_col].astype(str).values)
+
+#     offset = np.random.rand() * np.pi
+#     radius = 1 # radius of the circle 20/3 * radius/noise_scale
+#     noise_scale = 0.16 
+#     # For nodes in student node: position based on community label.
+#     set1_pos = {}
+#     for node in student_nodes.intersection(set(nx_G.nodes())):
+#         comm = nx_G.nodes[node].get('cluster', "-1")
+#         comm_index = communities.index(comm) if comm in communities else 0
+#         angle = 2 * np.pi * comm_index / len(communities) + offset
+#         x = radius * np.cos(angle) + (2 * np.random.rand() - 1) * noise_scale
+#         y = radius * np.sin(angle) + (2 * np.random.rand() - 1) * noise_scale
+#         set1_pos[node] = (x, y)
+#     # For nodes in object node: arrange in a circle (half radius)
+#     set2_pos = {}
+#     for node in object1_nodes.intersection(set(nx_G.nodes())):
+#         object1_list = sorted(list(object1_nodes.intersection(set(nx_G.nodes()))))
+#         num_s2 = len(object1_list)
+#         index = object1_list.index(node)
+#         angle = 2 * np.pi * index / num_s2 + offset
+#         x = 0.5 * radius * np.cos(angle)
+#         y = 0.5 * radius * np.sin(angle)
+#         set2_pos[node] = (x, y)
+    
+#     pos_custom = {**set1_pos, **set2_pos}
+    
+#     if layout == 'bipartite':
+#         pos = pos_custom
+#     elif layout == 'spring':
+#         pos = nx.spring_layout(nx_G, k=0.2)
+#     elif layout == 'circular':
+#         pos = nx.circular_layout(nx_G)
+#     else:
+#         pos = pos_custom
+    
+#     return nx_G, pos, cluster_labels
 def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str, number_cluster=None):
     """
     Build a clustered network using get_bipartite/get_tripartite and hina_communities.
@@ -275,18 +351,6 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
     """
     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
 
-    
-    # G_edges = get_bipartite(df, attribute_1, attribute_2)
-    # G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
-    
-    # if pruning != "none":
-    #     if isinstance(pruning, dict):
-    #         significant_edges = prune_edges(G_edges_ordered, **pruning)
-    #     else:
-    #         significant_edges = prune_edges(G_edges_ordered)
-    #     significant_edges = significant_edges or set()
-    #     G_edges_ordered = list(significant_edges)
-    
     if number_cluster not in (None, "", "none"):
         try:
             number_cluster = int(number_cluster)
@@ -296,14 +360,10 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
         number_cluster = None
     
     # Run community detection (clustering)
-    node_bipartite_list = [x for x in [data for n, data in nx_G.nodes(data=True)]]
-    print('node_bipartite_list', node_bipartite_list)
-
     cluster_result = hina_communities(nx_G, fix_B=number_cluster)
     print('cluster_result', cluster_result)
     cluster_labels = cluster_result['node communities']
     compression_ratio = cluster_result['community structure quality value']
-    # cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
     
     for node in nx_G.nodes():
         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
@@ -313,14 +373,32 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
                           for node in nx_G.nodes() 
                           if nx_G.nodes[node]['type'] == 'student'})
     comm_colors = dict(zip(communities, list(mcolors.TABLEAU_COLORS.values())[:len(communities)]))
+
+    # Apply community colors to student nodes
+    for node in nx_G.nodes():
+        if nx_G.nodes[node]['type'] == 'student':
+            comm = nx_G.nodes[node]['cluster']
+            if comm in comm_colors:
+                nx_G.nodes[node]['color'] = comm_colors[comm]
+                nx_G.nodes[node]['original_type'] = 'student'
+    
+    # Check if tripartite graph
+    is_tripartite = object2_col is not None and object2_col not in ['none', 'null', 'undefined', '']
     student_nodes = set(df[student_col].astype(str).values)
     object1_nodes = set(df[object1_col].astype(str).values)
-    # object2_nodes = set(df[object2_col].astype(str).values)
+    
+    # Create a set of combined nodes for tripartite case
+    combined_nodes = set()
+    if is_tripartite:
+        for node in nx_G.nodes():
+            if '**' in str(node) or nx_G.nodes[node].get('type') == 'object1_object2':
+                combined_nodes.add(str(node))
 
     offset = np.random.rand() * np.pi
-    radius = 1 # radius of the circle 20/3 * radius/noise_scale
+    radius = 1  # radius of the circle 20/3 * radius/noise_scale
     noise_scale = 0.16 
-    # For nodes in attribute_1: position based on community label.
+    
+    # For nodes in student node: position based on community label.
     set1_pos = {}
     for node in student_nodes.intersection(set(nx_G.nodes())):
         comm = nx_G.nodes[node].get('cluster', "-1")
@@ -329,18 +407,30 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
         x = radius * np.cos(angle) + (2 * np.random.rand() - 1) * noise_scale
         y = radius * np.sin(angle) + (2 * np.random.rand() - 1) * noise_scale
         set1_pos[node] = (x, y)
-    # For nodes in attribute_2: arrange in a circle (half radius)
+    
+    # For nodes in object1 node: arrange in a circle (half radius)
     set2_pos = {}
-    for node in object1_nodes.intersection(set(nx_G.nodes())):
-        object1_list = sorted(list(object1_nodes.intersection(set(nx_G.nodes()))))
-        num_s2 = len(object1_list)
-        index = object1_list.index(node)
-        angle = 2 * np.pi * index / num_s2 + offset
+    obj_nodes = object1_nodes.intersection(set(nx_G.nodes()))
+    obj_list = sorted(list(obj_nodes))
+    num_obj = len(obj_list)
+    for i, node in enumerate(obj_list):
+        angle = 2 * np.pi * i / num_obj + offset
         x = 0.5 * radius * np.cos(angle)
         y = 0.5 * radius * np.sin(angle)
         set2_pos[node] = (x, y)
     
-    pos_custom = {**set1_pos, **set2_pos}
+    # For combined nodes in tripartite graph: arrange in a circle (0.7 radius)
+    set3_pos = {}
+    if is_tripartite:
+        combined_list = sorted(list(combined_nodes))
+        num_combined = len(combined_list)
+        for i, node in enumerate(combined_list):
+            angle = 2 * np.pi * i / num_combined + offset + np.pi/num_combined 
+            x = 0.7 * radius * np.cos(angle)
+            y = 0.7 * radius * np.sin(angle)
+            set3_pos[node] = (x, y)
+    
+    pos_custom = {**set1_pos, **set2_pos, **set3_pos}
     
     if layout == 'bipartite':
         pos = pos_custom
