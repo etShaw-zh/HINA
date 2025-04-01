@@ -95,7 +95,7 @@ async def build_cluster_network_endpoint(
     df = pd.read_json(StringIO(data), orient="split")
     pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
 
-    nx_G, pos, cluster_result = utils.build_clustered_network(
+    nx_G, pos, cluster_labels = utils.build_clustered_network(
         df=df, 
         group_col=group_col, 
         student_col=student_col, 
@@ -109,7 +109,7 @@ async def build_cluster_network_endpoint(
     elements = utils.cy_elements_from_graph(nx_G, pos)
     return {
         "elements": elements,
-        "cluster_result": cluster_result
+        "cluster_labels": cluster_labels
     }
 
 @app.post("/quantity-diversity")

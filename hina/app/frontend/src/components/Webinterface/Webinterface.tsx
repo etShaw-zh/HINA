@@ -52,8 +52,10 @@ export function Webinterface() {
   const [qdData, setQdData] = useState<QDData | null>(null);
   const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
+  const [clusterOptions, setClusterOptions] = useState<string[]>(["All"]);
   const [activeTab, setActiveTab] = useState<string | null>("node-level");
   const cyRef = useRef<any>(null);
+  const originalElementsRef = useRef<any[]>([]);
   
   interface QDData {
     quantity: Record<string, number>;
@@ -81,6 +83,7 @@ export function Webinterface() {
   const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
   // const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
   const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
+
 
   const LAYOUT_OPTIONS = [
     { value: "spring", label: "Spring" },
@@ -628,6 +631,53 @@ const fetchQuantityAndDiversity = async () => {
         });
     }
   };
+
+  // Updated handleClusterChange function
+  const handleClusterChange = (value: string | null) => {
+    const newValue = value || "All";
+    setCluster(newValue);
+    const trueOriginalElements = originalElementsRef.current;
+    if (newValue === "All") {
+      setElements([...trueOriginalElements]);
+      return;
+    }
+    // Get all nodes that belong to the selected cluster
+    const nodesInCluster = Object.entries(clusterLabels || {})
+      .filter(([node, label]) => String(label) === newValue)
+      .map(([node]) => node);
+    
+    if (nodesInCluster.length === 0) {
+      setElements([...trueOriginalElements]);
+      return;
+    }
+    const clusterNodeSet = new Set(nodesInCluster);
+    // Find all nodes and edges in the original elements
+    const allNodes = trueOriginalElements.filter((el) => !el.data.source);
+    const allEdges = trueOriginalElements.filter((el) => el.data.source);
+    // Get edges that connect at least one node in the cluster
+    const relevantEdges = allEdges.filter(
+      (edge) =>
+        clusterNodeSet.has(edge.data.source) ||
+        clusterNodeSet.has(edge.data.target)
+    );
+  
+    // Get all nodes that are connected by these edges
+    const connectedNodeIds = new Set();
+    relevantEdges.forEach((edge) => {
+      connectedNodeIds.add(edge.data.source);
+      connectedNodeIds.add(edge.data.target);
+    });
+    // Get all node elements for those IDs
+    const relevantNodes = allNodes.filter((node) =>
+      connectedNodeIds.has(node.data.id)
+    );  
+    // If no nodes or edges are found, show all elements
+    if (relevantNodes.length === 0 || relevantEdges.length === 0) {
+      setElements([...trueOriginalElements]);
+    } else {
+      setElements([...relevantNodes, ...relevantEdges]);
+    }
+  };
   
 
   useEffect(() => {
@@ -653,7 +703,10 @@ const fetchQuantityAndDiversity = async () => {
 
   useEffect(() => {
     if (elements.length > 0) {
-      setInitialRenderDone(false); 
+      setInitialRenderDone(false);
+      if (originalElementsRef.current.length === 0) {
+        originalElementsRef.current = [...elements];
+      }
     }
   }, [elements]);
 
@@ -662,6 +715,17 @@ const fetchQuantityAndDiversity = async () => {
       setFixDeg("none");
     }
   }, [student, object1, object2]);
+
+  useEffect(() => {
+    if (clusterLabels) {
+      const uniqueValues = [...new Set(Object.values(clusterLabels))].map(val => String(val));
+      setClusterOptions(["All", ...uniqueValues]);
+      setCluster("All");
+    } else {
+      setClusterOptions(["All"]);
+    }
+  }, [clusterLabels]);
+
 
   return (
     <AppShell
@@ -800,13 +864,13 @@ const fetchQuantityAndDiversity = async () => {
                     data={groups}
                   />
                   )}
-                  {groups.length > 1 && elements.length > 0 && (
-                  <Select
-                    label="Cluster"
-                    value={cluster}
-                    onChange={(value) => setCluster(value || "All")}
-                    data={groups}
-                  />
+                  {clusterLabels && elements.length > 0 && (
+                    <Select
+                      label="Cluster Filter"
+                      value={cluster}
+                      onChange={handleClusterChange}
+                      data={clusterOptions.map(label => ({ value: label, label }))}
+                    />
                   )}
                 </Group>
               </Paper>   

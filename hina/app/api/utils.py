@@ -264,90 +264,14 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
         })
     return elements
 
-# def build_clustered_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, 
-#                             number_cluster=None, pruning="none", layout="bipartite"):
-# def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str, number_cluster=None):
-#     """
-#     Build a clustered network using get_bipartite/get_tripartite and hina_communities.
-    
-#     Colors:
-#       - Nodes in attribute_1 are colored based on their community using TABLEAU_COLORS.
-#       - Nodes in attribute_2 are fixed as blue.
-#     """
-#     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
-
-#     if number_cluster not in (None, "", "none"):
-#         try:
-#             number_cluster = int(number_cluster)
-#         except ValueError:
-#             number_cluster = None
-#     else:
-#         number_cluster = None
-    
-#     # Run community detection (clustering)
-#     node_bipartite_list = [x for x in [data for n, data in nx_G.nodes(data=True)]]
-#     print('node_bipartite_list', node_bipartite_list)
-
-#     cluster_result = hina_communities(nx_G, fix_B=number_cluster)
-#     print('cluster_result', cluster_result)
-#     cluster_labels = cluster_result['node communities']
-#     compression_ratio = cluster_result['community structure quality value']
-#     # cluster_labels, compression_ratio = bipartite_communities(G_edges_ordered, fix_B=number_cluster)
-    
-#     for node in nx_G.nodes():
-#         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
-    
-#     # Build color mapping for student nodes based on community labels.
-#     communities = sorted({nx_G.nodes[node]['cluster'] 
-#                           for node in nx_G.nodes() 
-#                           if nx_G.nodes[node]['type'] == 'student'})
-#     comm_colors = dict(zip(communities, list(mcolors.TABLEAU_COLORS.values())[:len(communities)]))
-#     student_nodes = set(df[student_col].astype(str).values)
-#     object1_nodes = set(df[object1_col].astype(str).values)
-#     # object2_nodes = set(df[object2_col].astype(str).values)
-
-#     offset = np.random.rand() * np.pi
-#     radius = 1 # radius of the circle 20/3 * radius/noise_scale
-#     noise_scale = 0.16 
-#     # For nodes in student node: position based on community label.
-#     set1_pos = {}
-#     for node in student_nodes.intersection(set(nx_G.nodes())):
-#         comm = nx_G.nodes[node].get('cluster', "-1")
-#         comm_index = communities.index(comm) if comm in communities else 0
-#         angle = 2 * np.pi * comm_index / len(communities) + offset
-#         x = radius * np.cos(angle) + (2 * np.random.rand() - 1) * noise_scale
-#         y = radius * np.sin(angle) + (2 * np.random.rand() - 1) * noise_scale
-#         set1_pos[node] = (x, y)
-#     # For nodes in object node: arrange in a circle (half radius)
-#     set2_pos = {}
-#     for node in object1_nodes.intersection(set(nx_G.nodes())):
-#         object1_list = sorted(list(object1_nodes.intersection(set(nx_G.nodes()))))
-#         num_s2 = len(object1_list)
-#         index = object1_list.index(node)
-#         angle = 2 * np.pi * index / num_s2 + offset
-#         x = 0.5 * radius * np.cos(angle)
-#         y = 0.5 * radius * np.sin(angle)
-#         set2_pos[node] = (x, y)
-    
-#     pos_custom = {**set1_pos, **set2_pos}
-    
-#     if layout == 'bipartite':
-#         pos = pos_custom
-#     elif layout == 'spring':
-#         pos = nx.spring_layout(nx_G, k=0.2)
-#     elif layout == 'circular':
-#         pos = nx.circular_layout(nx_G)
-#     else:
-#         pos = pos_custom
-    
-#     return nx_G, pos, cluster_labels
 def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str, number_cluster=None):
     """
     Build a clustered network using get_bipartite/get_tripartite and hina_communities.
     
     Colors:
-      - Nodes in attribute_1 are colored based on their community using TABLEAU_COLORS.
-      - Nodes in attribute_2 are fixed as blue.
+      - Nodes in student_col are colored based on their community using TABLEAU_COLORS.
+      - Nodes in object1_col are fixed as blue.
+      - Nodes in object2_col are fixed as green.
     """
     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
 
