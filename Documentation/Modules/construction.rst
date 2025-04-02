@@ -172,3 +172,4 @@ Paper Source
 ============
 
 If you use this function in your work, please cite:
+Feng, S., Gibson, D., & Gasevic, D. (2025). Analyzing Students' Emerging Roles Based on Quantity and Heterogeneity of Individual Contributions in Small Group Online Collaborative Learning Using Bipartite Network Analysis. arXiv preprint arXiv:2502.19112.
