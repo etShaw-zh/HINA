@@ -28,7 +28,7 @@ Reference
 
    <div id="get-bipartite" class="function-header">
        <span class="class-name">function</span> <span class="function-name">get_bipartite(df,student_col,object_col,attr_col = None,group_col = None)</span> 
-       <a href="../Code/quantity_diversity.html#get-bipartite" class="source-link">[source]</a>
+       <a href="../Code/construction.html#get-bipartite" class="source-link">[source]</a>
    </div>
 
 **Description**:
@@ -39,46 +39,62 @@ Constructs a bipartite network projection from dataset columns.
 .. raw:: html
 
    <div class="parameter-block">
-       (df, col1, col2)
+       (df,student_col,object_col,attr_col = None,group_col = None)
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing interaction records.</li>
-       <li><span class="param-name">col1</span>: The column name representing one set of nodes (e.g., individuals).</li>
-       <li><span class="param-name">col2</span>: The column name representing the second set of nodes (e.g., tasks). If a tuple of column names is provided, attributes will be merged into a composite index.</li>
+       <li><span class="param-name">df</span>: The input DataFrame containing the data to construct the bipartite graph.
+</li>
+       <li><span class="param-name">student_col</span>: The column name in the DataFrame representing student nodes.</li>
+       <li><span class="param-name">object_col</span>: The column name in the DataFrame representing the studied object nodes.</li>
+       <li><span class="param-name">attr_col</span>: The column name in the DataFrame representing attributes for object nodes (e.g. the dimension of coded constructs). If provided, these attributes will be added as node attributes in the graph. Default is None.</li>
+       <li><span class="param-name">group_col</span>: The column name in the DataFrame representing group information for student nodes. If provided, these groups will be added as node attributes in the graph. Default is None.</li>
    </ul>
 
 **Returns**:
-  - **set**: A set of tuples `(i, j, w)`, where `i` and `j` are node labels, and `w` is the edge weight (interaction frequency).
+  - networkx.Graph
+     A bipartite graph with the following properties:
+     - Nodes: Student nodes and object nodes, with 'bipartite' attribute indicating their type.
+     - Edges: Weighted edges between student and object nodes, where weights represent the frequency of relationships.
+     - Node attributes: If `group_col` is provided, student nodes will have a group attribute. If `attr_col` is provided,
+       object nodes will have an attribute.
 
-.. _get-bipartite:
+.. _get-tripartite:
 
 .. raw:: html
 
-   <div id="get-bipartite" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">get_bipartite(df, col1, col2)</span> 
-       <a href="../Code/quantity_diversity.html#get-bipartite" class="source-link">[source]</a>
+   <div id="get-tripartite" class="function-header">
+       <span class="class-name">function</span> <span class="function-name">get_tripartite(df,student_col,object1_col,object2_col,group_col = None)</span> 
+       <a href="../Code/construction.html#get-tripartite" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Constructs a bipartite network projection from dataset columns.
+Constructs a tripartite network projection from dataset columns.
 
 **Parameters**:
 
 .. raw:: html
 
    <div class="parameter-block">
-       (df, col1, col2)
+       (df,student_col,object1_col,object2_col,group_col = None)
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing interaction records.</li>
-       <li><span class="param-name">col1</span>: The column name representing one set of nodes (e.g., individuals).</li>
-       <li><span class="param-name">col2</span>: The column name representing the second set of nodes (e.g., tasks). If a tuple of column names is provided, attributes will be merged into a composite index.</li>
+       <li><span class="param-name">df</span>: The input DataFrame containing the data to construct the bipartite graph.
+</li>
+       <li><span class="param-name">student_col</span>: The column name in the DataFrame representing student nodes.</li>
+       <li><span class="param-name">object1_col</span>: The column name in the DataFrame representing the first type of object nodes.</li>
+       <li><span class="param-name">object2_col</span>: The column name in the DataFrame representing the second type of object nodes.</li>
+       <li><span class="param-name">group_col</span>: The column name in the DataFrame representing group information for student nodes. If provided, these groups will be added as node attributes in the graph. Default is None.</li>
    </ul>
 
 **Returns**:
-  - **set**: A set of tuples `(i, j, w)`, where `i` and `j` are node labels, and `w` is the edge weight (interaction frequency).
+  - networkx.Graph
+     A tripartite graph with the following properties:
+     - Nodes: Student nodes and joint object nodes (combining `object1_col` and `object2_col`), with 'bipartite' and
+       'tripartite' attributes indicating their type.
+     - Edges: Weighted edges between student and joint object nodes, where weights represent the frequency of relationships.
+     - Node attributes: If `group_col` is provided, student nodes will have a group attribute.
 
 Demo
 ====
@@ -86,15 +102,14 @@ Demo
 Example Code
 ------------
 
-This example demonstrates how to use the `quantity_and_diversity` function to compute node-level measures.
+This example demonstrates how to use the `get_bipartite` and `get_tripartite` functions to construct HINs from a learning process dataset.
 
 **Step 1: Import necessary libraries**
 
 .. code-block:: python
 
     import pandas as pd
-    from hina.construction.network_construct import get_bipartite
-    from hina.individual.quantity_diversity import quantity_and_diversity
+    from hina.construction.network_construct import get_bipartite,get_tripartite
 
 **Step 2: Define the dataset**
 
@@ -102,55 +117,32 @@ A dataset containing student-task interactions:
 
 .. code-block:: python
 
-    data = {
-        'student': ['Student 1', 'Student 2', 'Student 1', \
-                    'Student 1', 'Student 1','Student 2',\
-                    'Student 2','Student 1','Student 2'],
-        'task_category_1': ['Code 1', 'Code 1', 'Code 2', 'Code 2', 'Code 2', 'Code 3',\
-                 'Code 3', 'Code 4', 'Code 4'],
-        'task_category_2': ['Code A', 'Code A', 'Code A', 'Code A', 'Code A', 'Code B',\
-                 'Code B', 'Code B', 'Code B']
-    }
-   df = pd.DataFrame(data)
+    import pandas as pd
+    df = pd.DataFrame({
+         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
+         'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring'],
+         'object2': ['tilt head', 'shake head', 'nod head', 'nod head'],
+         'group': ['A', 'B', 'A', 'B'],
+         'attr': ['cognitive', 'cognitive', 'metacognitive', 'metacognitive']
+     })
 
-**Step 3a: Construct the bipartite network**
+**Step 3a: Construct the bipartite network representation**
 
-We create a bipartite network representation of the interactions between students and task codes in category 1.
+We create a bipartite network representation of the interactions between students and objects in the `object1` category.
 
 .. code-block:: python
 
-    bipartite_graph = get_bipartite(df, 'student', 'task_category_1')
-    print("Bipartite Network with First Set of Task Codes:\n", bipartite_graph)
+    B = get_bipartite(df, student_col='student', object_col='object1', attr_col='attr', group_col='group')
+    print('Bipartite Graph:',B.nodes(data=True))
 
-**Step 3b: Construct an alternative bipartite network**
+**Step 3b: Construct a tripartite network representation**
 
 We create a bipartite network representation of the interactions between students and task codes in category 2.
 
 .. code-block:: python
 
-    bipartite_graph = get_bipartite(df, 'student', 'task_category_2')
-    print("Bipartite Network with Second Set of Task Codes:\n", bipartite_graph)
-
-**Step 4a: Compute quantity and diversity measures**
-
-Calculate the participation quantity and diversity for each student relative to the task codes in category 1.
-
-.. code-block:: python
-
-    quantities, diversities = quantity_and_diversity(df, 'student', 'task_category_1')
-    print("Quantities for Code Category 1:\n", quantities)
-    print("Diversities for Code Category 1:\n", diversities)
-
-**Step 4b: Compute quantity and diversity measures for alternative task codes**
-
-Calculate the participation quantity and diversity for each student relative to the task codes in category 2.
-
-.. code-block:: python
-
-    quantities, diversities = quantity_and_diversity(df, 'student', 'task_category_2')
-    print("Quantities for Code Category 2:\n", quantities)
-    print("Diversities for Code Category 2:\n", diversities)
-
+    T = get_tripartite(df,student_col='student', object1_col='object1', object2_col='object2', group_col='group')
+    print('Tripartite Graph:',T.nodes(data=True))
 
 
 Example Output
@@ -158,23 +150,17 @@ Example Output
 
 .. code-block:: console
 
-    Bipartite Network with First Set of Task Codes:
-    {('Student 2', 'Code 3', 2), ('Student 1', 'Code 4', 1), ('Student 1', 'Code 2', 3), ('Student 1', 'Code 1', 1), ('Student 2', 'Code 1', 1), ('Student 2', 'Code 4', 1)}
+    Bipartite Graph:
+    [('Alice', {'bipartite': 'student', 'group': 'A'}), 
+     ('Bob', {'bipartite': 'student', 'group': 'B'}), 
+     ('Charlie', {'bipartite': 'student', 'group': 'B'}), 
+     ('ask question', {'bipartite': 'object', 'attr': 'cognitive}), 
+     ('answer questions', {'bipartite': 'object', 'attr': 'cognitive'})]
 
-   Bipartite Network with Second Set of Task Codes:
-    {('Student 1', 'Code A', 4), ('Student 1', 'Code B', 1), ('Student 2', 'Code A', 1), ('Student 2', 'Code B', 3)}
+   Tripartite Graph:
+    ????????
+
    
-   Quantities for Code Category 1:
-    {'Student 2': 0.4444444444444444, 'Student 1': 0.5555555555555556}
-  
-   Diversities for Code Category 1:
-    {'Student 2': 0.75, 'Student 1': 0.6854752972273345}
-  
-   Quantities for Code Category 2:
-    {'Student 1': 0.5555555555555556, 'Student 2': 0.4444444444444444}
- 
-   Diversities for Code Category 2:
-    {'Student 1': 0.7219280948873623, 'Student 2': 0.8112781244591328}
 
 Paper Source
 ============
