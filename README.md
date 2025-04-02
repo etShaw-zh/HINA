@@ -33,32 +33,32 @@ pip install hina
     directly from input learning process data. The methods in this module are designed to handle the typical
     data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
-### [hina.individual](https://hina.readthedocs.io/en/latest/Modules/individual.html)
+### <a id="hina.individual">[hina.individual](https://hina.readthedocs.io/en/latest/Modules/individual.html)
 
 - **Individual-level Analysis**: Provides functions to compute the node-level measures of [@feng2025analyzing] gauging the quantity and diversity
     of individuals’ connections to different learning constructs. Students’ group information and construct attributes
     can be flexibly manipulated for different applications. 
 
-### [hina.dyad](https://hina.readthedocs.io/en/latest/Modules/dyad.html)
+### <a id="hina.dyad">[hina.dyad](https://hina.readthedocs.io/en/latest/Modules/dyad.html)
 
 - **Dyadic Analysis**: Provides methods to identify statistically significant edges in the heterogeneous interaction
     network relative to different null models of interaction structure [@feng2025analyzing], which can be specified by the user.  
 
-### [hina.mesoscale](https://hina.readthedocs.io/en/latest/Modules/mesoscale.html)
+### <a id="hina.mesoscale">[hina.mesoscale](https://hina.readthedocs.io/en/latest/Modules/mesoscale.html)
 
 - **Mesoscale Clustering**: Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure [@feng2024heterogenous], 
     to automatically learn the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. Utilizes a novel method
     based on data compression for parsimonious inference. If the input is a tripartite representation of heterogeneous interaction network,
     the function also returns the projected bipartite networks of the related constructs of individuals within each cluster.  
 
-### [hina.visualization](https://hina.readthedocs.io/en/latest/Modules/visualization.html)
+### <a id="hina.visualization">[hina.visualization](https://hina.readthedocs.io/en/latest/Modules/visualization.html)
 
 - **Visualization**: Provides network visualization functionalities for heterogeneous interaction networks.
     Users can generate a customizable network visualization using a specified layout, allowing for the pruning of insignificant edges,
     grouping of nodes based on engagement patterns, and customization of the graph's appearance.
     Users can also visualize HINs with a novel community-based layout, emphasizing the underlying bipartite community structure.
   
-### [hina.app](https://hina.readthedocs.io/en/latest/Modules/dashboard.html)
+### <a id="hina.app">[hina.app](https://hina.readthedocs.io/en/latest/Modules/dashboard.html)
 
 - **HINA Dashboard**: Provides functions to deploy a dashboard that includes a web-based interface serving multiple purposes.
   
