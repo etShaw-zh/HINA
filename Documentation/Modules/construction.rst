@@ -1,10 +1,10 @@
-Construction
+hina.construction
 ++++++++++++
 
 Tutorial
 ========
 
-The `construction` module provides functions to construct Heterogeneous Interaction Networks (HINs)
+The hina.construction module provides functions to construct heterogeneous interaction networks (HINs)
     directly from input learning process data. The methods in this module are designed to handle the typical
     data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
