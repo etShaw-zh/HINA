@@ -1,4 +1,4 @@
-# <span style="color:red">HINA</span>: A Learning Analytics Tool for <span style="color:red">H</span>eterogenous <span style="color:red">I</span>nteraction <span style="color:red">N</span>etwork <span style="color:red">A</span>nalysis in Python
+<span style="color:red">HINA</span>: A Learning Analytics Tool for <span style="color:red">H</span>eterogenous <span style="color:red">I</span>nteraction <span style="color:red">N</span>etwork <span style="color:red">A</span>nalysis in Python
 
 HINA is a learning analytics tool that models and analyzes heterogenous interactions in learning processes. Heterogenous interactions refer to the interactions occurring between different types of entities during learning processes, such as students’ interactions with learning objects or students’ display of different behaviors coded using multimodal process data. 
 
