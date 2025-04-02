@@ -4,11 +4,9 @@ hina.construction
 Tutorial
 ========
 
-The hina.construction module provides functions to construct heterogeneous interaction networks (HINs)
-    directly from input learning process data. The methods in this module are designed to handle the typical
-    data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
+The `construction` module provides functions to construct heterogeneous interaction networks (HINs) directly from input learning process data. The methods in this module are designed to handle the typical data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
-Currently, the module contains the `netweork_construct.py` file, which includes:
+Currently, the module contains the `network_construct.py` file, which includes:
 
 - `get_bipartite`: Constructs a bipartite graph from an input pandas dataFrame.
 - `get_tripartite`: Constructs a tripartite graph from an input pandas dataFrame.
