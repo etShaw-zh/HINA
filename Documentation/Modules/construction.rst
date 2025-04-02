@@ -43,8 +43,7 @@ Constructs a bipartite network projection from dataset columns.
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: The input DataFrame containing the data to construct the bipartite graph.
-</li>
+       <li><span class="param-name">df</span>: The input DataFrame containing the data to construct the bipartite graph.</li>
        <li><span class="param-name">student_col</span>: The column name in the DataFrame representing student nodes.</li>
        <li><span class="param-name">object_col</span>: The column name in the DataFrame representing the studied object nodes.</li>
        <li><span class="param-name">attr_col</span>: The column name in the DataFrame representing attributes for object nodes (e.g. the dimension of coded constructs). If provided, these attributes will be added as node attributes in the graph. Default is None.</li>
@@ -80,11 +79,10 @@ Constructs a tripartite network projection from dataset columns.
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: The input DataFrame containing the data to construct the bipartite graph.
-</li>
+       <li><span class="param-name">df</span>: The input DataFrame containing the data to construct the bipartite graph.</li>
        <li><span class="param-name">student_col</span>: The column name in the DataFrame representing student nodes.</li>
        <li><span class="param-name">object1_col</span>: The column name in the DataFrame representing the first type of object nodes.</li>
-       <li><span class="param-name">object2_col</span>: The column name in the DataFrame representing the second type of object nodes.</li>
+       <li><span class="param-name">object2_col</span>: The column name in the DataFrame representing the second type of object nodes. </li>
        <li><span class="param-name">group_col</span>: The column name in the DataFrame representing group information for student nodes. If provided, these groups will be added as node attributes in the graph. Default is None.</li>
    </ul>
 
