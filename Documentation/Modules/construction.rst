@@ -126,21 +126,21 @@ A dataset containing student-task interactions:
 
 **Step 3a: Construct the bipartite network representation**
 
-We create a bipartite network representation of the interactions between students and objects in the `object1` category.
+We create a bipartite network representation of the interactions between students and objects in the 'object1' category, adding the additional attribute 'attr' storing object codes.
 
 .. code-block:: python
 
     B = get_bipartite(df, student_col='student', object_col='object1', attr_col='attr', group_col='group')
-    print('Bipartite Graph:',B.nodes(data=True))
+    print('Bipartite Graph:\n',B.nodes(data=True))
 
 **Step 3b: Construct a tripartite network representation**
 
-We create a bipartite network representation of the interactions between students and task codes in category 2.
+We create a tripartite network representation of the interactions among students and two categories of objects: 'object1' and 'object2'.
 
 .. code-block:: python
 
     T = get_tripartite(df,student_col='student', object1_col='object1', object2_col='object2', group_col='group')
-    print('Tripartite Graph:',T.nodes(data=True))
+    print('Tripartite Graph:\n',T.nodes(data=True))
 
 
 Example Output
@@ -149,16 +149,24 @@ Example Output
 .. code-block:: console
 
     Bipartite Graph:
-    [('Alice', {'bipartite': 'student', 'group': 'A'}), 
-     ('Bob', {'bipartite': 'student', 'group': 'B'}), 
-     ('Charlie', {'bipartite': 'student', 'group': 'B'}), 
-     ('ask question', {'bipartite': 'object', 'attr': 'cognitive}), 
-     ('answer questions', {'bipartite': 'object', 'attr': 'cognitive'})]
+       [('Alice', {'bipartite': 'student', 'group': 'A'}), 
+         ('Bob', {'bipartite': 'student', 'group': 'B'}), 
+         ('Charlie', {'bipartite': 'student', 'group': 'B'}),
+         ('ask questions', {'bipartite': 'object1', 'attr': 'cognitive'}), 
+         ('answer questions', {'bipartite': 'object1', 'attr': 'cognitive'}), 
+         ('evaluating', {'bipartite': 'object1', 'attr': 'metacognitive'}), 
+         ('monitoring', {'bipartite': 'object1', 'attr': 'metacognitive'})] 
+
 
    Tripartite Graph:
-    ????????
+    [('Alice', {'bipartite': 'student', 'group': 'A'}),
+     ('Bob', {'bipartite': 'student', 'group': 'B'}), 
+     ('Charlie', {'bipartite': 'student', 'group': 'B'}),
+     ('ask questions**tilt head', {'bipartite': '(object1,object2)', 'tripartite': True}),
+     ('answer questions**shake head', {'bipartite': '(object1,object2)', 'tripartite': True}), 
+     ('evaluating**nod head', {'bipartite': '(object1,object2)', 'tripartite': True}), 
+     ('monitoring**nod head', {'bipartite': '(object1,object2)', 'tripartite': True})]
 
-   
 
 Paper Source
 ============
