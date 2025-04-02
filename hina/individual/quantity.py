@@ -1,7 +1,7 @@
 import networkx as nx 
 from collections import defaultdict
 import numpy as np 
-import pandas as pd 
+import pandas as pd
 
 def quantity(B, attr = None, group = None, return_type='all'):
     
