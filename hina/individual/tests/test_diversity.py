@@ -1,7 +1,7 @@
 import pytest
 import networkx as nx
 import numpy as np
-from hina.individual.quantity_diversity import quantity, diversity
+from hina.individual.quantity import quantity
 
 def create_test_graph():
     B = nx.Graph()
