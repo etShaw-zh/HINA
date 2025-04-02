@@ -59,7 +59,7 @@ pip install hina
   
 ### <a id="hina.app">[hina.app](https://hina.readthedocs.io/en/latest/Modules/dashboard.html)
 
-- **HINA Dashboard**: Provides functions to deploy a dashboard that includes a web-based interface serving multiple purposes.
+- **HINA Dashboard**: Provides functions to deploy a dashboard that includes a web-based interface for data analysis and visualization.
   
     1. The dashboard serves as a web-based tool for conducting learning analytics with HINA using an intuitive user interface,
        enabling users to conduct the individual-, dyadic- and mesoscale-level analysis available in the package without any programming.
