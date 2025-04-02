@@ -28,7 +28,7 @@ Reference
 
    <div id="get-bipartite" class="function-header">
        <span class="class-name">function</span> <span class="function-name">get_bipartite(df,student_col,object_col,attr_col = None,group_col = None)</span> 
-       <a href="../Code/construction.html#get-bipartite" class="source-link">[source]</a>
+       <a href="../Code/network_construct.html#get-bipartite" class="source-link">[source]</a>
    </div>
 
 **Description**:
@@ -64,7 +64,7 @@ Constructs a bipartite network projection from dataset columns.
 
    <div id="get-tripartite" class="function-header">
        <span class="class-name">function</span> <span class="function-name">get_tripartite(df,student_col,object1_col,object2_col,group_col = None)</span> 
-       <a href="../Code/construction.html#get-tripartite" class="source-link">[source]</a>
+       <a href="../Code/network_construct.html#get-tripartite" class="source-link">[source]</a>
    </div>
 
 **Description**:
