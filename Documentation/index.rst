@@ -8,27 +8,56 @@
 -------------------------------------
 
 
-HINA: A Learning Analytics Tool for Heterogenous Interaction Network Analysis in Python
-=============================================
+# `HINA`: A Learning Analytics Tool for `H`eterogenous `I`nteraction `N`etwork `A`nalysis in Python 
 
-*HINA*: *HINA* is is a learning analytics tool that models and analyzes heterogenous interactions during learning, equipped with modules as below:
+HINA is a learning analytics tool that models and analyzes heterogenous interactions in learning processes. Heterogenous interactions refer to the interactions occurring between different types of entities during learning processes, such as students’ interactions with learning objects or students’ display of different behaviors coded using multimodal process data. 
 
-- **Individual-level Analysis**: Provides functions to compute the node-level measures of gauging the quantity and diversity of individuals’ interactions in the learning process. New package contributions can incorporate other node-level measures for understanding individuals’ interaction patterns.
-- **Dyadic Analysis**: Provides methods to identify statistically significant edges in the heterogeneous interaction network relative to multiple different null models of interaction structure, which can be specified by the user. New package contributions can incorporate other dyad-level analyses for understanding interaction patterns among pairs of nodes.
-- **Mesoscale Clustering**: Provides methods for clustering nodes in a bipartite projection of the heterogeneous interaction network according to shared interaction structure, automatically learning the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. New package contributions can incorporate other measures for understanding the mesoscale structure of the interaction network.
-- **Visualization**: Provides network visualization functions for networks at the group level or cohort level that enable the user to easily project the heterogeneous interaction network onto any subset of node types (e.g. students, tasks, behavioral codes). These methods allow for the inclusion of various metadata such as inferred student clusters or contribution metrics, as well as pruning of the interaction network to identify significant interaction structure. Also enables visualization with Sankey diagrams for an alternative representation of the weighted networks. These visualizations come together with a web-based interface that enables interactions and user engagement. New package contributions can incorporate other relevant metadata for visualization, as well as other preprocessing tools for augmenting or modifying the network structure to highlight particular features.
+**Heterogenous interaction networks (HINs)** consist of different sets of nodes and edges connecting nodes from different sets. Each node in a heterogenous interaction network (HIN) can represent any meaningful entity reflecting a certain object or construct in a learning process, such as a student, group of students, coded behavior, or learning artefact. Edges in HINs pair nodes from different sets and can reflect affiliations, associations, or interactions among the nodes for modeling a specific learning process.
 
-Statement of Need
-=============================================
+**Heterogenous interaction network analysis (HINA)** offers a flexible, adaptive, and widely applicable method to model a wide variety of interactions that can occur during the learning processes, across individual learning, group learning, and community learning. 
 
-Modelling learning processes using heterogenous interaction networks enables us to investigate a wide range of questions through summative measures and network inference that are tailored for the learning analytics setting. *HINA* offers analytical modules to address four specific questions of interest for learning analytics practitioners:
 
-1. **At the node level**: How can we gauge the quantity and diversity of the heterogenous connections for a designated set of nodes?
-2. **At the dyad level**: How can we extract statistically significant ties that indicate a higher level of interaction among a pair of nodes than expected under a suitable null model?
-3. **At the mesoscale level**: How can we identify subgroups of entities that share similar heterogenous interaction patterns?
-4. **At the network level**: How can we visualize these heterogeneous interaction networks in an interactive and informative way, using different visualization formats that are tailored for learning analytics applications?
+Modules
+========
 
-These analytical features offered by *HINA* allow for easy access to critical measures and visualizations for learning analytics researchers and practitioners to derive insights about their learning process data. The inherent complexity of learning process data, coupled with the lack of standardized methodologies, necessitates a tailored approach to data analysis that can effectively address the specific conceptual and analytical questions posed in learning contexts. What differentiates *HINA* from existing network analysis packages such as NetworkX or iGraph is its focus on heterogeneous interaction networks for learning process data and its inclusion of specifically tailored novel metrics and visualization tools for the learning analytics setting. For example, *HINA* allows for studies exploring how to gauge individual contribution based on the interactions between students and learning artefacts, identify subgroups of students who share similar learning strategies based on their associations with behavioral and cognitive constructs during learning processes, uncover significant associations among behavioral engagement in different modalities, and design learning analytics dashboard with the visualization of heterogenous engagement to support teaching and learning practices. By packaging these tools in a compact package accessible to practitioners in the emerging field of learning analytics, particularly those less familiar with network analysis, *HINA* can provide substantial impact in the education community.  
+### hina.construction
+
+- **Heterogeneous Interaction Network Construction**: Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples above) directly from input learning process data. The methods in this module are designed to handle the typical
+    data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
+
+### hina.individual
+
+- **Individual-level Analysis**: Provides functions to compute the node-level measures gauging the quantity and diversity
+    of individuals’ connections to different learning constructs. Students’ group information and construct attributes
+    can be flexibly manipulated for different applications. 
+
+### hina.dyad
+
+- **Dyadic Analysis**: Provides methods to identify statistically significant edges in the heterogeneous interaction
+    network relative to different null models of interaction structure, which can be specified by the user.  
+
+### hina.mesoscale
+
+- **Mesoscale Clustering**: Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure, to automatically learn the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. Utilizes a novel method based on data compression for parsimonious inference. If the input is a tripartite representation of heterogeneous interaction network, the function also returns the projected bipartite networks of the related constructs of individuals within each cluster.  
+
+### hina.visualization
+
+- **Visualization**: Provides network visualization functionalities for heterogeneous interaction networks.
+    Users can generate a customizable network visualization using a specified layout, allowing for the pruning of insignificant edges,
+    grouping of nodes based on engagement patterns, and customization of the graph's appearance.
+    Users can also visualize HINs with a novel community-based layout, emphasizing the underlying bipartite community structure.
+  
+### hina.app
+
+- **HINA Dashboard**: Provides functions to deploy a dashboard that includes a web-based interface for data analysis and visualization.
+  
+    1. The dashboard serves as a web-based tool for conducting learning analytics with HINA using an intuitive user interface,
+       enabling users to conduct the individual-, dyadic- and mesoscale-level analysis available in the package without any programming.
+    2. The dashboard also allows teachers and students to visualize, interpret, and communicate HINA results effectively.
+    
+    This dual functionality supports both data analysis and the sharing of actionable insights in an interactive and user-friendly manner,
+    making it a versatile tool for both data analytics and teaching practice. 
+
 
 Citation
 ========
@@ -47,6 +76,7 @@ If you use **HINA** in your research or projects, please cite it as follows:
    :maxdepth: 2
    :caption: Modules
 
+   Modules/construction
    Modules/individual
    Modules/dyad
    Modules/mesoscale
