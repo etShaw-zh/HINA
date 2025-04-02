@@ -69,10 +69,12 @@ HINA/
 │       └── test_network_construct.py
 ├── individual/                      # Node-level analysis: quantity & diversity
 │   ├── __init__.py
-│   ├── quantity_diversity.py
+│   ├── quantity.py
+│   ├── diversity.py
 │   └── tests/
 │       ├── __init__.py
-│       └── test_quantity_diversity.py
+│       └── test_quantity.py
+│       └── test_diversity.py
 │
 ├── dyad/                            # Edge-level analysis: significant edges
 │   ├── __init__.py
