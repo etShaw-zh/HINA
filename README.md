@@ -6,6 +6,9 @@ HINA is a learning analytics tool that models and analyzes heterogenous interact
 
 **Heterogenous interaction network analysis (HINA)** offers a flexible, adaptive, and widely applicable method to model a wide variety of interactions that can occur during the learning processes, across individual learning, group learning, and community learning. 
 
+![Examples of heterogenous interaction networks for learning in HINA.](./Paper/Examples.png "Examples of heterogenous interaction networks for learning in HINA.")
+
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -29,27 +32,23 @@ pip install hina
 
 ### <a id="hina.construction">[hina.construction](https://hina.readthedocs.io/en/latest/Modules/construction.html)
 
-- **Heterogeneous Interaction Network Construction**: Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples in Figure 1A, 1B)
-    directly from input learning process data. The methods in this module are designed to handle the typical
+- **Heterogeneous Interaction Network Construction**: Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples below) directly from input learning process data. The methods in this module are designed to handle the typical
     data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
 ### <a id="hina.individual">[hina.individual](https://hina.readthedocs.io/en/latest/Modules/individual.html)
 
-- **Individual-level Analysis**: Provides functions to compute the node-level measures of [@feng2025analyzing] gauging the quantity and diversity
+- **Individual-level Analysis**: Provides functions to compute the node-level measures gauging the quantity and diversity
     of individuals’ connections to different learning constructs. Students’ group information and construct attributes
     can be flexibly manipulated for different applications. 
 
 ### <a id="hina.dyad">[hina.dyad](https://hina.readthedocs.io/en/latest/Modules/dyad.html)
 
 - **Dyadic Analysis**: Provides methods to identify statistically significant edges in the heterogeneous interaction
-    network relative to different null models of interaction structure [@feng2025analyzing], which can be specified by the user.  
+    network relative to different null models of interaction structure, which can be specified by the user.  
 
 ### <a id="hina.mesoscale">[hina.mesoscale](https://hina.readthedocs.io/en/latest/Modules/mesoscale.html)
 
-- **Mesoscale Clustering**: Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure [@feng2024heterogenous], 
-    to automatically learn the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. Utilizes a novel method
-    based on data compression for parsimonious inference. If the input is a tripartite representation of heterogeneous interaction network,
-    the function also returns the projected bipartite networks of the related constructs of individuals within each cluster.  
+- **Mesoscale Clustering**: Provides methods for clustering nodes in a heterogeneous interaction network according to shared interaction structure, to automatically learn the number of clusters from heterogeneity in the interaction data to find a mesoscale representation. Utilizes a novel method based on data compression for parsimonious inference. If the input is a tripartite representation of heterogeneous interaction network, the function also returns the projected bipartite networks of the related constructs of individuals within each cluster.  
 
 ### <a id="hina.visualization">[hina.visualization](https://hina.readthedocs.io/en/latest/Modules/visualization.html)
 
