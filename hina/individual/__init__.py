@@ -1,3 +1,4 @@
-from .quantity_diversity import quantity, diversity
+from .quantity import quantity
+from .diversity import diversity
 
 __all__ = ['quantity', 'diversity']
