@@ -32,7 +32,7 @@ pip install hina
 
 ### <a id="hina.construction">[hina.construction](https://hina.readthedocs.io/en/latest/Modules/construction.html)
 
-- **Heterogeneous Interaction Network Construction**: Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples below) directly from input learning process data. The methods in this module are designed to handle the typical
+- **Heterogeneous Interaction Network Construction**: Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples above) directly from input learning process data. The methods in this module are designed to handle the typical
     data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
 ### <a id="hina.individual">[hina.individual](https://hina.readthedocs.io/en/latest/Modules/individual.html)
