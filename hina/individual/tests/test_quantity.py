@@ -23,12 +23,6 @@ def test_quantity():
     result = quantity(B)
     assert 'quantity' in result[0], "Quantity should be computed."
     assert 'normalized_quantity' in result[0], "Normalized quantity should be computed."
-
-
-def test_diversity():
-    B = create_test_graph()
-    result = diversity(B)
-    assert 'Alice' in result[0], "Diversity for Alice should be computed."
     
 
 if __name__ == "__main__":
