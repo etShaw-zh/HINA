@@ -237,6 +237,7 @@ export function Webinterface() {
     console.log("number_cluster", numberCluster)
     try {
       const res = await axios.post("/build-cluster-network", params);
+      originalElementsRef.current = [...res.data.elements];
       setElements(res.data.elements);
       if (res.data.cluster_labels) {
         setClusterLabels(res.data.cluster_labels);
@@ -396,6 +397,44 @@ const fetchQuantityAndDiversity = async () => {
     }
   };
 
+  // Sorting function for table data
+  const applySorting = <T extends Record<string, any>>(
+    data: T[],
+    sortConfig: SortConfig,
+    numericColumns: string[] = []
+  ): T[] => {
+    if (!sortConfig) return data;
+    
+    return [...data].sort((a, b) => {
+      const key = sortConfig.key;
+      const valueA = a[key];
+      const valueB = b[key];      
+      if (numericColumns.includes(key)) {
+        const numA = !isNaN(Number(valueA)) ? Number(valueA) : null;
+        const numB = !isNaN(Number(valueB)) ? Number(valueB) : null;        
+        if (numA !== null && numB !== null) {
+          return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+        }
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          const lastPartA = valueA.split('_').pop() || '';
+          const lastPartB = valueB.split('_').pop() || '';
+          const extractedA = parseInt(lastPartA, 10);
+          const extractedB = parseInt(lastPartB, 10);
+          if (!isNaN(extractedA) && !isNaN(extractedB)) {
+            return sortConfig.direction === "asc" ? extractedA - extractedB : extractedB - extractedA;
+          }
+        }
+      }
+      if (valueA < valueB) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
   // Compute sorted data for Node-Level table
   const quantityTableData = useMemo(() => {
     if (!qdData?.quantity) return [];
@@ -403,18 +442,8 @@ const fetchQuantityAndDiversity = async () => {
       Student: key,
       Quantity: value
     }));
-    if (quantitySortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[quantitySortConfig.key] < b[quantitySortConfig.key]) {
-          return quantitySortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[quantitySortConfig.key] > b[quantitySortConfig.key]) {
-          return quantitySortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    // "Quantity" is a numeric column
+    return applySorting(data, quantitySortConfig, ["Quantity"]);
   }, [qdData?.quantity, quantitySortConfig]);
 
   // Sorted data for Diversity table
@@ -424,18 +453,7 @@ const fetchQuantityAndDiversity = async () => {
       Student: key,
       Diversity: value
     }));
-    if (diversitySortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[diversitySortConfig.key] < b[diversitySortConfig.key]) {
-          return diversitySortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[diversitySortConfig.key] > b[diversitySortConfig.key]) {
-          return diversitySortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    return applySorting(data, diversitySortConfig, ["Diversity"]);
   }, [qdData?.diversity, diversitySortConfig]);
 
   // Sorted data for Normalized Quantity table
@@ -445,20 +463,9 @@ const fetchQuantityAndDiversity = async () => {
       Student: key,
       "Normalized Quantity": value
     }));
-    if (normalizedQuantitySortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[normalizedQuantitySortConfig.key] < b[normalizedQuantitySortConfig.key]) {
-          return normalizedQuantitySortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[normalizedQuantitySortConfig.key] > b[normalizedQuantitySortConfig.key]) {
-          return normalizedQuantitySortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    return applySorting(data, normalizedQuantitySortConfig, ["Normalized Quantity"]);
   }, [qdData?.normalized_quantity, normalizedQuantitySortConfig]);
-
+  
   // Sorted data for Category Quantity table
   const categoryQuantityTableData = useMemo(() => {
     if (!qdData?.quantity_by_category) return [];
@@ -473,20 +480,9 @@ const fetchQuantityAndDiversity = async () => {
         });
       });
     });
-    
-    if (categoryQuantitySortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[categoryQuantitySortConfig.key] < b[categoryQuantitySortConfig.key]) {
-          return categoryQuantitySortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[categoryQuantitySortConfig.key] > b[categoryQuantitySortConfig.key]) {
-          return categoryQuantitySortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    return applySorting(data, categoryQuantitySortConfig, ["Value"]);
   }, [qdData?.quantity_by_category, categoryQuantitySortConfig]);
+  
 
   // Sorted data for Normalized Quantity by Group table
   const normalizedGroupTableData = useMemo(() => {
@@ -495,20 +491,9 @@ const fetchQuantityAndDiversity = async () => {
       Student: key,
       "Normalized Quantity": value
     }));
-    if (normalizedGroupSortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[normalizedGroupSortConfig.key] < b[normalizedGroupSortConfig.key]) {
-          return normalizedGroupSortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[normalizedGroupSortConfig.key] > b[normalizedGroupSortConfig.key]) {
-          return normalizedGroupSortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    return applySorting(data, normalizedGroupSortConfig, ["Normalized Quantity"]);
   }, [qdData?.normalized_quantity_by_group, normalizedGroupSortConfig]);
-
+  
   // Compute sorted data for Dyadic Analysis Significant Edges table
   const dyadicSigTableData = useMemo(() => {
     if (!dyadicAnalysis) return [];
@@ -517,62 +502,19 @@ const fetchQuantityAndDiversity = async () => {
       "Node 2": edge[1],
       Weight: edge[2],
     }));
-    if (dyadicSigSortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[dyadicSigSortConfig.key] < b[dyadicSigSortConfig.key]) {
-          return dyadicSigSortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[dyadicSigSortConfig.key] > b[dyadicSigSortConfig.key]) {
-          return dyadicSigSortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    return applySorting(data, dyadicSigSortConfig, ["Weight"]);
   }, [dyadicAnalysis, dyadicSigSortConfig]);
-
-  // Compute sorted data for Dyadic Analysis Pruned Edges table
-  // const dyadicPrunedTableData = useMemo(() => {
-  //   if (!dyadicAnalysis) return [];
-  //   const data = dyadicAnalysis.pruned_edges.map((edge) => ({
-  //     "Node 1": edge[0],
-  //     "Node 2": edge[1],
-  //     Weight: edge[2],
-  //   }));
-  //   if (dyadicPrunedSortConfig !== null) {
-  //     data.sort((a, b) => {
-  //       if (a[dyadicPrunedSortConfig.key] < b[dyadicPrunedSortConfig.key]) {
-  //         return dyadicPrunedSortConfig.direction === "asc" ? -1 : 1;
-  //       }
-  //       if (a[dyadicPrunedSortConfig.key] > b[dyadicPrunedSortConfig.key]) {
-  //         return dyadicPrunedSortConfig.direction === "asc" ? 1 : -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  //   return data;
-  // }, [dyadicAnalysis, dyadicPrunedSortConfig]);
-
-  // Compute sorted data for Cluster Labels table
+  
+  // Compute sorted data for Mesoscale Clustering table
   const clusterTableData = useMemo(() => {
     if (!clusterLabels) return [];
     const data = Object.keys(clusterLabels).map((node) => ({
       Node: node,
       "Cluster Label": clusterLabels[node],
     }));
-    if (clusterSortConfig !== null) {
-      data.sort((a, b) => {
-        if (a[clusterSortConfig.key] < b[clusterSortConfig.key]) {
-          return clusterSortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[clusterSortConfig.key] > b[clusterSortConfig.key]) {
-          return clusterSortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return data;
+    return applySorting(data, clusterSortConfig, ["Cluster Label"]);
   }, [clusterLabels, clusterSortConfig]);
+
 
   // Determine if the current active tab has exportable data
   const hasExportData = useMemo(() => {
@@ -636,49 +578,44 @@ const fetchQuantityAndDiversity = async () => {
   const handleClusterChange = (value: string | null) => {
     const newValue = value || "All";
     setCluster(newValue);
-    const trueOriginalElements = originalElementsRef.current;
+    const fullElements = originalElementsRef.current;        
     if (newValue === "All") {
-      setElements([...trueOriginalElements]);
+      setElements([...fullElements]);
       return;
-    }
-    // Get all nodes that belong to the selected cluster
-    const nodesInCluster = Object.entries(clusterLabels || {})
+    }    
+    const filteredStudentIds = Object.entries(clusterLabels || {})
       .filter(([node, label]) => String(label) === newValue)
       .map(([node]) => node);
-    
-    if (nodesInCluster.length === 0) {
-      setElements([...trueOriginalElements]);
+
+    if (filteredStudentIds.length === 0) {
+      setElements([...fullElements]);
       return;
     }
-    const clusterNodeSet = new Set(nodesInCluster);
-    // Find all nodes and edges in the original elements
-    const allNodes = trueOriginalElements.filter((el) => !el.data.source);
-    const allEdges = trueOriginalElements.filter((el) => el.data.source);
-    // Get edges that connect at least one node in the cluster
-    const relevantEdges = allEdges.filter(
-      (edge) =>
-        clusterNodeSet.has(edge.data.source) ||
-        clusterNodeSet.has(edge.data.target)
+    const studentIdSet = new Set(filteredStudentIds);
+    // Get student nodes in the selected cluster
+    const filteredStudentNodes = fullElements.filter(el => 
+      !el.data.source && studentIdSet.has(el.data.id)
     );
-  
-    // Get all nodes that are connected by these edges
-    const connectedNodeIds = new Set();
-    relevantEdges.forEach((edge) => {
+    // Find edges connecting to filtered student nodes
+    const filteredEdges = fullElements.filter(el => 
+      el.data.source && (studentIdSet.has(el.data.source) || studentIdSet.has(el.data.target))
+    );    
+    const connectedNodeIds = new Set<string>();
+    filteredEdges.forEach(edge => {
       connectedNodeIds.add(edge.data.source);
       connectedNodeIds.add(edge.data.target);
     });
-    // Get all node elements for those IDs
-    const relevantNodes = allNodes.filter((node) =>
-      connectedNodeIds.has(node.data.id)
+    // Find object nodes that are connected to students in the selected cluster
+    const filteredObjectNodes = fullElements.filter(el => 
+      !el.data.source && 
+      !studentIdSet.has(el.data.id) &&
+      connectedNodeIds.has(el.data.id)
     );  
-    // If no nodes or edges are found, show all elements
-    if (relevantNodes.length === 0 || relevantEdges.length === 0) {
-      setElements([...trueOriginalElements]);
-    } else {
-      setElements([...relevantNodes, ...relevantEdges]);
-    }
+    const newElements = [...filteredStudentNodes, ...filteredObjectNodes, ...filteredEdges];
+    setElements(newElements);
   };
   
+
 
   useEffect(() => {
     if (!cyRef.current) return;
@@ -718,7 +655,22 @@ const fetchQuantityAndDiversity = async () => {
 
   useEffect(() => {
     if (clusterLabels) {
-      const uniqueValues = [...new Set(Object.values(clusterLabels))].map(val => String(val));
+      let uniqueValues = [...new Set(Object.values(clusterLabels))].map(val => String(val));      
+      uniqueValues = uniqueValues.sort((a, b) => {
+        const numA = !isNaN(Number(a)) ? Number(a) : null;
+        const numB = !isNaN(Number(b)) ? Number(b) : null;        
+        if (numA !== null && numB !== null) {
+          return numA - numB;
+        }        
+        const lastPartA = a.split('_').pop() || '';
+        const lastPartB = b.split('_').pop() || '';
+        const extractedA = parseInt(lastPartA, 10);
+        const extractedB = parseInt(lastPartB, 10);
+        if (!isNaN(extractedA) && !isNaN(extractedB)) {
+          return extractedA - extractedB;
+        }        
+        return a.localeCompare(b);
+      });
       setClusterOptions(["All", ...uniqueValues]);
       setCluster("All");
     } else {

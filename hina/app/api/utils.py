@@ -61,56 +61,6 @@ def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight
         # If both nodes are in the same attribute or ambiguous, sort lexicographically.
         return tuple(sorted([u_str, v_str])) + (weight,)
         
-# def build_hina_network(df: pd.DataFrame, group: str, attribute_1: str, attribute_2: str, pruning, layout: str):
-#     """
-#     Build a NetworkX graph for the HINA network.
-#     """
-
-#     if group != 'All':
-#         df = df[df['group'] == group]
-    
-#     G_edges = get_bipartite(df, attribute_1, attribute_2)
-#     G_edges_ordered = [order_edge(u, v, df, attribute_1, attribute_2, int(w)) for u, v, w in G_edges]
-    
-#     if pruning != "none":
-#         if isinstance(pruning, dict):
-#             significant_edges = prune_edges(G_edges_ordered, **pruning)
-#         else:
-#             significant_edges = prune_edges(G_edges_ordered)
-#         significant_edges = significant_edges or set()
-#         G_edges_ordered = list(significant_edges)
-
-#     nx_G = nx.Graph()
-#     for edge in G_edges_ordered:
-#         nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
-
-#     # Assign node types and colors
-#     for node in nx_G.nodes():
-#         if node in df[attribute_1].astype(str).values:
-#             nx_G.nodes[node]['type'] = 'attribute_1'
-#             nx_G.nodes[node]['color'] = 'grey'
-#         elif node in df[attribute_2].astype(str).values:
-#             nx_G.nodes[node]['type'] = 'attribute_2'
-#             nx_G.nodes[node]['color'] = 'blue'
-#         else:
-#             nx_G.nodes[node]['type'] = 'unknown'
-#             nx_G.nodes[node]['color'] = 'black'
-
-#     for u, v, d in nx_G.edges(data=True):
-#         d['label'] = str(d.get('weight', ''))
-
-#     if layout == 'bipartite':
-#         attribute_1_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'attribute_1'}
-#         if not nx.is_bipartite(nx_G):
-#             raise ValueError("The graph is not bipartite; check the input data.")
-#         pos = nx.bipartite_layout(nx_G, attribute_1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
-#     elif layout == 'spring':
-#         pos = nx.spring_layout(nx_G, k=0.2)
-#     elif layout == 'circular':
-#         pos = nx.circular_layout(nx_G)
-#     else:
-#         raise ValueError(f"Unsupported layout: {layout}")
-#     return nx_G, pos, G_edges_ordered
 def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning):
     # Create the bipartite/tripartite graph
     is_tripartite = object2_col is not None and object2_col not in ['none', 'null', 'undefined', '']
@@ -241,7 +191,7 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
     elements = []
     for node, data in G.nodes(data=True):
         node_str = str(node)
-        print('node_str', node_str)
+        print('node_str_pos', node_str, pos[node])
         x = pos[node][0] * 400 + 300
         y = pos[node][1] * 400 + 300
         elements.append({

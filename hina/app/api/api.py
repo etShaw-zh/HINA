@@ -68,7 +68,6 @@ async def build_hina_network_endpoint(
         layout=layout
     )
     elements = utils.cy_elements_from_graph(nx_G, pos)
-    
     return {
         "elements": elements,
         "significant_edges": significant_edges
