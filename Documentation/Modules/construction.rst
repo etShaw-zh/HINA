@@ -11,34 +11,45 @@ Currently, the module contains the `network_construct.py` file, which includes:
 - `get_bipartite`: Constructs a bipartite graph from an input pandas dataFrame.
 - `get_tripartite`: Constructs a tripartite graph from an input pandas dataFrame.
 
-Inputs include:
-
-- **df**: A pandas DataFrame containing individual interactions.
-- **student_col**: The column name representing individuals (students).
-- **task_col**: The column name representing tasks.
-
-Outputs include:
-
-- **Quantity**: A dictionary mapping individuals to their total weighted participation in tasks.
-- **Diversity**: A dictionary mapping individuals to their diversity score based on the entropy of their task distribution.
-
-Individual
-==========
-
-This module provides functions for computing node-level measures related to participation in learning networks.
-
 .. list-table:: Functions
    :header-rows: 1
 
-   * - Function
-     - Description
-   * - `get_bipartite(df, col1, col2) <#get-bipartite>`_
-     - Constructs a bipartite network from dataset columns.
-   * - `quantity_and_diversity(df, student_col, task_col) <#quantity-and-diversity>`_
-     - Computes node-level measures of interaction quantity and diversity.
+   * - `get_bipartite(df,student_col,object_col,attr_col = None,group_col = None) <#get-bipartite>`_
+     - Constructs a bipartite graph from an input pandas dataFrame.
+   * - `get_tripartite(df,student_col,object1_col,object2_col,group_col = None) <#get-tripartite>`_
+     - Constructs a tripartite graph from an input pandas dataFrame.
 
 Reference
 ---------
+
+.. _get-bipartite:
+
+.. raw:: html
+
+   <div id="get-bipartite" class="function-header">
+       <span class="class-name">function</span> <span class="function-name">get_bipartite(df,student_col,object_col,attr_col = None,group_col = None)</span> 
+       <a href="../Code/quantity_diversity.html#get-bipartite" class="source-link">[source]</a>
+   </div>
+
+**Description**:
+Constructs a bipartite network projection from dataset columns.
+
+**Parameters**:
+
+.. raw:: html
+
+   <div class="parameter-block">
+       (df, col1, col2)
+   </div>
+
+   <ul class="parameter-list">
+       <li><span class="param-name">df</span>: A pandas DataFrame containing interaction records.</li>
+       <li><span class="param-name">col1</span>: The column name representing one set of nodes (e.g., individuals).</li>
+       <li><span class="param-name">col2</span>: The column name representing the second set of nodes (e.g., tasks). If a tuple of column names is provided, attributes will be merged into a composite index.</li>
+   </ul>
+
+**Returns**:
+  - **set**: A set of tuples `(i, j, w)`, where `i` and `j` are node labels, and `w` is the edge weight (interaction frequency).
 
 .. _get-bipartite:
 
@@ -68,37 +79,6 @@ Constructs a bipartite network projection from dataset columns.
 
 **Returns**:
   - **set**: A set of tuples `(i, j, w)`, where `i` and `j` are node labels, and `w` is the edge weight (interaction frequency).
-
-.. _quantity-and-diversity:
-
-.. raw:: html
-
-   <div id="quantity-and-diversity" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">quantity_and_diversity(df, student_col, task_col)</span> 
-       <a href="../Code/quantity_diversity.html#quantity-and-diversity" class="source-link">[source]</a>
-   </div>
-
-**Description**:
-Computes node-level measures of interaction quantity and diversity.
-
-**Parameters**:
-
-.. raw:: html
-
-   <div class="parameter-block">
-       (df, student_col, task_col, weight_col)
-   </div>
-
-   <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing interaction records.</li>
-       <li><span class="param-name">student_col</span>: The column name representing individuals.</li>
-       <li><span class="param-name">task_col</span>: The column name representing tasks.</li>
-   </ul>
-
-**Returns**:
-  - **tuple**: Two dictionaries:
-    - **quantities**: `{node: quantity}` mapping individuals to their total weighted participation.
-    - **diversities**: `{node: diversity}` mapping individuals to their diversity score (entropy of task distribution).
 
 Demo
 ====
