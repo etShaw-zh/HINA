@@ -10,7 +10,7 @@ HINA is a learning analytics tool that models and analyzes heterogenous interact
 
 - [Installation](#installation)
 - [Modules](#modules)
-  - [hina.construction] (#hina.construction)
+  - [hina.construction](#hina.construction)
   - [hina.individual](#hina.individual)
   - [hina.dyad](#hina.dyad)
   - [hina.mesoscale](#hina.mesoscale)
