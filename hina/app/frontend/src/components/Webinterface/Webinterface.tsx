@@ -81,13 +81,12 @@ export function Webinterface() {
   const [categoryQuantitySortConfig, setCategoryQuantitySortConfig] = useState<SortConfig>(null);
   const [normalizedGroupSortConfig, setNormalizedGroupSortConfig] = useState<SortConfig>(null);  
   const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
-  // const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
   const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
-
   const [objectObjectGraphs, setObjectObjectGraphs] = useState<Record<string, any>>({});
   const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
   const [communityOptions, setCommunityOptions] = useState<string[]>([]);
   const [currentNetworkView, setCurrentNetworkView] = useState<'hina' | 'cluster' | 'object' | null>(null);
+  const [compressionRatio, setCompressionRatio] = useState<number | null>(null);
 
 
 
@@ -251,6 +250,18 @@ export function Webinterface() {
       } else {
         setClusterLabels(null);
       }
+      // Handle significant edges from cluster result
+      if (res.data.significant_edges) {
+        console.log("Significant edges found:", res.data.significant_edges);
+        setDyadicAnalysis(res.data.significant_edges);
+      } else {
+        setDyadicAnalysis(null);
+      }
+      if (res.data.compression_ratio !== undefined) {
+        setCompressionRatio(res.data.compression_ratio);
+      } else {
+        setCompressionRatio(null);
+      }
       fetchQuantityAndDiversity();
     } catch (error) {
       console.error("Error updating Clustered network:", error);
@@ -288,6 +299,13 @@ export function Webinterface() {
       params.append("fix_deg", fixDeg);
       params.append("layout", layout);
       const clusterResult = await axios.post("/build-cluster-network", params);
+      // // Handle significant edges from object result
+      // if (clusterResult.data.significant_edges) {
+      //   console.log("Significant edges found:", clusterResult.data.significant_edges);
+      //   setDyadicAnalysis(clusterResult.data.significant_edges);
+      // } else {
+      //   setDyadicAnalysis(null);
+      // }
       if (clusterResult.data.object_object_graphs && Object.keys(clusterResult.data.object_object_graphs).length > 0) {
         const graphs = clusterResult.data.object_object_graphs;
         setObjectObjectGraphs(graphs);
@@ -467,14 +485,6 @@ export function Webinterface() {
       ];
       const wsSig = XLSX.utils.aoa_to_sheet(sigData);
       XLSX.utils.book_append_sheet(wb, wsSig, "Significant Edges");
-
-      // const prunedData = [
-      //   ["Node 1", "Node 2", "Weight"],
-      //   ...dyadicAnalysis.pruned_edges.map((edge) => [edge[0], edge[1], edge[2]]),
-      // ];
-      // const wsPruned = XLSX.utils.aoa_to_sheet(prunedData);
-      // XLSX.utils.book_append_sheet(wb, wsPruned, "Pruned Edges");
-
       XLSX.writeFile(wb, "dyadic_analysis.xlsx");
     } else if (activeTab === "cluster") {
       if (!clusterLabels) return;
@@ -487,6 +497,17 @@ export function Webinterface() {
       ];
       const wsCluster = XLSX.utils.aoa_to_sheet(clusterData);
       XLSX.utils.book_append_sheet(wb, wsCluster, "Cluster Labels");
+      // Worksheet for community summary
+      const numberOfClusters = new Set(Object.values(clusterLabels)).size;
+      const compressionRatioValue = compressionRatio !== null ? 
+        compressionRatio.toFixed(4) : "Not available";
+      const summaryData = [
+        ["Metric", "Value"],
+        ["Number of Clusters", numberOfClusters],
+        ["Community Quality (Compression Ratio)", compressionRatioValue]
+      ];
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Community Summary");
       XLSX.writeFile(wb, "mesoscale_clustering.xlsx");
     }
   };
@@ -760,6 +781,21 @@ const NetworkFilters = () => {
   }
 };
 
+const SectionHeader = ({ children }: { children: React.ReactNode }) => (
+  <Paper 
+    p="xs" 
+    mb="xs" 
+    style={{ 
+      background: 'linear-gradient(to right, #4263eb, #00b5fa)',
+      borderRadius: '4px',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    }}
+  >
+    <Title order={4} c="white" fw={600} style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+      {children}
+    </Title>
+  </Paper>
+);
 
   useEffect(() => {
     if (!cyRef.current) return;
@@ -845,6 +881,8 @@ const NetworkFilters = () => {
             />
             {columns.length > 0 && (
               <Paper withBorder shadow="sm" p="md" mb="md">
+                {/* DATA INPUTS SECTION */}
+                <SectionHeader>Data Inputs</SectionHeader>
                 <Group grow>
                   <Select
                     label="Student Column"
@@ -859,7 +897,7 @@ const NetworkFilters = () => {
                     data={Array.from(new Set([...getAvailableColumns('object1'), ...(object1 ? [object1] : [])]))}
                   />
                   <Select
-                    label="Object 2 Column (Only for Tripartite Analysis)"
+                    label="Object 2 Column (For Tripartite)"
                     withAsterisk
                     value={object2}
                     onChange={(value) => setObject2(value || "none")}
@@ -892,48 +930,52 @@ const NetworkFilters = () => {
                     )}
                   />
                 </Group>
-                <Group grow mt="md" mb="md">
-                    <Select
-                        label="Pruning"
-                        value={pruning}
-                        onChange={(value) => setPruning(value || "none")}
-                        data={PRUNING_OPTIONS}
-                    />
-                    {pruning === "custom" && (
+
+                {/* VISUALIZATION PARAMETERS SECTION */}
+                <SectionHeader>Visualization Parameters</SectionHeader>
+                <Group grow>
+                  <Select
+                    label="Pruning"
+                    value={pruning}
+                    onChange={(value) => setPruning(value || "none")}
+                    data={PRUNING_OPTIONS}
+                  />
+                  {pruning === "custom" && (
                     <>
-                        <NumberInput
+                      <NumberInput
                         value={alpha}
                         onChange={(value) => setAlpha(value as number || 0.05)}
                         label="Alpha"
-                        style={{ width: "100px" }}
                         placeholder="Alpha"
                         step={0.01}
-                        />
-                        <Select
+                      />
+                      <Select
                         label="Fix Deg"
                         value={fixDeg}
                         onChange={(value) => setFixDeg(value || "None")}
                         data={DEG_OPTIONS}
-                        />
+                      />
                     </>
-                    )}
-                    <Select
-                        label="Layout"
-                        value={layout}
-                        onChange={(value) => setLayout(value || "spring")}
-                        data={LAYOUT_OPTIONS}
-                    />
-                    <NumberInput
-                      label="Fixed Number of Cluster (Optional)"
-                      withAsterisk
-                      value={numberCluster === "" ? 'none' : Number(numberCluster)}
-                      onChange={(val) => setNumberCluster(val?.toString() || "")}
-                      placeholder="None"
-                      min={1}
-                      allowDecimal={false}
-                    />
+                  )}
+                  <Select
+                    label="Layout"
+                    value={layout}
+                    onChange={(value) => setLayout(value || "spring")}
+                    data={LAYOUT_OPTIONS}
+                  />
+                  <NumberInput
+                    label="Fixed Number of Cluster"
+                    withAsterisk
+                    value={numberCluster === "" ? 'none' : Number(numberCluster)}
+                    onChange={(val) => setNumberCluster(val?.toString() || "")}
+                    placeholder="None"
+                    min={1}
+                    allowDecimal={false}
+                  />
                 </Group>
-                <Group mt="md">
+
+                {/* BUTTONS SECTION */}
+                <Group mt="xl">
                   <Button
                     rightSection={<IconRefresh size={14} />}
                     variant="gradient"
@@ -951,14 +993,14 @@ const NetworkFilters = () => {
                     Update Clustered Network
                   </Button>
                   <Button
-                      rightSection={<IconRefresh size={14} />}
-                      variant="gradient"
-                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
-                      onClick={updateObjectNetwork}
-                      disabled={object2 == "none"}
-                    >
-                      Update Tripartite Network
-                    </Button>
+                    rightSection={<IconRefresh size={14} />}
+                    variant="gradient"
+                    gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                    onClick={updateObjectNetwork}
+                    disabled={object2 === "none"}
+                  >
+                    Update Tripartite Network
+                  </Button>
                 </Group>
               </Paper>   
             )}
@@ -1327,33 +1369,84 @@ const NetworkFilters = () => {
 
                       {/* Dyadic Analysis Tab Content */}
                       <Tabs.Panel value="dyadic">
-                        {dyadicAnalysis ? (
+                      {dyadicAnalysis ? (
+                        <Paper withBorder shadow="sm" p="md">
+                        <Title order={3} mb="md">
+                          Significant Edges ({dyadicAnalysis.length})
+                        </Title>
+                        <Table highlightOnHover withTableBorder withColumnBorders>
+                          <Table.Thead>
+                          <Table.Tr>
+                            {["Node 1", "Node 2", "Weight"].map((col) => (
+                            <Table.Th
+                              key={col}
+                              style={{ textAlign: "center", cursor: "pointer" }}
+                              onClick={() =>
+                              toggleSort(
+                                col,
+                                dyadicSigSortConfig,
+                                setDyadicSigSortConfig
+                              )
+                              }
+                            >
+                              {col}{" "}
+                              {dyadicSigSortConfig?.key === col ? (
+                              dyadicSigSortConfig.direction === "asc" ? (
+                                <IconSortAscending size={14} />
+                              ) : (
+                                <IconSortDescending size={14} />
+                              )
+                              ) : (
+                              <IconArrowsSort size={14} />
+                              )}
+                            </Table.Th>
+                            ))}
+                          </Table.Tr>
+                          </Table.Thead>
+                          <Table.Tbody>
+                          {dyadicSigTableData.map((row, idx) => (
+                            <Table.Tr key={idx}>
+                            <Table.Td style={{ textAlign: "center" }}>{row["Node 1"]}</Table.Td>
+                            <Table.Td style={{ textAlign: "center" }}>{row["Node 2"]}</Table.Td>
+                            <Table.Td style={{ textAlign: "center" }}>{row.Weight}</Table.Td>
+                            </Table.Tr>
+                          ))}
+                          </Table.Tbody>
+                        </Table>
+                        </Paper>
+                      ) : (
+                        <Text>No Dyadic analysis data available.</Text>
+                      )}
+                      </Tabs.Panel>
+
+                      {/* Mesoscale Clustering Tab Content */}
+                      <Tabs.Panel value="cluster">
+                        {clusterLabels ? (
                           <Accordion transitionDuration={500}>
-                            <Accordion.Item value="sig">
+                            {/* Cluster Labels Table */}
+                            <Accordion.Item value="cluster-labels">
                               <Accordion.Control>
-                                <Title order={4}>
-                                  Significant Edges ({dyadicAnalysis.length})
-                                </Title>
+                                <Title order={4}>Cluster Labels</Title>
                               </Accordion.Control>
                               <Accordion.Panel>
                                 <Table highlightOnHover withTableBorder withColumnBorders>
                                   <Table.Thead>
                                     <Table.Tr>
-                                      {["Node 1", "Node 2", "Weight"].map((col) => (
+                                      {["Node", "Cluster Label"].map((col) => (
                                         <Table.Th
                                           key={col}
                                           style={{ textAlign: "center", cursor: "pointer" }}
                                           onClick={() =>
                                             toggleSort(
                                               col,
-                                              dyadicSigSortConfig,
-                                              setDyadicSigSortConfig
+                                              clusterSortConfig,
+                                              setClusterSortConfig
                                             )
                                           }
                                         >
                                           {col}{" "}
-                                          {dyadicSigSortConfig?.key === col ? (
-                                            dyadicSigSortConfig.direction === "asc" ? (
+                                          {clusterSortConfig?.key === col ? (
+                                            clusterSortConfig.direction === "asc" ? (
                                               <IconSortAscending size={14} />
                                             ) : (
                                               <IconSortDescending size={14} />
@@ -1366,11 +1459,10 @@ const NetworkFilters = () => {
                                     </Table.Tr>
                                   </Table.Thead>
                                   <Table.Tbody>
-                                    {dyadicSigTableData.map((row, idx) => (
+                                    {clusterTableData.map((row, idx) => (
                                       <Table.Tr key={idx}>
-                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 1"]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 2"]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{row.Weight}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row.Node}</Table.Td>
+                                        <Table.Td style={{ textAlign: "center" }}>{row["Cluster Label"]}</Table.Td>
                                       </Table.Tr>
                                     ))}
                                   </Table.Tbody>
@@ -1378,104 +1470,39 @@ const NetworkFilters = () => {
                               </Accordion.Panel>
                             </Accordion.Item>
 
-                            {/* <Accordion.Item value="pruned">
+                            {/* Community Summary */}
+                            <Accordion.Item value="community-summary">
                               <Accordion.Control>
-                                <Title order={4}>
-                                  Pruned Edges ({dyadicAnalysis.pruned_edges.length})
-                                </Title>
+                                <Title order={4}>Community Summary</Title>
                               </Accordion.Control>
                               <Accordion.Panel>
                                 <Table highlightOnHover withTableBorder withColumnBorders>
                                   <Table.Thead>
                                     <Table.Tr>
-                                      {["Node 1", "Node 2", "Weight"].map((col) => (
-                                        <Table.Th
-                                          key={col}
-                                          style={{ textAlign: "center", cursor: "pointer" }}
-                                          onClick={() =>
-                                            toggleSort(
-                                              col,
-                                              dyadicPrunedSortConfig,
-                                              setDyadicPrunedSortConfig
-                                            )
-                                          }
-                                        >
-                                          {col}{" "}
-                                          {dyadicPrunedSortConfig?.key === col ? (
-                                            dyadicPrunedSortConfig.direction === "asc" ? (
-                                              <IconSortAscending size={14} />
-                                            ) : (
-                                              <IconSortDescending size={14} />
-                                            )
-                                          ) : (
-                                            <IconArrowsSort size={14} />
-                                          )}
-                                        </Table.Th>
-                                      ))}
+                                      <Table.Th style={{ textAlign: "center" }}>Metric</Table.Th>
+                                      <Table.Th style={{ textAlign: "center" }}>Value</Table.Th>
                                     </Table.Tr>
                                   </Table.Thead>
                                   <Table.Tbody>
-                                    {dyadicPrunedTableData.map((row, idx) => (
-                                      <Table.Tr key={idx}>
-                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 1"]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{row["Node 2"]}</Table.Td>
-                                        <Table.Td style={{ textAlign: "center" }}>{row.Weight}</Table.Td>
-                                      </Table.Tr>
-                                    ))}
+                                    <Table.Tr>
+                                      <Table.Td style={{ textAlign: "center" }}>Number of Clusters</Table.Td>
+                                      <Table.Td style={{ textAlign: "center" }}>
+                                        {new Set(Object.values(clusterLabels)).size}
+                                      </Table.Td>
+                                    </Table.Tr>
+                                    <Table.Tr>
+                                      <Table.Td style={{ textAlign: "center" }}>Community Quality (Compression Ratio)</Table.Td>
+                                      <Table.Td style={{ textAlign: "center" }}>
+                                        {compressionRatio !== null 
+                                          ? compressionRatio.toFixed(4) 
+                                          : "Not available"}
+                                      </Table.Td>
+                                    </Table.Tr>
                                   </Table.Tbody>
                                 </Table>
                               </Accordion.Panel>
-                            </Accordion.Item> */}
+                            </Accordion.Item>
                           </Accordion>
-                        ) : (
-                          <Text>No Dyadic analysis data available.</Text>
-                        )}
-                      </Tabs.Panel>
-
-                      {/* Mesoscale Clustering Tab Content */}
-                      <Tabs.Panel value="cluster">
-                        {clusterLabels ? (
-                          <Paper withBorder shadow="sm" p="md">
-                            <Title order={3}>Cluster Labels</Title>
-                            <Table highlightOnHover withTableBorder withColumnBorders>
-                              <Table.Thead>
-                                <Table.Tr>
-                                  {["Node", "Cluster Label"].map((col) => (
-                                    <Table.Th
-                                      key={col}
-                                      style={{ textAlign: "center", cursor: "pointer" }}
-                                      onClick={() =>
-                                        toggleSort(
-                                          col,
-                                          clusterSortConfig,
-                                          setClusterSortConfig
-                                        )
-                                      }
-                                    >
-                                      {col}{" "}
-                                      {clusterSortConfig?.key === col ? (
-                                        clusterSortConfig.direction === "asc" ? (
-                                          <IconSortAscending size={14} />
-                                        ) : (
-                                          <IconSortDescending size={14} />
-                                        )
-                                      ) : (
-                                        <IconArrowsSort size={14} />
-                                      )}
-                                    </Table.Th>
-                                  ))}
-                                </Table.Tr>
-                              </Table.Thead>
-                              <Table.Tbody>
-                                {clusterTableData.map((row, idx) => (
-                                  <Table.Tr key={idx}>
-                                    <Table.Td style={{ textAlign: "center" }}>{row.Node}</Table.Td>
-                                    <Table.Td style={{ textAlign: "center" }}>{row["Cluster Label"]}</Table.Td>
-                                  </Table.Tr>
-                                ))}
-                              </Table.Tbody>
-                            </Table>
-                          </Paper>
                         ) : (
                           <Text>No Mesoscale clustering data available.</Text>
                         )}

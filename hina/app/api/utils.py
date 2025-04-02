@@ -320,5 +320,5 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
     else:
         pos = pos_custom
     
-    return nx_G, pos, cluster_labels, compression_ratio, object_object_graphs
+    return nx_G, pos, G_edges_ordered, cluster_labels, compression_ratio, object_object_graphs
 
