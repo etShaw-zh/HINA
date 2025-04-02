@@ -84,6 +84,12 @@ export function Webinterface() {
   // const [dyadicPrunedSortConfig, setDyadicPrunedSortConfig] = useState<SortConfig>(null);
   const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
 
+  const [objectObjectGraphs, setObjectObjectGraphs] = useState<Record<string, any>>({});
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
+  const [communityOptions, setCommunityOptions] = useState<string[]>([]);
+  const [currentNetworkView, setCurrentNetworkView] = useState<'hina' | 'cluster' | 'object' | null>(null);
+
+
 
   const LAYOUT_OPTIONS = [
     { value: "spring", label: "Spring" },
@@ -208,6 +214,7 @@ export function Webinterface() {
       const res = await axios.post("/build-hina-network", params);
       console.log("Received response:", res.data);
       setElements(res.data.elements);
+      setCurrentNetworkView('hina');
       if (res.data.significant_edges) {
         setDyadicAnalysis(res.data.significant_edges);
       } else {
@@ -234,11 +241,25 @@ export function Webinterface() {
     params.append("alpha", alpha.toString());
     params.append("fix_deg", fixDeg);
     params.append("layout", layout);
-    console.log("number_cluster", numberCluster)
     try {
       const res = await axios.post("/build-cluster-network", params);
       originalElementsRef.current = [...res.data.elements];
       setElements(res.data.elements);
+      setCurrentNetworkView('cluster');
+      if (res.data.cluster_labels) {
+        setClusterLabels(res.data.cluster_labels);
+      } else {
+        setClusterLabels(null);
+      }
+      fetchQuantityAndDiversity();
+    } catch (error) {
+      console.error("Error updating Clustered network:", error);
+    }
+    try {
+      const res = await axios.post("/build-cluster-network", params);
+      originalElementsRef.current = [...res.data.elements];
+      setElements(res.data.elements);
+      
       if (res.data.cluster_labels) {
         setClusterLabels(res.data.cluster_labels);
       } else {
@@ -250,28 +271,101 @@ export function Webinterface() {
     }
   };
 
-// Fetch Quantity & Diversity data endpoint
-const fetchQuantityAndDiversity = async () => {
-  if (!uploadedData) return;
-  const params = new URLSearchParams();
-  params.append("data", uploadedData);
-  params.append("student_col", student);
-  params.append("object1_col", object1);
-  params.append("object2_col", object2);
-  params.append("attr_col", attr || "");
-  params.append("group_col", groupCol || "");
-  
-  try {
-    console.log("Fetching quantity-diversity with params:", {
-      student, object1, object2, attr, groupCol
-    });
-    const res = await axios.post("/quantity-diversity", params);
-    console.log("Quantity-diversity response:", res.data);
-    setQdData(res.data);
-  } catch (error) {
-    console.error("Error computing Quantity & Diversity:", error);
-  }
-};
+  // Update Object network endpoint
+  const updateObjectNetwork = async () => {
+    if (!uploadedData) return;
+    
+    try {
+      const params = new URLSearchParams();
+      params.append("data", uploadedData);
+      params.append("group", group);
+      params.append("student_col", student);  
+      params.append("object1_col", object1);  
+      params.append("object2_col", object2); 
+      params.append("number_cluster", numberCluster);
+      params.append("pruning", pruning);
+      params.append("alpha", alpha.toString());
+      params.append("fix_deg", fixDeg);
+      params.append("layout", layout);
+      const clusterResult = await axios.post("/build-cluster-network", params);
+      if (clusterResult.data.object_object_graphs && Object.keys(clusterResult.data.object_object_graphs).length > 0) {
+        const graphs = clusterResult.data.object_object_graphs;
+        setObjectObjectGraphs(graphs);
+        const commIds = Object.keys(graphs);
+        setCommunityOptions(commIds);
+        const firstCommunityId = commIds[0];
+        setSelectedCommunityId(firstCommunityId);
+        const objectGraphsData = JSON.stringify(graphs);
+        const objectParams = new URLSearchParams();
+        objectParams.append("data", objectGraphsData);
+        objectParams.append("community_id", firstCommunityId);
+        objectParams.append("object1_col", object1);  
+        objectParams.append("object2_col", object2); 
+        objectParams.append("layout", layout);
+        await fetchObjectGraph(objectParams);
+      } else {
+        console.warn("No object-object graphs found in the data");
+      }
+    } catch (error) {
+      console.error("Error updating object network:", error);
+      console.error("Error details:", error.response?.data || error.message);
+    }
+  };
+
+  // Fetch a selected Object Graph
+  const fetchObjectGraph = async (params: URLSearchParams) => {
+    try {
+      console.log(`Fetching object graph for community ${params.get('community_id')}`);
+      const res = await axios.post("/build-object-network", params);
+      if (res && res.data && res.data.elements) {
+        setElements(res.data.elements);
+        setCurrentNetworkView('object');
+      } else {
+        console.error("Invalid response structure:", res);
+      }
+    } catch (error) {
+      console.error("Error getting object graph:", error);
+      console.error("Error details:", error.response?.data || error.message);
+    }
+  };  
+
+  // Update the selected community ID and Object Graph
+  const handleCommunityChange = (value: string) => {
+    setSelectedCommunityId(value);    
+    if (value && objectObjectGraphs && Object.keys(objectObjectGraphs).length > 0) {
+      const objectParams = new URLSearchParams();
+      const objectGraphsData = JSON.stringify(objectObjectGraphs);
+      objectParams.append("data", objectGraphsData);
+      objectParams.append("community_id", value); 
+      objectParams.append("object1_col", object1);
+      objectParams.append("object2_col", object2);
+      objectParams.append("layout", layout);
+      fetchObjectGraph(objectParams);
+    }
+  };
+
+  // Fetch Quantity & Diversity data endpoint
+  const fetchQuantityAndDiversity = async () => {
+    if (!uploadedData) return;
+    const params = new URLSearchParams();
+    params.append("data", uploadedData);
+    params.append("student_col", student);
+    params.append("object1_col", object1);
+    params.append("object2_col", object2);
+    params.append("attr_col", attr || "");
+    params.append("group_col", groupCol || "");
+    
+    try {
+      console.log("Fetching quantity-diversity with params:", {
+        student, object1, object2, attr, groupCol
+      });
+      const res = await axios.post("/quantity-diversity", params);
+      console.log("Quantity-diversity response:", res.data);
+      setQdData(res.data);
+    } catch (error) {
+      console.error("Error computing Quantity & Diversity:", error);
+    }
+  };
 
   // Zoom functions
   const zoomIn = () => {
@@ -615,6 +709,56 @@ const fetchQuantityAndDiversity = async () => {
     setElements(newElements);
   };
   
+// NetworkFilters component to render the graph filter
+const NetworkFilters = () => {
+  if (!elements.length) return null;
+  
+  const filterPaperStyle = {
+    background: 'rgba(255, 255, 255, 0)',  // transparent
+    // backdropFilter: 'blur(5px)',              
+  };
+  
+  switch (currentNetworkView) {
+    case 'hina':
+      return groups.length > 1 ? (
+        <Paper style={filterPaperStyle}>
+          <Select
+            radius="xl"
+            label="Group Filter"
+            value={group}
+            onChange={handleGroupChange}
+            data={groups}
+          />
+        </Paper>
+      ) : null;
+    case 'cluster':
+      return clusterLabels ? (
+        <Paper style={filterPaperStyle}>
+          <Select
+            radius="xl"
+            label="Cluster Filter"
+            value={cluster}
+            onChange={handleClusterChange}
+            data={clusterOptions.map(label => ({ value: label, label }))}
+          />
+        </Paper>
+      ) : null;
+    case 'object':
+      return communityOptions.length > 0 ? (
+        <Paper style={filterPaperStyle}>
+          <Select
+            radius="xl"
+            label="Community Filter"
+            value={selectedCommunityId}
+            onChange={handleCommunityChange}
+            data={communityOptions.map(id => ({ value: id, label: `Community ${id}` }))}
+          />
+        </Paper>
+      ) : null;
+    default:
+      return null;
+  }
+};
 
 
   useEffect(() => {
@@ -806,24 +950,15 @@ const fetchQuantityAndDiversity = async () => {
                   >
                     Update Clustered Network
                   </Button>
-                </Group>
-                <Group grow>
-                  {groups.length > 1 && elements.length > 0 && (
-                  <Select
-                    label="Group"
-                    value={group}
-                    onChange={handleGroupChange}
-                    data={groups}
-                  />
-                  )}
-                  {clusterLabels && elements.length > 0 && (
-                    <Select
-                      label="Cluster Filter"
-                      value={cluster}
-                      onChange={handleClusterChange}
-                      data={clusterOptions.map(label => ({ value: label, label }))}
-                    />
-                  )}
+                  <Button
+                      rightSection={<IconRefresh size={14} />}
+                      variant="gradient"
+                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                      onClick={updateObjectNetwork}
+                      disabled={object2 == "none"}
+                    >
+                      Update Tripartite Network
+                    </Button>
                 </Group>
               </Paper>   
             )}
@@ -835,6 +970,9 @@ const fetchQuantityAndDiversity = async () => {
                   shadow="sm"
                   style={{ flex: 1, position: "relative", height: "700px", marginBottom: "20px" }}
                 >
+                  <div style={{ position: "absolute", top: "5px", left: "10px", zIndex: 999 }}>
+                    <NetworkFilters />
+                  </div>
                   <CytoscapeComponent
                     elements={elements}
                     style={{ width: "100%", height: "100%" }}

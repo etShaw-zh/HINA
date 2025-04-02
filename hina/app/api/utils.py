@@ -239,6 +239,11 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
     cluster_labels = cluster_result['node communities']
     compression_ratio = cluster_result['community structure quality value']
     
+    object_object_graphs = {}
+    if 'object-object graphs for each community' in cluster_result:
+        object_object_graphs = cluster_result['object-object graphs for each community']
+        print(f"Found {len(object_object_graphs)} object-object graphs for communities")
+    
     for node in nx_G.nodes():
         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))
     
@@ -315,4 +320,5 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
     else:
         pos = pos_custom
     
-    return nx_G, pos, cluster_labels
+    return nx_G, pos, cluster_labels, compression_ratio, object_object_graphs
+

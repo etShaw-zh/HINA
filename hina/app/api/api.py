@@ -4,6 +4,8 @@ import uvicorn
 import pandas as pd
 from hina.app.api import utils
 import base64
+import networkx as nx
+import json
 from io import StringIO
 
 app = FastAPI(title="HINA REST API")
@@ -88,28 +90,88 @@ async def build_cluster_network_endpoint(
     layout: str = Form("bipartite"),
     number_cluster: str = Form(None)
 ):
-    attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
-    group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
-    
-    df = pd.read_json(StringIO(data), orient="split")
-    pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
+    try:
+        attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
+        group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
+        
+        df = pd.read_json(StringIO(data), orient="split")
+        pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
 
-    nx_G, pos, cluster_labels = utils.build_clustered_network(
-        df=df, 
-        group_col=group_col, 
-        student_col=student_col, 
-        object1_col=object1_col, 
-        object2_col=object2_col,
-        attr_col=attr_col,
-        pruning=pruning_param, 
-        layout=layout,
-        number_cluster=number_cluster
-    )
-    elements = utils.cy_elements_from_graph(nx_G, pos)
-    return {
-        "elements": elements,
-        "cluster_labels": cluster_labels
-    }
+        nx_G, pos, cluster_labels, compression_ratio, object_object_graphs = utils.build_clustered_network(
+            df=df, 
+            group_col=group_col, 
+            student_col=student_col, 
+            object1_col=object1_col, 
+            object2_col=object2_col,
+            attr_col=attr_col,
+            pruning=pruning_param, 
+            layout=layout,
+            number_cluster=number_cluster
+        )
+        elements = utils.cy_elements_from_graph(nx_G, pos)
+        # Convert NetworkX graphs to JSON serializable format
+        serializable_graphs = {}
+        for comm_id, graph in object_object_graphs.items():
+            serializable_graphs[comm_id] = nx.node_link_data(graph)
+        return {
+            "elements": elements,
+            "cluster_labels": cluster_labels,
+            "compression_ratio": compression_ratio,
+            "object_object_graphs": serializable_graphs
+        }
+    except Exception as e:
+        print(f"Error in build_cluster_network_endpoint: {str(e)}")
+
+@app.post("/build-object-network")
+async def build_object_network_endpoint(
+    data: str = Form(...),
+    community_id: str = Form(...),
+    object1_col: str = Form(...),  
+    object2_col: str = Form(...),  
+    layout: str = Form("bipartite")
+):
+    try:
+        object_graphs_data = json.loads(data)        
+        if community_id not in object_graphs_data:
+            print(f"No object graph found for community ID {community_id}")
+            # raise HTTPException(status_code=404, detail=f"No object graph found for community ID {community_id}")
+        
+        # Get the NetworkX graph for this community
+        graph_data = object_graphs_data[community_id]
+        # print(f"Graph data for community {community_id}: {graph_data}")
+        G = nx.node_link_graph(graph_data)
+        
+        # Set attributes for nodes based on bipartite attribute
+        for node, attrs in G.nodes(data=True):
+            bipartite_value = str(attrs.get('bipartite', ''))
+            if object1_col in bipartite_value:
+                G.nodes[node]['color'] = 'blue'
+                G.nodes[node]['type'] = 'object1'
+            else:
+                G.nodes[node]['color'] = 'green'
+                G.nodes[node]['type'] = 'object2'
+        
+        if layout == 'spring':
+            pos = nx.spring_layout(G, k=0.3)
+        elif layout == 'circular':
+            pos = nx.circular_layout(G)
+        elif layout == 'bipartite':
+            object1_nodes = [n for n, d in G.nodes(data=True) if d.get('type') == 'object1']
+            if object1_nodes:
+                pos = nx.bipartite_layout(G, object1_nodes)
+            else:
+                pos = nx.spring_layout(G, k=0.3)
+        else:
+            pos = nx.spring_layout(G, k=0.3)
+            
+        elements = utils.cy_elements_from_graph(G, pos)
+        return {
+            "elements": elements,
+            "community_id": community_id
+        }
+    except Exception as e:
+        print(f"Error in build_object_network_endpoint: {str(e)}")
+        # raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/quantity-diversity")
 async def quantity_diversity_endpoint(
