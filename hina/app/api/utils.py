@@ -190,7 +190,7 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
     elements = []
     for node, data in G.nodes(data=True):
         node_str = str(node)
-        print('node_str_pos', node_str, pos[node])
+        # print('node_str_pos', node_str, pos[node])
         x = pos[node][0] * 400 + 300
         y = pos[node][1] * 400 + 300
         elements.append({
