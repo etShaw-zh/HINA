@@ -51,12 +51,12 @@ Constructs a bipartite network projection from dataset columns.
    </ul>
 
 **Returns**:
-  - networkx.Graph
-     A bipartite graph with the following properties:
-     - Nodes: Student nodes and object nodes, with 'bipartite' attribute indicating their type.
-     - Edges: Weighted edges between student and object nodes, where weights represent the frequency of relationships.
-     - Node attributes: If `group_col` is provided, student nodes will have a group attribute. If `attr_col` is provided,
-       object nodes will have an attribute.
+    - networkx.Graph
+         A bipartite graph with the following properties:
+         
+         - Nodes: Student nodes and object nodes, with 'bipartite' attribute indicating their type.
+         - Edges: Weighted edges between student and object nodes, where weights represent the frequency of relationships.
+         - Node attributes: If ``group_col`` is provided, student nodes will have a group attribute. If ``attr_col`` is provided,object nodes will have an attribute.
 
 .. _get-tripartite:
 
@@ -87,12 +87,13 @@ Constructs a tripartite network projection from dataset columns.
    </ul>
 
 **Returns**:
-  - networkx.Graph
-     A tripartite graph with the following properties:
-     - Nodes: Student nodes and joint object nodes (combining `object1_col` and `object2_col`), with 'bipartite' and
-       'tripartite' attributes indicating their type.
-     - Edges: Weighted edges between student and joint object nodes, where weights represent the frequency of relationships.
-     - Node attributes: If `group_col` is provided, student nodes will have a group attribute.
+    - networkx.Graph
+         A tripartite graph with the following properties:
+         
+         - Nodes: Student nodes and joint object nodes (combining ``object1_col`` and ``object2_col``), with 'bipartite' and
+           'tripartite' attributes indicating their type.
+         - Edges: Weighted edges between student and joint object nodes, where weights represent the frequency of relationships.
+         - Node attributes: If ``group_col`` is provided, student nodes will have a group attribute.
 
 Demo
 ====
