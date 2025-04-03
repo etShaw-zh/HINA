@@ -19,7 +19,8 @@ import {
   ScrollArea,
   Accordion,
   Menu,
-  ActionIcon
+  ActionIcon,
+  Switch
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { NavbarMinimalColored } from '../Navbar/NavbarMinimalColored';
@@ -87,6 +88,9 @@ export function Webinterface() {
   const [communityOptions, setCommunityOptions] = useState<string[]>([]);
   const [currentNetworkView, setCurrentNetworkView] = useState<'hina' | 'cluster' | 'object' | null>(null);
   const [compressionRatio, setCompressionRatio] = useState<number | null>(null);
+  const [showLabels, setShowLabels] = useState<boolean>(true);
+  const [showEdgeWeights, setShowEdgeWeights] = useState<boolean>(true);
+  const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
 
 
 
@@ -782,20 +786,77 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
   </Paper>
 );
 
-  useEffect(() => {
-    if (!cyRef.current) return;
-    const cy = cyRef.current;
-    const handleTap = (evt: any) => {
-      // Remove highlight class from all nodes
-      cy.nodes().removeClass("highlight");
+useEffect(() => {
+  if (!cyRef.current) return;
+  const cy = cyRef.current;
+  
+  const handleTap = (evt: any) => {
+    const clickedNode = evt.target;
+    const clickedNodeId = clickedNode.id();
+    if (highlightedNodeId === clickedNodeId) {
+      cy.elements().removeClass("highlight");
+      setHighlightedNodeId(null);
+    } else {
+      cy.elements().removeClass("highlight");
+      
       // Add highlight to the clicked node
-      evt.target.addClass("highlight");
-    };
-    cy.on("tap", "node", handleTap);
-    return () => {
-      cy.removeListener("tap", "node", handleTap);
-    };
-  }, [elements]);
+      clickedNode.addClass("highlight");
+      setHighlightedNodeId(clickedNodeId);
+      
+      // Highlight connected edges
+      const connectedEdges = clickedNode.connectedEdges();
+      connectedEdges.addClass("highlight");
+      
+      // Highlight nodes connected to this node
+      const connectedNodes = clickedNode.neighborhood('node');
+      connectedNodes.addClass("highlight");
+    }
+  };
+  
+  const handleBackgroundTap = (evt: any) => {
+    if (evt.target === cy) {
+      cy.elements().removeClass("highlight");
+      setHighlightedNodeId(null);
+    }
+  };
+  
+  cy.on("tap", "node", handleTap);
+  cy.on("tap", handleBackgroundTap);
+  
+  return () => {
+    cy.removeListener("tap", "node", handleTap);
+    cy.removeListener("tap", handleBackgroundTap);
+  };
+}, [elements, highlightedNodeId]);
+
+useEffect(() => {
+  if (!cyRef.current || highlightedNodeId === null) return;
+  
+  const cy = cyRef.current;
+  let opacity = 0.7;
+  let increasing = true;
+  let animationFrameId: number;
+  
+  const animate = () => {
+    if (highlightedNodeId === null) return;
+    
+    if (opacity >= 1) increasing = false;
+    if (opacity <= 0.5) increasing = true;
+    
+    opacity += increasing ? 0.015 : -0.015;
+    const highlightedNode = cy.$(`node[id="${highlightedNodeId}"]`);
+    if (highlightedNode && highlightedNode.length > 0) {
+      highlightedNode.style('border-opacity', opacity);
+    }
+    animationFrameId = requestAnimationFrame(animate);
+  };
+  animationFrameId = requestAnimationFrame(animate);
+  return () => {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  };
+}, [highlightedNodeId]);
 
   useEffect(() => {
     if (uploadedData && groupCol !== "none") {
@@ -1012,7 +1073,9 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
                         selector: "node",
                         style: {
                           "background-color": "data(color)",
-                          "label": "data(id)",
+                          "border-width": 1,
+                          "border-color": "#000000",
+                          "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
                           "text-valign": "center",
                           "color": "#fff",
                           "text-outline-width": 2,
@@ -1022,7 +1085,18 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
                       {
                         selector: "node.highlight",
                         style: {
-                          "background-color": "red"
+                          "background-color": "data(color)",
+                          "border-width": 8,
+                          "border-color": "#a593f5",
+                          "border-opacity": 0.8,
+                          "label": "data(id)", // Always show label for highlighted nodes
+                          "height": 30,
+                          "width": 30,
+                          "shadow-blur": 10,
+                          "shadow-color": "data(color)",
+                          "shadow-opacity": 0.9,
+                          "shadow-offset-x": 0,
+                          "shadow-offset-y": 0
                         },
                       },
                       {
@@ -1030,7 +1104,7 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
                         style: {
                           "line-color": "#ccc",
                           "width": "data(weight)",
-                          "label": "data(label)",
+                          "label": showEdgeWeights ? "data(label)" : "",
                           "font-size": "10px",
                           "text-rotation": "autorotate",
                           "text-margin-y": 0,
@@ -1042,6 +1116,15 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
                           "text-background-padding": "2px",
                         },
                       },
+                      {
+                        selector: "edge.highlight",
+                        style: {
+                          "line-color": "#FF5733",
+                          "width": "data(weight)",
+                          "target-arrow-color": "#FF5733",
+                          "opacity": 1
+                        }
+                      }
                     ]}
                     cy={(cy) => {
                       cyRef.current = cy;
@@ -1057,6 +1140,34 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
                       }
                     }}
                   />
+
+                  <div style={{ 
+                    position: "absolute", 
+                    top: "10px", 
+                    right: "100px", 
+                    zIndex: 10,
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "10px",
+                    alignItems: "center",
+                    background: "rgba(255, 255, 255, 0)", 
+                    padding: "5px 10px",
+                  }}>
+                    <Switch
+                      checked={showLabels}
+                      onChange={(event) => setShowLabels(event.currentTarget.checked)}
+                      label="Labels"
+                      size="sm"
+                      styles={{ label: { fontWeight: 'bold' } }}
+                    />
+                    <Switch
+                      checked={showEdgeWeights}
+                      onChange={(event) => setShowEdgeWeights(event.currentTarget.checked)}
+                      label="Weights"
+                      size="sm"
+                      styles={{ label: { fontWeight: 'bold' } }}
+                    />
+                  </div>
 
                   <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
                     <Menu shadow="md" width={100} trigger="click-hover" openDelay={100} closeDelay={400}>
