@@ -26,9 +26,18 @@ jobs:
           # PDF. Note, this should be the same directory as the input
           # paper.md
           path: Paper/paper.pdf
-      - name: Commit PDF to repository
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: '(auto) Paper PDF Draft'
-          # This should be the path to the paper within your repo.
-          add: 'Paper/*.pdf' # 'paper/*.pdf' to commit all PDFs in the paper directory
+      # - name: Commit PDF to repository
+      #   uses: EndBug/add-and-commit@v9
+      #   with:
+      #     message: '(auto) Paper PDF Draft'
+      #     # This should be the path to the paper within your repo.
+      #     add: 'Paper/*.pdf' # 'paper/*.pdf' to commit all PDFs in the paper directory
+      - name: Commit and push PDF
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add paper/paper.pdf
+          git commit -m 'Add compiled PDF'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
