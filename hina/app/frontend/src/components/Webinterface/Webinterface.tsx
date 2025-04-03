@@ -206,12 +206,7 @@ export function Webinterface() {
     params.append("layout", layout);  
 
     try {
-      console.log("Sending build-hina-network request with params:", {
-        group, student_col: student, object1_col: object1, object2_col: object2,
-        group_col: groupCol, attr_col: attr, pruning
-      });
       const res = await axios.post("/build-hina-network", params);
-      console.log("Received response:", res.data);
       setElements(res.data.elements);
       setCurrentNetworkView('hina');
       if (res.data.significant_edges) {
@@ -252,7 +247,6 @@ export function Webinterface() {
       }
       // Handle significant edges from cluster result
       if (res.data.significant_edges) {
-        console.log("Significant edges found:", res.data.significant_edges);
         setDyadicAnalysis(res.data.significant_edges);
       } else {
         setDyadicAnalysis(null);
@@ -299,13 +293,7 @@ export function Webinterface() {
       params.append("fix_deg", fixDeg);
       params.append("layout", layout);
       const clusterResult = await axios.post("/build-cluster-network", params);
-      // // Handle significant edges from object result
-      // if (clusterResult.data.significant_edges) {
-      //   console.log("Significant edges found:", clusterResult.data.significant_edges);
-      //   setDyadicAnalysis(clusterResult.data.significant_edges);
-      // } else {
-      //   setDyadicAnalysis(null);
-      // }
+
       if (clusterResult.data.object_object_graphs && Object.keys(clusterResult.data.object_object_graphs).length > 0) {
         const graphs = clusterResult.data.object_object_graphs;
         setObjectObjectGraphs(graphs);
@@ -333,7 +321,6 @@ export function Webinterface() {
   // Fetch a selected Object Graph
   const fetchObjectGraph = async (params: URLSearchParams) => {
     try {
-      console.log(`Fetching object graph for community ${params.get('community_id')}`);
       const res = await axios.post("/build-object-network", params);
       if (res && res.data && res.data.elements) {
         setElements(res.data.elements);
@@ -374,11 +361,7 @@ export function Webinterface() {
     params.append("group_col", groupCol || "");
     
     try {
-      console.log("Fetching quantity-diversity with params:", {
-        student, object1, object2, attr, groupCol
-      });
       const res = await axios.post("/quantity-diversity", params);
-      console.log("Quantity-diversity response:", res.data);
       setQdData(res.data);
     } catch (error) {
       console.error("Error computing Quantity & Diversity:", error);
@@ -675,7 +658,6 @@ export function Webinterface() {
       axios.post("/build-hina-network", params)
         .then(res => {
           setElements(res.data.elements);
-          console.log( "Received response:", res.data.elements);
           if (res.data.significant_edges) {
             setDyadicAnalysis(res.data.significant_edges);
           } else {

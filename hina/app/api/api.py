@@ -24,9 +24,9 @@ app.add_middleware(
     expose_headers=["Content-Disposition"]
 )
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+# @app.get("/health")
+# async def health_check():
+#     return {"status": "healthy"}
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
