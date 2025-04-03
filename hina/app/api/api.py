@@ -21,20 +21,28 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
 )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    contents = await file.read()
-    # Encode the file contents in base64 (without header)
-    encoded = contents 
-    df = utils.parse_contents(base64.b64encode(encoded).decode('utf-8'), file.filename)
-    groups = list(df['group'].unique()) if 'group' in df.columns else ["All"]
-    return {
-        "columns": df.columns.tolist(),
-        "groups": groups,
-        "data": df.to_json(orient="split")
-    }
+    try:
+        contents = await file.read()
+        # Encode the file contents in base64 (without header)
+        encoded = contents 
+        df = utils.parse_contents(base64.b64encode(encoded).decode('utf-8'), file.filename)
+        groups = list(df['group'].unique()) if 'group' in df.columns else ["All"]
+        return {
+            "columns": df.columns.tolist(),
+            "groups": groups,
+            "data": df.to_json(orient="split")
+        }
+    except Exception as e:
+        print(f"Error in upload_file: {str(e)}")
 
 @app.post("/build-hina-network")
 async def build_hina_network_endpoint(
@@ -50,30 +58,33 @@ async def build_hina_network_endpoint(
     fix_deg: str = Form(None),
     layout: str = Form("bipartite")
 ):
-    object2_col = None if object2_col in ["none", "null", "undefined", ""] else object2_col
-    attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
-    group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
-    
-    df = pd.read_json(StringIO(data), orient="split")
+    try:
+        object2_col = None if object2_col in ["none", "null", "undefined", ""] else object2_col
+        attr_col = None if attr_col in ["none", "null", "undefined", ""] else attr_col
+        group_col = None if group_col in ["none", "null", "undefined", ""] else group_col
+        
+        df = pd.read_json(StringIO(data), orient="split")
 
-    pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
+        pruning_param = {"fix_deg": fix_deg, "alpha": alpha} if pruning == "custom" else "none"
 
-    nx_G, pos, significant_edges = utils.build_hina_network(
-        df=df, 
-        group_col=group_col, 
-        group=group, 
-        student_col=student_col, 
-        object1_col=object1_col, 
-        object2_col=object2_col,
-        attr_col=attr_col,
-        pruning=pruning_param, 
-        layout=layout
-    )
-    elements = utils.cy_elements_from_graph(nx_G, pos)
-    return {
-        "elements": elements,
-        "significant_edges": significant_edges
-    }
+        nx_G, pos, significant_edges = utils.build_hina_network(
+            df=df, 
+            group_col=group_col, 
+            group=group, 
+            student_col=student_col, 
+            object1_col=object1_col, 
+            object2_col=object2_col,
+            attr_col=attr_col,
+            pruning=pruning_param, 
+            layout=layout
+        )
+        elements = utils.cy_elements_from_graph(nx_G, pos)
+        return {
+            "elements": elements,
+            "significant_edges": significant_edges
+        }
+    except Exception as e:
+        print(f"Error in build_hina_network_endpoint: {str(e)}")
 
 
 @app.post("/build-cluster-network")

@@ -5,7 +5,6 @@ import networkx as nx
 import numpy as np
 import matplotlib.colors as mcolors
 from hina.dyad.significant_edges import prune_edges
-# from hina.mesoscale import bipartite_communities
 from hina.mesoscale import hina_communities
 from hina.construction import get_bipartite, get_tripartite
 from hina.individual import quantity, diversity

@@ -27,7 +27,7 @@ import * as XLSX from "xlsx";
 import { IconArrowsSort, IconSortAscending, IconSortDescending, IconDownload, IconRefresh, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 
 // For local development
-axios.defaults.baseURL = 'http://localhost:8000';
+// axios.defaults.baseURL = 'http://localhost:8000';
 
 export function Webinterface() {
   const [opened, { toggle }] = useDisclosure();
