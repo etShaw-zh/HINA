@@ -145,16 +145,10 @@ def hina_communities(G,fix_B=None):
         Hs.append(H)
         B -= 1
 
-        if B == fix_B:
-            community_labels = {str(i[0]):str(i[1]) for i in node2cluster.items()}
-            Hmdl = H
-            results = {'number of communities': len(set(community_labels.values())), \
-               "node communities": community_labels, "community structure quality value":Hmdl/H0,\
-               'updated graph object':G}
-            return results
-
-
-    best_ind = np.argmin(Hs)
+    if fix_B is None:
+        best_ind = np.argmin(Hs)
+    else:
+        best_ind = len(Hs)-fix_B
     Hmdl = Hs[best_ind]
     community_labels = past_partitions[best_ind]
     old_labels = list(set(community_labels.values()))
