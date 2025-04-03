@@ -32,7 +32,7 @@ jobs:
       #     message: '(auto) Paper PDF Draft'
       #     # This should be the path to the paper within your repo.
       #     add: 'Paper/*.pdf' # 'paper/*.pdf' to commit all PDFs in the paper directory
-      - name: Commit and push PDF
+      - name: Commit and push PDF by bot
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
