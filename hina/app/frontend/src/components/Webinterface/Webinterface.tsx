@@ -27,7 +27,7 @@ import * as XLSX from "xlsx";
 import { IconArrowsSort, IconSortAscending, IconSortDescending, IconDownload, IconRefresh, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 
 // For local development
-// axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = 'http://localhost:8000';
 
 export function Webinterface() {
   const [opened, { toggle }] = useDisclosure();
@@ -48,7 +48,7 @@ export function Webinterface() {
   const [alpha, setAlpha] = useState<number>(0.05);
   const [fixDeg, setFixDeg] = useState<string>("Set 1");
   const [layout, setLayout] = useState<string>("bipartite");
-  const [zoom, setZoom] = useState<number>(0.5);
+  const [zoom, setZoom] = useState<number>(1);
   const [qdData, setQdData] = useState<QDData | null>(null);
   const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
   const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
@@ -717,8 +717,11 @@ const NetworkFilters = () => {
   if (!elements.length) return null;
   
   const filterPaperStyle = {
-    background: 'rgba(255, 255, 255, 0)',  // transparent
-    // backdropFilter: 'blur(5px)',              
+    background: 'transparent',  // transparent
+    width: '50%',
+    border: 'none',
+    boxShadow: 'none',
+    padding: 0
   };
   
   switch (currentNetworkView) {
@@ -1045,10 +1048,12 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
                       if (!initialRenderDone && elements.length > 0) {
                         setTimeout(() => {
                           cy.fit();
-                          cy.center();
+                          const defaultZoom = cy.zoom() * 0.9;
+                          cy.zoom(defaultZoom);
                           setZoom(cy.zoom());
+                          cy.center();
                           setInitialRenderDone(true); 
-                        }, 100);
+                        }, 10);
                       }
                     }}
                   />
