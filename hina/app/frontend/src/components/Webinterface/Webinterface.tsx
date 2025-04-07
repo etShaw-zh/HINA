@@ -1140,98 +1140,105 @@ useEffect(() => {
                       }
                     }}
                   />
-
-                  <div style={{ 
-                    position: "absolute", 
-                    top: "10px", 
-                    right: "100px", 
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: "10px",
-                    alignItems: "center",
-                    background: "rgba(255, 255, 255, 0)", 
-                    padding: "5px 10px",
-                  }}>
-                    <Switch
-                      checked={showLabels}
-                      onChange={(event) => setShowLabels(event.currentTarget.checked)}
-                      label="Labels"
-                      size="sm"
-                      styles={{ label: { fontWeight: 'bold' } }}
-                    />
-                    <Switch
-                      checked={showEdgeWeights}
-                      onChange={(event) => setShowEdgeWeights(event.currentTarget.checked)}
-                      label="Weights"
-                      size="sm"
-                      styles={{ label: { fontWeight: 'bold' } }}
-                    />
-                  </div>
-
-                  <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
-                    <Menu shadow="md" width={100} trigger="click-hover" openDelay={100} closeDelay={400}>
-                      <Menu.Target>
-                        <Button
-                          rightSection={<IconDownload size={14} />}
-                          variant="gradient"
-                          gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
-                        >
-                          Save
-                        </Button>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item onClick={() => handleSave(true)}>
-                          Save Full
-                        </Menu.Item>
-                        <Menu.Divider />
-                        <Menu.Item onClick={() => handleSave(false)}>
-                          Save Now
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </div>
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "10px",
-                      right: "10px",
-                      zIndex: 999,
+                
+                  {elements.length > 0 && (
+                    <div style={{ 
+                      position: "absolute", 
+                      top: "10px", 
+                      right: "100px", 
+                      zIndex: 10,
                       display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <ActionIcon
-                      variant="gradient"
-                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
-                      onClick={resetView} 
-                      size="xl"
-                      radius="lg"  
-                      mb="xs"                    
+                      flexDirection: "row",
+                      gap: "10px",
+                      alignItems: "center",
+                      background: "rgba(255, 255, 255, 0)", 
+                      padding: "5px 10px",
+                    }}>
+                      <Switch
+                        checked={showLabels}
+                        onChange={(event) => setShowLabels(event.currentTarget.checked)}
+                        label="Labels"
+                        size="sm"
+                        styles={{ label: { fontWeight: 'bold' } }}
+                      />
+                      <Switch
+                        checked={showEdgeWeights}
+                        onChange={(event) => setShowEdgeWeights(event.currentTarget.checked)}
+                        label="Weights"
+                        size="sm"
+                        styles={{ label: { fontWeight: 'bold' } }}
+                      />
+                    </div>
+                  )}
+
+                  {elements.length > 0 && (
+                    <div style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10 }}>
+                        <Menu shadow="md" width={100} trigger="click-hover" openDelay={100} closeDelay={400}>
+                          <Menu.Target>
+                            <Button
+                              rightSection={<IconDownload size={14} />}
+                              variant="gradient"
+                              gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
+                            >
+                              Save
+                            </Button>
+                          </Menu.Target>
+                          <Menu.Dropdown>
+                            <Menu.Item onClick={() => handleSave(true)}>
+                              Save Full
+                            </Menu.Item>
+                            <Menu.Divider />
+                            <Menu.Item onClick={() => handleSave(false)}>
+                              Save Now
+                            </Menu.Item>
+                          </Menu.Dropdown>
+                        </Menu>
+                    </div>
+                  )}
+
+                  {elements.length > 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "10px",
+                        right: "10px",
+                        zIndex: 999,
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
                     >
-                      Reset
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="gradient"
-                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
-                      onClick={zoomIn} 
-                      size="xl"  
-                      radius="lg"
-                      mb="xs"                    
-                    >
-                      <IconZoomIn />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="gradient"
-                      gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
-                      onClick={zoomOut} 
-                      size="xl"  
-                      radius="lg"
-                      mb="xs"                    
-                    >
-                      <IconZoomOut />
-                    </ActionIcon>
-                  </div>
+                      <ActionIcon
+                        variant="gradient"
+                        gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                        onClick={resetView} 
+                        size="xl"
+                        radius="lg"  
+                        mb="xs"                    
+                      >
+                        Reset
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="gradient"
+                        gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                        onClick={zoomIn} 
+                        size="xl"  
+                        radius="lg"
+                        mb="xs"                    
+                      >
+                        <IconZoomIn />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="gradient"
+                        gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
+                        onClick={zoomOut} 
+                        size="xl"  
+                        radius="lg"
+                        mb="xs"                    
+                      >
+                        <IconZoomOut />
+                      </ActionIcon>
+                    </div>
+                  )}
                 </Paper>
               </Grid.Col>
 
