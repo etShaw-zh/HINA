@@ -298,6 +298,20 @@ export function Webinterface() {
       params.append("layout", layout);
       const clusterResult = await axios.post("/build-cluster-network", params);
 
+      // Update cluster data from response
+      if (clusterResult.data.cluster_labels) {
+        setClusterLabels(clusterResult.data.cluster_labels);
+      } else {
+        setClusterLabels(null);
+      }
+      
+      // Update compression ratio from response
+      if (clusterResult.data.compression_ratio !== undefined) {
+        setCompressionRatio(clusterResult.data.compression_ratio);
+      } else {
+        setCompressionRatio(null);
+      }
+
       if (clusterResult.data.object_object_graphs && Object.keys(clusterResult.data.object_object_graphs).length > 0) {
         const graphs = clusterResult.data.object_object_graphs;
         setObjectObjectGraphs(graphs);
@@ -313,6 +327,8 @@ export function Webinterface() {
         objectParams.append("object2_col", object2); 
         objectParams.append("layout", layout);
         await fetchObjectGraph(objectParams);
+        fetchQuantityAndDiversity();
+
       } else {
         console.warn("No object-object graphs found in the data");
       }
@@ -329,6 +345,22 @@ export function Webinterface() {
       if (res && res.data && res.data.elements) {
         setElements(res.data.elements);
         setCurrentNetworkView('object');
+        
+        // Extract edge information for dyadic analysis
+        const edges = res.data.elements.filter(el => el.data.source);
+        if (edges.length > 0) {
+          const significantEdges = edges.map(edge => [
+            edge.data.source,
+            edge.data.target,
+            edge.data.weight || 1
+          ]);
+          // Update dyadic analysis with object graph edges
+          setDyadicAnalysis(significantEdges);
+          console.log(`Found ${significantEdges.length} edges for dyadic analysis`);
+        } else {
+          setDyadicAnalysis([]);
+          console.log("No edges found in the object graph");
+        }
       } else {
         console.error("Invalid response structure:", res);
       }
@@ -336,7 +368,7 @@ export function Webinterface() {
       console.error("Error getting object graph:", error);
       console.error("Error details:", error.response?.data || error.message);
     }
-  };  
+  };
 
   // Update the selected community ID and Object Graph
   const handleCommunityChange = (value: string) => {
@@ -734,6 +766,9 @@ const NetworkFilters = () => {
         <Paper style={filterPaperStyle}>
           <Select
             radius="xl"
+            checkIconPosition="right"
+            maxDropdownHeight={200}
+            comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
             label="Group Filter"
             value={group}
             onChange={handleGroupChange}
@@ -746,6 +781,9 @@ const NetworkFilters = () => {
         <Paper style={filterPaperStyle}>
           <Select
             radius="xl"
+            checkIconPosition="right"
+            maxDropdownHeight={200}
+            comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
             label="Cluster Filter"
             value={cluster}
             onChange={handleClusterChange}
@@ -758,6 +796,9 @@ const NetworkFilters = () => {
         <Paper style={filterPaperStyle}>
           <Select
             radius="xl"
+            checkIconPosition="right"
+            maxDropdownHeight={200}
+            comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
             label="Community Filter"
             value={selectedCommunityId}
             onChange={handleCommunityChange}
