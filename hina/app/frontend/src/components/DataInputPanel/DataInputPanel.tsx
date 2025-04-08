@@ -90,12 +90,12 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
       options.push({ value: "student_column", label: `Student: ${student}` });
     }
     
-    if (object1) {
+    if (object1 && object2 == "none") {
       options.push({ value: "object1_column", label: `Object 1: ${object1}` });
     }
     
     if (object2 && object2 !== "none") {
-      options.push({ value: "object2_column", label: `Object 2: ${object2}` });
+      options.push({ value: "object2_column", label: `Object 1: ${object1}, Object 2: ${object2}` });
     }
     return options;
   }, [student, object1, object2]);
@@ -132,19 +132,20 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
           <Group grow>
             <Select
               label="Student Column"
+              withAsterisk
               value={student}
               onChange={(value) => setStudent(value || "")}
               data={Array.from(new Set([...getAvailableColumns('student'), ...(student ? [student] : [])]))}
             />
             <Select
               label="Object 1 Column"
+              withAsterisk
               value={object1}
               onChange={(value) => setObject1(value || "")}
               data={Array.from(new Set([...getAvailableColumns('object1'), ...(object1 ? [object1] : [])]))}
             />
             <Select
               label="Object 2 Column (For Tripartite)"
-              withAsterisk
               value={object2}
               onChange={(value) => setObject2(value || "none")}
               data={[{value: "none", label: "None"}].concat(
@@ -157,7 +158,6 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
           <Group grow mt="md" mb="md">
             <Select
               label="Object Attribute (Optional)"
-              withAsterisk
               value={attr}
               onChange={(value) => setAttr(value || "none")}
               data={[{value: "none", label: "None"}].concat(
@@ -167,7 +167,6 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
             />
             <Select
               label="Group Column (Optional)"
-              withAsterisk
               value={groupCol}
               onChange={(value) => setGroupCol(value || "none")}
               data={[{value: "none", label: "None"}].concat(
@@ -210,8 +209,7 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
               data={LAYOUT_OPTIONS}
             />
             <NumberInput
-              label="Fixed Number of Cluster"
-              withAsterisk
+              label="Fixed Number of Cluster (Optional)"
               value={numberCluster === "" ? undefined : Number(numberCluster)}
               onChange={(val) => setNumberCluster(val?.toString() || "")}
               placeholder="None"

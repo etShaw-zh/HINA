@@ -111,6 +111,7 @@ export function Webinterface() {
                   currentNetworkView={currentNetworkView}
                   groups={groups}
                   group={group}
+                  groupCol={groupCol} 
                   handleGroupChange={handleGroupChange}
                   clusterLabels={clusterLabels}
                   cluster={cluster}

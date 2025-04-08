@@ -3,7 +3,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 
 // Set axios base URL for local development
-axios.defaults.baseURL = 'http://localhost:8000';
+// axios.defaults.baseURL = 'http://localhost:8000';
 
 // Types
 interface QDData {
@@ -32,8 +32,8 @@ export function useNetworkData() {
   const [elements, setElements] = useState<any[]>([]);
   
   // Input parameters
-  const [groupCol, setGroupCol] = useState<string>("none");
-  const [group, setGroup] = useState<string>("All");
+  const [groupCol, _setGroupCol] = useState<string>("none");
+  const [group, setGroup] = useState<string>("All");  
   const [groups, setGroups] = useState<string[]>([]);
   const [student, setStudent] = useState<string>("");
   const [object1, setObject1] = useState<string>("");
@@ -43,7 +43,7 @@ export function useNetworkData() {
   const [cluster, setCluster] = useState<string>("");
   const [pruning, setPruning] = useState<string>("none");
   const [alpha, setAlpha] = useState<number>(0.05);
-  const [fixDeg, setFixDeg] = useState<string>("Set 1");
+  const [fixDeg, setFixDeg] = useState<string>("none");
   const [layout, setLayout] = useState<string>("bipartite");
   
   // Network visualization
@@ -121,6 +121,16 @@ export function useNetworkData() {
   };
 
   // Update groups based on uploaded data and group column
+  const setGroupCol = (value: string) => {
+    _setGroupCol(value || "none");
+    setGroup("All");
+    if (value === "none" || !value) {
+      setGroups(["All"]);
+    } else if (uploadedData) {
+      updateGroups(uploadedData, value);
+    }
+  };
+
   const updateGroups = (data: string, groupColumn: string) => {
     if (!data || groupColumn === "none") {
       setGroups(["All"]);
@@ -171,18 +181,28 @@ export function useNetworkData() {
     document.body.removeChild(link);
   };
 
+  // Get the fixDeg value based on the selected option
+  const getFixDegValue = () => {
+    let fixDegValue = fixDeg;
+    if (fixDeg === "student_column") {
+      fixDegValue = student;
+    } else if (fixDeg === "object1_column") {
+      fixDegValue = object1;
+    } else if (fixDeg === "object2_column") {
+      if (object2 && object2 !== "none") {
+        fixDegValue = `(${object1},${object2})`;
+      } else {
+        fixDegValue = object1; 
+      }
+    }
+    return fixDegValue;
+  };
   // Update HINA network
   const updateHinaNetwork = async () => {
     if (!uploadedData) return;
     const params = new URLSearchParams();
-    let fixDegValue = fixDeg;
-    if (fixDeg === "student_column") {
-        fixDegValue = student;
-    } else if (fixDeg === "object1_column") {
-        fixDegValue = object1;
-    } else if (fixDeg === "object2_column") {
-        fixDegValue = object2;
-    }
+    const fixDegValue = getFixDegValue();
+
     params.append("data", uploadedData);
     params.append("group_col", groupCol); 
     params.append("group", group);
@@ -224,6 +244,8 @@ export function useNetworkData() {
   const updateClusteredNetwork = async () => {
     if (!uploadedData) return;
     const params = new URLSearchParams();
+    const fixDegValue = getFixDegValue();
+
     params.append("data", uploadedData);
     params.append("group", group);
     params.append("student_col", student);  
@@ -232,7 +254,7 @@ export function useNetworkData() {
     params.append("number_cluster", numberCluster);
     params.append("pruning", pruning);
     params.append("alpha", alpha.toString());
-    params.append("fix_deg", fixDeg);
+    params.append("fix_deg", fixDegValue);
     params.append("layout", layout);
     try {
       const res = await axios.post("/build-cluster-network", params);
@@ -276,6 +298,8 @@ export function useNetworkData() {
     
     try {
       const params = new URLSearchParams();
+      const fixDegValue = getFixDegValue();
+
       params.append("data", uploadedData);
       params.append("group", group);
       params.append("student_col", student);  
@@ -284,7 +308,7 @@ export function useNetworkData() {
       params.append("number_cluster", numberCluster);
       params.append("pruning", pruning);
       params.append("alpha", alpha.toString());
-      params.append("fix_deg", fixDeg);
+      params.append("fix_deg", fixDegValue);
       params.append("layout", layout);
       const clusterResult = await axios.post("/build-cluster-network", params);
 

@@ -8,6 +8,7 @@ interface NetworkVisualizationProps {
   currentNetworkView: 'hina' | 'cluster' | 'object' | null;
   groups: string[];
   group: string;
+  groupCol?: string;
   handleGroupChange: (value: string | null) => void;
   clusterLabels: Record<string, string> | null;
   cluster: string;
@@ -34,6 +35,7 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
   currentNetworkView,
   groups,
   group,
+  groupCol = "none",
   handleGroupChange,
   clusterLabels,
   cluster,
@@ -70,49 +72,49 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     
     switch (currentNetworkView) {
       case 'hina':
-        return groups.length > 1 ? (
-          <Paper style={filterPaperStyle}>
-            <Select
-              radius="xl"
-              checkIconPosition="right"
-              maxDropdownHeight={200}
-              comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
-              label="Group Filter"
-              value={group}
-              onChange={handleGroupChange}
-              data={groups}
-            />
-          </Paper>
+        return groupCol !== "none" && groups.length > 1 ? (
+            <Paper style={filterPaperStyle}>
+                <Select
+                radius="xl"
+                checkIconPosition="right"
+                maxDropdownHeight={200}
+                comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
+                label="Group Filter"
+                value={group}
+                onChange={handleGroupChange}
+                data={groups}
+                />
+            </Paper>
         ) : null;
       case 'cluster':
         return clusterLabels ? (
-          <Paper style={filterPaperStyle}>
-            <Select
-              radius="xl"
-              checkIconPosition="right"
-              maxDropdownHeight={200}
-              comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
-              label="Cluster Filter"
-              value={cluster}
-              onChange={handleClusterChange}
-              data={clusterOptions}
-            />
-          </Paper>
+            <Paper style={filterPaperStyle}>
+                <Select
+                radius="xl"
+                checkIconPosition="right"
+                maxDropdownHeight={200}
+                comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
+                label="Cluster Filter"
+                value={cluster}
+                onChange={handleClusterChange}
+                data={clusterOptions}
+                />
+            </Paper>
         ) : null;
       case 'object':
         return communityOptions.length > 0 ? (
-          <Paper style={filterPaperStyle}>
-            <Select
-              radius="xl"
-              checkIconPosition="right"
-              maxDropdownHeight={200}
-              comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
-              label="Community Filter"
-              value={selectedCommunityId}
-              onChange={handleCommunityChange}
-              data={communityOptions.map(id => ({ value: id, label: `Community ${id}` }))}
-            />
-          </Paper>
+            <Paper style={filterPaperStyle}>
+                <Select
+                radius="xl"
+                checkIconPosition="right"
+                maxDropdownHeight={200}
+                comboboxProps={{ width: 150, position: 'bottom-start', transitionProps: { transition: 'pop', duration: 200 }}}
+                label="Community Filter"
+                value={selectedCommunityId}
+                onChange={handleCommunityChange}
+                data={communityOptions.map(id => ({ value: id, label: `Community ${id}` }))}
+                />
+            </Paper>
         ) : null;
       default:
         return null;
