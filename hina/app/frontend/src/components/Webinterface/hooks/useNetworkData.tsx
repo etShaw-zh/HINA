@@ -1,0 +1,941 @@
+import { useState, useRef, useEffect, useMemo } from "react";
+import axios from "axios";
+import * as XLSX from "xlsx";
+
+// Set axios base URL for local development
+axios.defaults.baseURL = 'http://localhost:8000';
+
+// Types
+interface QDData {
+  quantity: Record<string, number>;
+  normalized_quantity: Record<string, number>;
+  diversity: Record<string, number>;
+  quantity_by_category?: Record<string, Record<string, number>>;
+  normalized_quantity_by_group?: Record<string, number>;
+}
+
+interface DyadicAnalysisData {
+  significant_edges: [string, string, number][];
+}
+
+interface ClusterLabelsData {
+  [node: string]: string;
+}
+
+type SortConfig = { key: string; direction: "asc" | "desc" } | null;
+
+export function useNetworkData() {
+  // Basic state
+  const [uploadedData, setUploadedData] = useState<string | null>(null);
+  const [initialRenderDone, setInitialRenderDone] = useState(false);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [elements, setElements] = useState<any[]>([]);
+  
+  // Input parameters
+  const [groupCol, setGroupCol] = useState<string>("none");
+  const [group, setGroup] = useState<string>("All");
+  const [groups, setGroups] = useState<string[]>([]);
+  const [student, setStudent] = useState<string>("");
+  const [object1, setObject1] = useState<string>("");
+  const [object2, setObject2] = useState<string>("none");
+  const [attr, setAttr] = useState<string>("none");
+  const [numberCluster, setNumberCluster] = useState<string>("");
+  const [cluster, setCluster] = useState<string>("");
+  const [pruning, setPruning] = useState<string>("none");
+  const [alpha, setAlpha] = useState<number>(0.05);
+  const [fixDeg, setFixDeg] = useState<string>("Set 1");
+  const [layout, setLayout] = useState<string>("bipartite");
+  
+  // Network visualization
+  const [zoom, setZoom] = useState<number>(1);
+  const [showLabels, setShowLabels] = useState<boolean>(true);
+  const [showEdgeWeights, setShowEdgeWeights] = useState<boolean>(true);
+  const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
+  const [currentNetworkView, setCurrentNetworkView] = useState<'hina' | 'cluster' | 'object' | null>(null);
+  
+  // Analysis data
+  const [qdData, setQdData] = useState<QDData | null>(null);
+  const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
+  const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
+  const [clusterOptions, setClusterOptions] = useState<string[]>(["All"]);
+  const [activeTab, setActiveTab] = useState<string | null>("node-level");
+  const [compressionRatio, setCompressionRatio] = useState<number | null>(null);
+  const [objectObjectGraphs, setObjectObjectGraphs] = useState<Record<string, any>>({});
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
+  const [communityOptions, setCommunityOptions] = useState<string[]>([]);
+  
+  // Sorting configurations
+  const [quantitySortConfig, setQuantitySortConfig] = useState<SortConfig>(null);
+  const [diversitySortConfig, setDiversitySortConfig] = useState<SortConfig>(null);
+  const [normalizedQuantitySortConfig, setNormalizedQuantitySortConfig] = useState<SortConfig>(null);
+  const [categoryQuantitySortConfig, setCategoryQuantitySortConfig] = useState<SortConfig>(null);
+  const [normalizedGroupSortConfig, setNormalizedGroupSortConfig] = useState<SortConfig>(null);
+  const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
+  const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
+  
+  // Refs
+  const cyRef = useRef<any>(null);
+  const originalElementsRef = useRef<any[]>([]);
+
+  // Constants for options
+  const LAYOUT_OPTIONS = [
+    { value: "spring", label: "Spring" },
+    { value: "bipartite", label: "Bipartite" },
+    { value: "circular", label: "Circular" },
+  ];
+
+  const PRUNING_OPTIONS = [
+    { value: "none", label: "No Pruning" },
+    { value: "custom", label: "Custom Pruning" },
+  ];
+
+  const DEG_OPTIONS = useMemo(() => {
+    const options = [
+      { value: "none", label: "None" }
+    ];
+    
+    if (student) {
+      options.push({ value: "student_column", label: `Student: ${student}` });
+    }
+    
+    if (object1) {
+      options.push({ value: "object1_column", label: `Object 1: ${object1}` });
+    }
+    
+    if (object2) {
+      options.push({ value: "object2_column", label: `Object 2: ${object2}` });
+    }
+    return options;
+  }, [student, object1, object2]);
+
+  // Filter available columns function
+  const getAvailableColumns = (currentField: string): string[] => {
+    const selectedValues = [
+      currentField !== 'student' ? student : null,
+      currentField !== 'object1' ? object1 : null,
+      currentField !== 'object2' ? object2 : null,
+      currentField !== 'attr' ? (attr !== 'none' ? attr : null) : null,
+      currentField !== 'groupCol' ? (groupCol !== 'none' ? groupCol : null) : null
+    ].filter(Boolean) as string[];
+    return columns.filter(col => !selectedValues.includes(col));
+  };
+
+  // Update groups based on uploaded data and group column
+  const updateGroups = (data: string, groupColumn: string) => {
+    if (!data || groupColumn === "none") {
+      setGroups(["All"]);
+      return;
+    }
+    try {
+      const df = JSON.parse(data);
+      const columnValues = df.data.map((row: any, index: number) => {
+        const colIndex = df.columns.indexOf(groupColumn);
+        return colIndex >= 0 ? String(row[colIndex]) : undefined;
+      }).filter((value: any) => value !== undefined);      
+      const uniqueValues = [...new Set(columnValues)];
+      const groupOptions: string[] = ["All", ...uniqueValues.filter((g: string) => g !== "All")];
+      setGroups(groupOptions);
+    } catch (error) {
+      console.error("Error updating groups:", error);
+      setGroups(["All"]);
+    }
+  };
+  
+  // Handle file upload
+  const handleFileUpload = async (file: File | null) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await axios.post("/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });      
+      setColumns(res.data.columns);
+      setUploadedData(res.data.data);
+      const defaultGroups = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
+      setGroups(defaultGroups);
+    } catch (error) {
+      console.error("Error during file upload:", error);
+    }
+  };
+
+  // Save network visualization
+  const handleSave = (full: boolean) => {
+    if (!cyRef.current) return;
+    const dataUrl = cyRef.current.png({ full, bg: 'white' });
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `graph_${full ? "full" : "partial"}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Update HINA network
+  const updateHinaNetwork = async () => {
+    if (!uploadedData) return;
+    const params = new URLSearchParams();
+    let fixDegValue = fixDeg;
+    if (fixDeg === "student_column") {
+        fixDegValue = student;
+    } else if (fixDeg === "object1_column") {
+        fixDegValue = object1;
+    } else if (fixDeg === "object2_column") {
+        fixDegValue = object2;
+    }
+    params.append("data", uploadedData);
+    params.append("group_col", groupCol); 
+    params.append("group", group);
+    params.append("student_col", student);  
+    params.append("object1_col", object1);  
+    params.append("object2_col", object2); 
+    params.append("attr_col", attr); 
+    params.append("pruning", pruning);
+    params.append("alpha", alpha.toString());
+    params.append("fix_deg", fixDegValue);
+    params.append("layout", layout);  
+
+    try {
+      const res = await axios.post("/build-hina-network", params);
+      setElements(res.data.elements);
+      setCurrentNetworkView('hina');
+      if (res.data.significant_edges) {
+        setDyadicAnalysis(res.data.significant_edges);
+      } else {
+        setDyadicAnalysis(null);
+      }
+      fetchQuantityAndDiversity();
+      setTimeout(() => {
+        if (cyRef.current) {
+          cyRef.current.fit();
+          const defaultZoom = cyRef.current.zoom() * 0.9;
+          cyRef.current.zoom(defaultZoom);
+          setZoom(cyRef.current.zoom());
+          cyRef.current.center();
+        }
+      }, 10);
+    } catch (error) {
+      console.error("Error updating HINA network:", error);
+      console.error("Error details:", error.response?.data || error.message)
+    }
+  };
+
+  // Update Clustered network endpoint
+  const updateClusteredNetwork = async () => {
+    if (!uploadedData) return;
+    const params = new URLSearchParams();
+    params.append("data", uploadedData);
+    params.append("group", group);
+    params.append("student_col", student);  
+    params.append("object1_col", object1);  
+    params.append("object2_col", object2); 
+    params.append("number_cluster", numberCluster);
+    params.append("pruning", pruning);
+    params.append("alpha", alpha.toString());
+    params.append("fix_deg", fixDeg);
+    params.append("layout", layout);
+    try {
+      const res = await axios.post("/build-cluster-network", params);
+      originalElementsRef.current = [...res.data.elements];
+      setElements(res.data.elements);
+      setCurrentNetworkView('cluster');
+      if (res.data.cluster_labels) {
+        setClusterLabels(res.data.cluster_labels);
+      } else {
+        setClusterLabels(null);
+      }
+      // Handle significant edges from cluster result
+      if (res.data.significant_edges) {
+        setDyadicAnalysis(res.data.significant_edges);
+      } else {
+        setDyadicAnalysis(null);
+      }
+      if (res.data.compression_ratio !== undefined) {
+        setCompressionRatio(res.data.compression_ratio);
+      } else {
+        setCompressionRatio(null);
+      }
+      fetchQuantityAndDiversity();
+      setTimeout(() => {
+        if (cyRef.current) {
+          cyRef.current.fit();
+          const defaultZoom = cyRef.current.zoom() * 0.9;
+          cyRef.current.zoom(defaultZoom);
+          setZoom(cyRef.current.zoom());
+          cyRef.current.center();
+        }
+      }, 10);
+    } catch (error) {
+      console.error("Error updating Clustered network:", error);
+    }
+  };
+
+  // Update Object network endpoint
+  const updateObjectNetwork = async () => {
+    if (!uploadedData) return;
+    
+    try {
+      const params = new URLSearchParams();
+      params.append("data", uploadedData);
+      params.append("group", group);
+      params.append("student_col", student);  
+      params.append("object1_col", object1);  
+      params.append("object2_col", object2); 
+      params.append("number_cluster", numberCluster);
+      params.append("pruning", pruning);
+      params.append("alpha", alpha.toString());
+      params.append("fix_deg", fixDeg);
+      params.append("layout", layout);
+      const clusterResult = await axios.post("/build-cluster-network", params);
+
+      // Update cluster data from response
+      if (clusterResult.data.cluster_labels) {
+        setClusterLabels(clusterResult.data.cluster_labels);
+      } else {
+        setClusterLabels(null);
+      }
+      
+      // Update compression ratio from response
+      if (clusterResult.data.compression_ratio !== undefined) {
+        setCompressionRatio(clusterResult.data.compression_ratio);
+      } else {
+        setCompressionRatio(null);
+      }
+
+      if (clusterResult.data.object_object_graphs && Object.keys(clusterResult.data.object_object_graphs).length > 0) {
+        const graphs = clusterResult.data.object_object_graphs;
+        setObjectObjectGraphs(graphs);
+        const commIds = Object.keys(graphs);
+        setCommunityOptions(commIds);
+        const firstCommunityId = commIds[0];
+        setSelectedCommunityId(firstCommunityId);
+        const objectGraphsData = JSON.stringify(graphs);
+        const objectParams = new URLSearchParams();
+        objectParams.append("data", objectGraphsData);
+        objectParams.append("community_id", firstCommunityId);
+        objectParams.append("object1_col", object1);  
+        objectParams.append("object2_col", object2); 
+        objectParams.append("layout", layout);
+        await fetchObjectGraph(objectParams);
+        fetchQuantityAndDiversity();
+
+      } else {
+        console.warn("No object-object graphs found in the data");
+      }
+    } catch (error) {
+      console.error("Error updating object network:", error);
+      console.error("Error details:", error.response?.data || error.message);
+    }
+  };
+
+  // Fetch a selected Object Graph
+  const fetchObjectGraph = async (params: URLSearchParams) => {
+    try {
+      const res = await axios.post("/build-object-network", params);
+      if (res && res.data && res.data.elements) {
+        setElements(res.data.elements);
+        setCurrentNetworkView('object');
+        const edges = res.data.elements.filter((el: any) => el.data.source);
+        if (edges.length > 0) {
+          const significantEdges = edges.map((edge: any) => [
+            edge.data.source,
+            edge.data.target,
+            edge.data.weight || 1
+          ]);
+          setDyadicAnalysis(significantEdges);
+        //   console.log(`Found ${significantEdges.length} edges for dyadic analysis`);
+        } else {
+          setDyadicAnalysis([]);
+          console.log("No edges found in the object graph");
+        }
+      } else {
+        console.error("Invalid response structure:", res);
+      }
+      setTimeout(() => {
+        if (cyRef.current) {
+          cyRef.current.fit();
+          const defaultZoom = cyRef.current.zoom() * 0.9;
+          cyRef.current.zoom(defaultZoom);
+          setZoom(cyRef.current.zoom());
+          cyRef.current.center();
+        }
+      }, 10);
+    } catch (error) {
+      console.error("Error getting object graph:", error);
+      console.error("Error details:", error.response?.data || error.message);
+    }
+  };
+
+  // Update the selected community ID and Object Graph
+  const handleCommunityChange = (value: string) => {
+    setSelectedCommunityId(value);    
+    if (value && objectObjectGraphs && Object.keys(objectObjectGraphs).length > 0) {
+      const objectParams = new URLSearchParams();
+      const objectGraphsData = JSON.stringify(objectObjectGraphs);
+      objectParams.append("data", objectGraphsData);
+      objectParams.append("community_id", value); 
+      objectParams.append("object1_col", object1);
+      objectParams.append("object2_col", object2);
+      objectParams.append("layout", layout);
+      fetchObjectGraph(objectParams);
+    }
+  };
+
+  // Fetch Quantity & Diversity data endpoint
+  const fetchQuantityAndDiversity = async () => {
+    if (!uploadedData) return;
+    const params = new URLSearchParams();
+    params.append("data", uploadedData);
+    params.append("student_col", student);
+    params.append("object1_col", object1);
+    params.append("object2_col", object2);
+    params.append("attr_col", attr || "");
+    params.append("group_col", groupCol || "");
+    
+    try {
+      const res = await axios.post("/quantity-diversity", params);
+      setQdData(res.data);
+    } catch (error) {
+      console.error("Error computing Quantity & Diversity:", error);
+    }
+  };
+
+  // Zoom functions
+  const zoomIn = () => {
+    if (cyRef.current) {
+      const currentZoom = cyRef.current.zoom();
+      const newZoom = Math.min(currentZoom * 1.2, 3);
+      cyRef.current.zoom(newZoom);
+      setZoom(newZoom);
+    }
+  };  
+
+  const zoomOut = () => {
+    if (cyRef.current) {
+      const currentZoom = cyRef.current.zoom();
+      const newZoom = Math.max(currentZoom / 1.2, 0.1);
+      cyRef.current.zoom(newZoom);
+      setZoom(newZoom);
+    }
+  };
+
+  const resetView = () => {
+    if (cyRef.current) {
+      cyRef.current.fit();
+      cyRef.current.center();
+      setZoom(cyRef.current.zoom());
+      cyRef.current.elements().removeClass("highlight");
+      setHighlightedNodeId(null);
+    }
+  };
+
+  // Sorting function for table data
+  const applySorting = <T extends Record<string, any>>(
+    data: T[],
+    sortConfig: SortConfig,
+    numericColumns: string[] = []
+  ): T[] => {
+    if (!sortConfig) return data;
+    
+    return [...data].sort((a, b) => {
+      const key = sortConfig.key;
+      const valueA = a[key];
+      const valueB = b[key];      
+      if (numericColumns.includes(key)) {
+        const numA = !isNaN(Number(valueA)) ? Number(valueA) : null;
+        const numB = !isNaN(Number(valueB)) ? Number(valueB) : null;        
+        if (numA !== null && numB !== null) {
+          return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+        }
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          const lastPartA = valueA.split('_').pop() || '';
+          const lastPartB = valueB.split('_').pop() || '';
+          const extractedA = parseInt(lastPartA, 10);
+          const extractedB = parseInt(lastPartB, 10);
+          if (!isNaN(extractedA) && !isNaN(extractedB)) {
+            return sortConfig.direction === "asc" ? extractedA - extractedB : extractedB - extractedA;
+          }
+        }
+      }
+      if (valueA < valueB) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  // Helper function to toggle sort for a given key and config state setter
+  const toggleSort = (
+    key: string,
+    sortConfig: SortConfig,
+    setSortConfig: React.Dispatch<React.SetStateAction<SortConfig>>
+  ) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const handleGroupChange = (value: string | null) => {
+    const newValue = value || "All";
+    setGroup(newValue);
+    if (uploadedData) {
+      const params = new URLSearchParams();
+      params.append("data", uploadedData);
+      params.append("group_col", groupCol); 
+      params.append("group", newValue);  
+      params.append("student_col", student);  
+      params.append("object1_col", object1);  
+      params.append("attr_col", attr); 
+      params.append("pruning", pruning);
+      params.append("alpha", alpha.toString());
+      params.append("fix_deg", fixDeg);
+      params.append("layout", layout);  
+  
+      axios.post("/build-hina-network", params)
+        .then(res => {
+          setElements(res.data.elements);
+          if (res.data.significant_edges) {
+            setDyadicAnalysis(res.data.significant_edges);
+          } else {
+            setDyadicAnalysis(null);
+          }
+          fetchQuantityAndDiversity();
+        })
+        .catch(error => {
+          console.error("Error updating HINA network:", error);
+        });
+    }
+  };
+
+  // Updated handleClusterChange function
+  const handleClusterChange = (value: string | null) => {
+    const newValue = value || "All";
+    setCluster(newValue);
+    const fullElements = originalElementsRef.current;        
+    if (newValue === "All") {
+      setElements([...fullElements]);
+      return;
+    }    
+    const filteredStudentIds = Object.entries(clusterLabels || {})
+      .filter(([node, label]) => String(label) === newValue)
+      .map(([node]) => node);
+
+    if (filteredStudentIds.length === 0) {
+      setElements([...fullElements]);
+      return;
+    }
+    const studentIdSet = new Set(filteredStudentIds);
+    // Get student nodes in the selected cluster
+    const filteredStudentNodes = fullElements.filter(el => 
+      !el.data.source && studentIdSet.has(el.data.id)
+    );
+    // Find edges connecting to filtered student nodes
+    const filteredEdges = fullElements.filter(el => 
+      el.data.source && (studentIdSet.has(el.data.source) || studentIdSet.has(el.data.target))
+    );    
+    const connectedNodeIds = new Set<string>();
+    filteredEdges.forEach(edge => {
+      connectedNodeIds.add(edge.data.source);
+      connectedNodeIds.add(edge.data.target);
+    });
+    // Find object nodes that are connected to students in the selected cluster
+    const filteredObjectNodes = fullElements.filter(el => 
+      !el.data.source && 
+      !studentIdSet.has(el.data.id) &&
+      connectedNodeIds.has(el.data.id)
+    );  
+    const newElements = [...filteredStudentNodes, ...filteredObjectNodes, ...filteredEdges];
+    setElements(newElements);
+  };
+
+  // Export to XLSX
+  const exportToXLSX = () => {
+    const wb = XLSX.utils.book_new();
+
+    if (activeTab === "node-level") {
+      if (!qdData) return;
+      
+      // Quantity
+      const quantityData = [
+        ["Student", "Quantity"],
+        ...Object.entries(qdData.quantity).map(([key, value]) => [
+          key, value
+        ]),
+      ];
+      const wsQuantity = XLSX.utils.aoa_to_sheet(quantityData);
+      XLSX.utils.book_append_sheet(wb, wsQuantity, "Quantity");
+
+      // Diversity
+      const diversityData = [
+        ["Student", "Diversity"],
+        ...Object.entries(qdData.diversity).map(([key, value]) => [
+          key, value
+        ]),
+      ];
+      const wsDiversity = XLSX.utils.aoa_to_sheet(diversityData);
+      XLSX.utils.book_append_sheet(wb, wsDiversity, "Diversity");
+      
+      // Normalized quantity
+      const normalizedData = [
+        ["Student", "Normalized Quantity"],
+        ...Object.entries(qdData.normalized_quantity).map(([key, value]) => [
+          key, value
+        ]),
+      ];
+      const wsNorm = XLSX.utils.aoa_to_sheet(normalizedData);
+      XLSX.utils.book_append_sheet(wb, wsNorm, "Normalized Quantity");
+      
+      if (qdData.quantity_by_category) {
+        const categoryData = [
+          ["Node", "Category", "Value"],
+        ];
+        
+        Object.entries(qdData.quantity_by_category).forEach(([node, categories]) => {
+          Object.entries(categories).forEach(([category, value]) => {
+            categoryData.push([node, category, value]);
+          });
+        });
+        
+        const wsCat = XLSX.utils.aoa_to_sheet(categoryData);
+        XLSX.utils.book_append_sheet(wb, wsCat, "Quantity by Category");
+      }
+      
+      if (qdData.normalized_quantity_by_group) {
+        const groupData = [
+          ["Student", "Normalized by Group"],
+          ...Object.entries(qdData.normalized_quantity_by_group).map(([key, value]) => [
+            key, value
+          ]),
+        ];
+        const wsGroup = XLSX.utils.aoa_to_sheet(groupData);
+        XLSX.utils.book_append_sheet(wb, wsGroup, "Normalized by Group");
+      }
+      XLSX.writeFile(wb, "quantity_and_diversity.xlsx");
+    } else if (activeTab === "dyadic") {
+        if (!dyadicAnalysis) return;
+        const edgesArray = Array.isArray(dyadicAnalysis) 
+          ? dyadicAnalysis 
+          : (dyadicAnalysis.significant_edges || []);
+        
+        const sigData = [
+          ["Node 1", "Node 2", "Weight"],
+          ...edgesArray.map((edge) => [edge[0], edge[1], edge[2]]),
+        ];
+        const wsSig = XLSX.utils.aoa_to_sheet(sigData);
+        XLSX.utils.book_append_sheet(wb, wsSig, "Significant Edges");
+        XLSX.writeFile(wb, "dyadic_analysis.xlsx");
+    } else if (activeTab === "cluster") {
+      if (!clusterLabels) return;
+      const clusterData = [
+        ["Node", "Cluster Label"],
+        ...Object.entries(clusterLabels).map(([node, label]) => [
+          node, label
+        ]),
+      ];
+      const wsCluster = XLSX.utils.aoa_to_sheet(clusterData);
+      XLSX.utils.book_append_sheet(wb, wsCluster, "Cluster Labels");
+      
+      // Worksheet for community summary
+      const numberOfClusters = new Set(Object.values(clusterLabels)).size;
+      const compressionRatioValue = compressionRatio !== null ? 
+        compressionRatio.toFixed(4) : "Not available";
+      const summaryData = [
+        ["Metric", "Value"],
+        ["Number of Clusters", numberOfClusters],
+        ["Community Quality (Compression Ratio)", compressionRatioValue]
+      ];
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Community Summary");
+      XLSX.writeFile(wb, "mesoscale_clustering.xlsx");
+    }
+  };
+
+  // Compute sorted data for tables
+  const quantityTableData = useMemo(() => {
+    if (!qdData?.quantity) return [];
+    const data = Object.entries(qdData.quantity).map(([key, value]) => ({
+      Student: key,
+      Quantity: value
+    }));
+    return applySorting(data, quantitySortConfig, ["Quantity"]);
+  }, [qdData?.quantity, quantitySortConfig]);
+
+  const diversityTableData = useMemo(() => {
+    if (!qdData?.diversity) return [];
+    const data = Object.entries(qdData.diversity).map(([key, value]) => ({
+      Student: key,
+      Diversity: value
+    }));
+    return applySorting(data, diversitySortConfig, ["Diversity"]);
+  }, [qdData?.diversity, diversitySortConfig]);
+
+  const normalizedQuantityTableData = useMemo(() => {
+    if (!qdData?.normalized_quantity) return [];
+    const data = Object.entries(qdData.normalized_quantity).map(([key, value]) => ({
+      Student: key,
+      "Normalized Quantity": value
+    }));
+    return applySorting(data, normalizedQuantitySortConfig, ["Normalized Quantity"]);
+  }, [qdData?.normalized_quantity, normalizedQuantitySortConfig]);
+  
+  const categoryQuantityTableData = useMemo(() => {
+    if (!qdData?.quantity_by_category) return [];
+    const data: { Student: string; Category: string; Value: number }[] = [];
+    
+    Object.entries(qdData.quantity_by_category).forEach(([node, categories]) => {
+      Object.entries(categories).forEach(([category, value]) => {
+        data.push({
+          Student: node,
+          Category: category,
+          Value: value as number
+        });
+      });
+    });
+    return applySorting(data, categoryQuantitySortConfig, ["Value"]);
+  }, [qdData?.quantity_by_category, categoryQuantitySortConfig]);
+  
+  const normalizedGroupTableData = useMemo(() => {
+    if (!qdData?.normalized_quantity_by_group) return [];
+    const data = Object.entries(qdData.normalized_quantity_by_group).map(([key, value]) => ({
+      Student: key,
+      "Normalized Quantity": value
+    }));
+    return applySorting(data, normalizedGroupSortConfig, ["Normalized Quantity"]);
+  }, [qdData?.normalized_quantity_by_group, normalizedGroupSortConfig]);
+  
+  const dyadicSigTableData = useMemo(() => {
+    if (!dyadicAnalysis) return [];
+    const edgesArray = Array.isArray(dyadicAnalysis) 
+      ? dyadicAnalysis 
+      : (dyadicAnalysis.significant_edges || []);
+    const data = edgesArray.map((edge) => ({
+      "Node 1": edge[0],
+      "Node 2": edge[1],
+      "Weight": edge[2],
+    }));
+    return applySorting(data, dyadicSigSortConfig, ["Weight"]);
+  }, [dyadicAnalysis, dyadicSigSortConfig]);
+  
+  const clusterTableData = useMemo(() => {
+    if (!clusterLabels) return [];
+    const data = Object.keys(clusterLabels).map((node) => ({
+      Node: node,
+      "Cluster Label": clusterLabels[node],
+    }));
+    return applySorting(data, clusterSortConfig, ["Cluster Label"]);
+  }, [clusterLabels, clusterSortConfig]);
+  
+  // Determine if the current active tab has exportable data
+  const hasExportData = useMemo(() => {
+    if (activeTab === "node-level") {
+      return !!qdData;
+    } else if (activeTab === "dyadic") {
+      return !!dyadicAnalysis;
+    } else if (activeTab === "cluster") {
+      return !!clusterLabels;
+    }
+    return false;
+  }, [activeTab, qdData, dyadicAnalysis, clusterLabels]);
+
+  // Network node highlighting effect
+  useEffect(() => {
+    if (!cyRef.current) return;
+    const cy = cyRef.current;
+    
+    const handleTap = (evt: any) => {
+      const clickedNode = evt.target;
+      const clickedNodeId = clickedNode.id();
+      if (highlightedNodeId === clickedNodeId) {
+        cy.elements().removeClass("highlight");
+        setHighlightedNodeId(null);
+      } else {
+        cy.elements().removeClass("highlight");
+        
+        // Add highlight to the clicked node
+        clickedNode.addClass("highlight");
+        setHighlightedNodeId(clickedNodeId);
+        
+        // Highlight connected edges
+        const connectedEdges = clickedNode.connectedEdges();
+        connectedEdges.addClass("highlight");
+        
+        // Highlight nodes connected to this node
+        const connectedNodes = clickedNode.neighborhood('node');
+        connectedNodes.addClass("highlight");
+      }
+    };
+    
+    const handleBackgroundTap = (evt: any) => {
+      if (evt.target === cy) {
+        cy.elements().removeClass("highlight");
+        setHighlightedNodeId(null);
+      }
+    };
+    
+    cy.on("tap", "node", handleTap);
+    cy.on("tap", handleBackgroundTap);
+    
+    return () => {
+      cy.removeListener("tap", "node", handleTap);
+      cy.removeListener("tap", handleBackgroundTap);
+    };
+  }, [elements, highlightedNodeId]);
+
+  // Node highlighting animation
+  useEffect(() => {
+    if (!cyRef.current || highlightedNodeId === null) return;
+    const cy = cyRef.current;
+    let opacity = 0.7;
+    let increasing = true;
+    let animationFrameId: number;
+    const animate = () => {
+      if (highlightedNodeId === null) return;
+      if (opacity >= 0.98) increasing = false; 
+      if (opacity <= 0.5) increasing = true;
+      opacity += increasing ? 0.015 : -0.015;
+      opacity = Math.min(0.99, Math.max(0.5, opacity));  
+      const highlightedNode = cy.$(`node[id="${highlightedNodeId}"]`);
+      if (highlightedNode && highlightedNode.length > 0) {
+        highlightedNode.style('border-opacity', opacity);
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+    animationFrameId = requestAnimationFrame(animate);
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [highlightedNodeId]);
+
+  // Update groups when groupCol or uploadedData changes
+  useEffect(() => {
+    if (uploadedData && groupCol !== "none") {
+      updateGroups(uploadedData, groupCol);
+    }
+  }, [groupCol, uploadedData]);
+
+  // Store original elements for filtering
+  useEffect(() => {
+    if (elements.length > 0) {
+      setInitialRenderDone(false);
+      if (originalElementsRef.current.length === 0) {
+        originalElementsRef.current = [...elements];
+      }
+    }
+  }, [elements]);
+
+  // Reset fixDeg if required columns change
+  useEffect(() => {
+    if (!["none", student, object1, object2].includes(fixDeg)) {
+      setFixDeg("none");
+    }
+  }, [student, object1, object2]);
+
+  // Update cluster options when clusterLabels changes
+  useEffect(() => {
+    if (clusterLabels) {
+      let uniqueValues = [...new Set(Object.values(clusterLabels))].map(val => String(val));      
+      uniqueValues = uniqueValues.sort((a, b) => {
+        const numA = !isNaN(Number(a)) ? Number(a) : null;
+        const numB = !isNaN(Number(b)) ? Number(b) : null;        
+        if (numA !== null && numB !== null) {
+          return numA - numB;
+        }        
+        const lastPartA = a.split('_').pop() || '';
+        const lastPartB = b.split('_').pop() || '';
+        const extractedA = parseInt(lastPartA, 10);
+        const extractedB = parseInt(lastPartB, 10);
+        if (!isNaN(extractedA) && !isNaN(extractedB)) {
+          return extractedA - extractedB;
+        }        
+        return a.localeCompare(b);
+      });
+      setClusterOptions(["All", ...uniqueValues]);
+      setCluster("All");
+    } else {
+      setClusterOptions(["All"]);
+    }
+  }, [clusterLabels]);
+
+  // Return all the state and functions needed by components
+  return {
+    // Data and state
+    uploadedData,
+    columns,
+    elements,
+    groups,
+    group,
+    student,
+    object1,
+    object2,
+    attr,
+    groupCol,
+    numberCluster,
+    pruning,
+    alpha,
+    fixDeg,
+    layout,
+    currentNetworkView,
+    qdData,
+    dyadicAnalysis,
+    dyadicSigTableData,
+    quantityTableData,
+    diversityTableData,
+    normalizedQuantityTableData,
+    categoryQuantityTableData,
+    normalizedGroupTableData,
+    clusterTableData,
+    clusterLabels,
+    cluster,
+    clusterOptions,
+    compressionRatio,
+    activeTab,
+    showLabels,
+    showEdgeWeights,
+    zoom,
+    selectedCommunityId,
+    communityOptions,
+    hasExportData,
+    cyRef,
+    highlightedNodeId,
+    
+    // Actions
+    handleFileUpload,
+    updateHinaNetwork,
+    updateClusteredNetwork,
+    updateObjectNetwork,
+    handleGroupChange,
+    handleClusterChange,
+    handleCommunityChange,
+    setStudent,
+    setObject1,
+    setObject2,
+    setAttr,
+    setGroupCol,
+    setPruning,
+    setAlpha,
+    setFixDeg,
+    setLayout,
+    setNumberCluster,
+    setActiveTab,
+    setShowLabels,
+    setShowEdgeWeights,
+    setZoom,
+    getAvailableColumns,
+    toggleSort,
+    LAYOUT_OPTIONS,
+    PRUNING_OPTIONS,
+    DEG_OPTIONS,
+    handleSave,
+    zoomIn,
+    zoomOut,
+    resetView,
+    exportToXLSX,
+  };
+}
