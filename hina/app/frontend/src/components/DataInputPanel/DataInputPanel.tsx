@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FileInput,
   Select,
@@ -8,9 +8,10 @@ import {
   Title,
   Paper,
 } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconRefresh, IconUpload, IconFile } from "@tabler/icons-react";
 
 interface DataInputPanelProps {
+  selectedFileName: string | null;
   columns: string[];
   student: string;
   object1: string;
@@ -40,6 +41,7 @@ interface DataInputPanelProps {
 }
 
 export const DataInputPanel: React.FC<DataInputPanelProps> = ({
+  selectedFileName,
   columns,
   student,
   object1,
@@ -67,6 +69,12 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
   updateObjectNetwork,
   getAvailableColumns,
 }) => {
+
+  // Custom file input handler
+  const handleFileChange = (file: File | null) => {
+    handleFileUpload(file);
+  };
+
   // Layout options for dropdown
   const LAYOUT_OPTIONS = [
     { value: "spring", label: "Spring" },
@@ -120,11 +128,15 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
     <>
       <FileInput
         label="Upload File"
-        placeholder="Select CSV/XLSX file"
+        placeholder={selectedFileName || "Select CSV/XLSX file"}
         accept=".csv,.xlsx"
-        onChange={handleFileUpload}
+        onChange={handleFileChange}
         mb="md"
+        leftSection={<IconFile size={16} />}
+        value={null}
+        clearable={false}
       />
+      
       {columns.length > 0 && (
         <Paper withBorder shadow="sm" p="md" mb="md">
           {/* DATA INPUTS SECTION */}

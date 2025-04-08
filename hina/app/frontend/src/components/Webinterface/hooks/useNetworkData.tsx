@@ -32,6 +32,7 @@ export function useNetworkData() {
   const [elements, setElements] = useState<any[]>([]);
   
   // Input parameters
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [groupCol, _setGroupCol] = useState<string>("none");
   const [group, setGroup] = useState<string>("All");  
   const [groups, setGroups] = useState<string[]>([]);
@@ -108,6 +109,25 @@ export function useNetworkData() {
     return options;
   }, [student, object1, object2]);
 
+  // Function to store the filename
+  const handleFileUpload = async (file: File | null) => {
+    if (!file) return;  
+    setSelectedFileName(file.name);
+  
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await axios.post("/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });      
+      setColumns(res.data.columns);
+      setUploadedData(res.data.data);
+      const defaultGroups = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
+      setGroups(defaultGroups);
+    } catch (error) {
+      console.error("Error during file upload:", error);
+    }
+  };
   // Filter available columns function
   const getAvailableColumns = (currentField: string): string[] => {
     const selectedValues = [
@@ -148,24 +168,6 @@ export function useNetworkData() {
     } catch (error) {
       console.error("Error updating groups:", error);
       setGroups(["All"]);
-    }
-  };
-  
-  // Handle file upload
-  const handleFileUpload = async (file: File | null) => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      const res = await axios.post("/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });      
-      setColumns(res.data.columns);
-      setUploadedData(res.data.data);
-      const defaultGroups = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
-      setGroups(defaultGroups);
-    } catch (error) {
-      console.error("Error during file upload:", error);
     }
   };
 
@@ -890,6 +892,7 @@ export function useNetworkData() {
   // Return all the state and functions needed by components
   return {
     // Data and state
+    selectedFileName,
     uploadedData,
     columns,
     elements,

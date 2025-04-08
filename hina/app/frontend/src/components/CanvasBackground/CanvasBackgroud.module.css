@@ -1,0 +1,18 @@
+@keyframes vibrate {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+  
+  .vibrateOnHover {
+    transition: all 0.3s ease;
+  }
+  
+  .vibrateOnHover:hover {
+    animation: vibrate 0.3s linear infinite;
+    box-shadow: 0 0 15px rgba(66, 99, 235, 0.6);
+    transform: scale(1.05);
+  }
