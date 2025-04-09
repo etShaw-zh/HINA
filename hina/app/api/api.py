@@ -208,13 +208,14 @@ async def quantity_diversity_endpoint(
         quantity_results, _ = utils.quantity(B, attr=attr_col, group=group_col, return_type='all')
         # Get diversity
         diversity_results, _ = utils.diversity(B, attr=attr_col)
+        print(f"Quantity results: {quantity_results}")
+        print(f"Diversity results: {diversity_results}")
         
         response = {
             "quantity": quantity_results.get('quantity', {}),
             "normalized_quantity": quantity_results.get('normalized_quantity', {}),
             "diversity": diversity_results
         }
-        
         # Convert tuple keys to string for JSON serialization
         if 'quantity_by_category' in quantity_results:
             category_dict = {}
@@ -225,9 +226,8 @@ async def quantity_diversity_endpoint(
             response["quantity_by_category"] = category_dict
             
         if 'normalized_quantity_by_group' in quantity_results:
-            response["normalized_quantity_by_group"] = quantity_results['normalized_quantity_by_group']
-            
-        return response
+            response["normalized_quantity_by_group"] = quantity_results['normalized_quantity_by_group']       
+        return utils.convert_numpy_scalars(response)
     except Exception as e:
         print(f"Error in quantity_diversity_endpoint: {str(e)}")
 

@@ -22,6 +22,16 @@ def parse_contents(encoded_contents: str, filename: str) -> pd.DataFrame:
     else:
         raise ValueError("Unsupported file format. Please upload a .csv or .xlsx file")
 
+def convert_numpy_scalars(obj):
+    if isinstance(obj, dict):
+        return {convert_numpy_scalars(k): convert_numpy_scalars(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_scalars(i) for i in obj]
+    elif isinstance(obj, np.generic):  
+        return obj.item()
+    else:
+        return obj
+
 def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight):
     """
     Given two node identifiers u and v (which may be of any type), force
