@@ -145,16 +145,24 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
             <Select
               label="Student Column"
               withAsterisk
-              value={student}
-              onChange={(value) => setStudent(value || "")}
-              data={Array.from(new Set([...getAvailableColumns('student'), ...(student ? [student] : [])]))}
+			  value={student === "none" ? null : student}
+			  onChange={(value) => setStudent(value || "none")}
+			  data={[{value: "none", label: ""}].concat(
+				Array.from(new Set([...getAvailableColumns('student'), ...(student !== "none" ? [student] : [])]))
+				.map(col => ({value: col, label: col}))
+				)}
+			  clearable={false}	
             />
             <Select
               label="Object 1 Column"
               withAsterisk
-              value={object1}
-              onChange={(value) => setObject1(value || "")}
-              data={Array.from(new Set([...getAvailableColumns('object1'), ...(object1 ? [object1] : [])]))}
+			  value={object1 === "none" ? null : object1}
+			  onChange={(value) => setObject1(value || "none")}
+			  data={[{value: "none", label: ""}].concat(
+				Array.from(new Set([...getAvailableColumns('object1'), ...(object1 !== "none" ? [object1] : [])]))
+				.map(col => ({value: col, label: col}))
+				)}
+			  clearable={false}
             />
             <Select
               label="Object 2 Column (For Tripartite)"

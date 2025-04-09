@@ -4,7 +4,7 @@ import { IconUpload, IconFile } from '@tabler/icons-react';
 import classes from './CanvasBackgroud.module.css';
 
 interface UploadOverlayProps {
-  onUploadClick: (file: File) => void; // Updated to accept the file directly
+  onUploadClick: (file: File) => void;
 }
 
 const UploadOverlay: React.FC<UploadOverlayProps> = ({ onUploadClick }) => {
