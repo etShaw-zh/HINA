@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
+import { notifications } from '@mantine/notifications';
+import { IconExclamationCircle, IconTimeline } from '@tabler/icons-react';
+import { rem } from '@mantine/core';
+
 
 // Set axios base URL for local development
-axios.defaults.baseURL = 'http://localhost:8000';
+// axios.defaults.baseURL = 'http://localhost:8000';
 
 // Types
 interface QDData {
@@ -118,18 +122,14 @@ export function useNetworkData() {
 		formData.append("file", file);
 		
 		try {
-			// First, get the data from the server
 			const res = await axios.post("/upload", formData, {
 				headers: { "Content-Type": "multipart/form-data" },
 			});
-			
-			// Store temporary values we need to keep
+			showSuccessNotification("File Uploaded", `Successfully uploaded ${file.name}`);
+
 			const newColumns = res.data.columns;
 			const newData = res.data.data;
 			const newGroups = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
-			
-			// Then reset all state COMPLETELY before setting new values
-			// This ensures we don't have race conditions with state updates
 			setElements([]);
 			setCurrentNetworkView(null);
 			setGroups(["All"]);
@@ -177,18 +177,42 @@ export function useNetworkData() {
 			setDyadicSigSortConfig(null);
 			setClusterSortConfig(null);
 			
-			// Use a small delay to ensure all state resets are processed
-			setTimeout(() => {
-				// Now set the new data after all resets have been processed
-				setColumns(newColumns);
-				setUploadedData(newData);
-				setGroups(newGroups);
-			}, 0);
+			setColumns(newColumns);
+			setUploadedData(newData);
+			setGroups(newGroups);
 		} catch (error) {
 			console.error("Error during file upload:", error);
+			showAPIErrorNotification("Upload Error", `Failed to upload ${file.name}: ${error.response?.data?.detail || error.message}`);
 		}
 	};
 
+	// Error notification function
+	const showAPIErrorNotification = (title: string, message: string) => {
+		notifications.show({
+			id: `error-${Date.now()}`,
+			title,
+			message,
+			color: 'red',
+			icon: <IconExclamationCircle />,
+			withBorder: true,
+			autoClose: 6000,
+			withCloseButton: true,
+			position: 'bottom-left',
+		});
+	};
+	// Success notification function
+	const showSuccessNotification = (title: string, message: string) => {
+		notifications.show({
+			id: `success-${Date.now()}`,
+			title,
+			message,
+			color: 'blue',
+			icon: <IconTimeline />,
+			autoClose: 3000,
+			withCloseButton: true,
+			position: 'bottom-left',
+		});
+	};
 
   	// Filter available columns function
 	const getAvailableColumns = (currentField: string): string[] => {
@@ -285,10 +309,13 @@ export function useNetworkData() {
 		setCurrentNetworkView('hina');
 		if (res.data.significant_edges) {
 			setDyadicAnalysis(res.data.significant_edges);
+			showSuccessNotification("Dyadic Analysis", `Identified ${res.data.significant_edges.length} significant edges in the network`);
 		} else {
 			setDyadicAnalysis(null);
 		}
 		fetchQuantityAndDiversity();
+		showSuccessNotification("Network Updated", "HINA network has been successfully built");
+
 		setTimeout(() => {
 			if (cyRef.current) {
 			cyRef.current.fit();
@@ -301,6 +328,7 @@ export function useNetworkData() {
 		} catch (error) {
 		console.error("Error updating HINA network:", error);
 		console.error("Error details:", error.response?.data || error.message)
+		showAPIErrorNotification("Network Error", `Failed to build HINA network: ${error.response?.data?.detail || error.message}`);
 		}
 	};
 
@@ -327,21 +355,27 @@ export function useNetworkData() {
 		setCurrentNetworkView('cluster');
 		if (res.data.cluster_labels) {
 			setClusterLabels(res.data.cluster_labels);
+			const clusterCount = new Set(Object.values(res.data.cluster_labels)).size;
+			showSuccessNotification("Mesoscale Clustering", `Identified ${clusterCount} clusters in the network`);
 		} else {
 			setClusterLabels(null);
 		}
 		// Handle significant edges from cluster result
 		if (res.data.significant_edges) {
 			setDyadicAnalysis(res.data.significant_edges);
+			showSuccessNotification("Dyadic Analysis", `Identified ${res.data.significant_edges.length} significant edges in the network`);
 		} else {
 			setDyadicAnalysis(null);
 		}
 		if (res.data.compression_ratio !== undefined) {
 			setCompressionRatio(res.data.compression_ratio);
+			showSuccessNotification("Community Quality", `Compression ratio: ${res.data.compression_ratio.toFixed(4)}`);
 		} else {
 			setCompressionRatio(null);
 		}
 		fetchQuantityAndDiversity();
+		showSuccessNotification("Network Updated", "Clustered network has been successfully built");
+
 		setTimeout(() => {
 			if (cyRef.current) {
 			cyRef.current.fit();
@@ -353,6 +387,7 @@ export function useNetworkData() {
 		}, 10);
 		} catch (error) {
 		console.error("Error updating Clustered network:", error);
+		showAPIErrorNotification("Network Error", `Failed to build clustered network: ${error.response?.data?.detail || error.message}`);
 		}
 	};
 
@@ -379,6 +414,8 @@ export function useNetworkData() {
 		// Update cluster data from response
 		if (clusterResult.data.cluster_labels) {
 			setClusterLabels(clusterResult.data.cluster_labels);
+			const clusterCount = new Set(Object.values(clusterResult.data.cluster_labels)).size;
+			showSuccessNotification("Mesoscale Clustering", `Identified ${clusterCount} clusters in the network`);
 		} else {
 			setClusterLabels(null);
 		}
@@ -386,6 +423,7 @@ export function useNetworkData() {
 		// Update compression ratio from response
 		if (clusterResult.data.compression_ratio !== undefined) {
 			setCompressionRatio(clusterResult.data.compression_ratio);
+			showSuccessNotification("Community Quality", `Compression ratio: ${clusterResult.data.compression_ratio.toFixed(4)}`);
 		} else {
 			setCompressionRatio(null);
 		}
@@ -406,13 +444,15 @@ export function useNetworkData() {
 			objectParams.append("layout", layout);
 			await fetchObjectGraph(objectParams);
 			fetchQuantityAndDiversity();
-
+			showSuccessNotification("Network Updated", "Tripartite network has been successfully built");
 		} else {
 			console.warn("No object-object graphs found in the data");
+			showAPIErrorNotification("Network Warning", "No object-object graphs were found in the cluster data");
 		}
 		} catch (error) {
 		console.error("Error updating object network:", error);
 		console.error("Error details:", error.response?.data || error.message);
+		showAPIErrorNotification("Network Error", `Failed to build tripartite network: ${error.response?.data?.detail || error.message}`);
 		}
 	};
 
@@ -431,13 +471,16 @@ export function useNetworkData() {
 				edge.data.weight || 1
 			]);
 			setDyadicAnalysis(significantEdges);
+			showSuccessNotification("Dyadic Analysis", `Identified ${significantEdges.length} edges in the object-object graph`);
 			//   console.log(`Found ${significantEdges.length} edges for dyadic analysis`);
 			} else {
 			setDyadicAnalysis([]);
-			console.log("No edges found in the object graph");
+			showAPIErrorNotification("Analysis Warning", "No significant edges found in the object-object graph");
+			console.log("No significant edges found in the object graph");
 			}
 		} else {
 			console.error("Invalid response structure:", res);
+			showAPIErrorNotification("Response Error", "Invalid response structure from the server");
 		}
 		setTimeout(() => {
 			if (cyRef.current) {
@@ -451,6 +494,7 @@ export function useNetworkData() {
 		} catch (error) {
 		console.error("Error getting object graph:", error);
 		console.error("Error details:", error.response?.data || error.message);
+		showAPIErrorNotification("Graph Error", `Failed to build Tripartite network: ${error.response?.data?.detail || error.message}`);
 		}
 	};
 
@@ -483,8 +527,10 @@ export function useNetworkData() {
 		try {
 		const res = await axios.post("/quantity-diversity", params);
 		setQdData(res.data);
+		showSuccessNotification("Node-Level", "Quantity and diversity metrics calculated successfully");
 		} catch (error) {
 		console.error("Error computing Quantity & Diversity:", error);
+		showAPIErrorNotification("Analysis Error", `Failed to compute quantity and diversity metrics: ${error.response?.data?.detail || error.message}`);
 		}
 	};
 

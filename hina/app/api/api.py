@@ -170,7 +170,7 @@ async def build_object_network_endpoint(
         elif layout == 'bipartite':
             object1_nodes = [n for n, d in G.nodes(data=True) if d.get('type') == 'object1']
             if object1_nodes:
-                pos = nx.bipartite_layout(G, object1_nodes)
+                pos = nx.bipartite_layout(G, object1_nodes, align='vertical', scale=1.5, aspect_ratio=0.7)
             else:
                 pos = nx.spring_layout(G, k=0.3)
         else:
@@ -208,8 +208,6 @@ async def quantity_diversity_endpoint(
         quantity_results, _ = utils.quantity(B, attr=attr_col, group=group_col, return_type='all')
         # Get diversity
         diversity_results, _ = utils.diversity(B, attr=attr_col)
-        print(f"Quantity results: {quantity_results}")
-        print(f"Diversity results: {diversity_results}")
         
         response = {
             "quantity": quantity_results.get('quantity', {}),

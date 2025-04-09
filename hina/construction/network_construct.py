@@ -53,7 +53,16 @@ def get_bipartite(df,student_col,object_col,attr_col = None,group_col = None):
      ('ask question', {'bipartite': 'object', 'attr': 'cognitive}), 
      ('answer questions', {'bipartite': 'object', 'attr': 'cognitive'})]
     """
-    
+    # Drop rows with NaN or empty student_col
+    df = df.dropna(subset=[student_col])
+    df = df[df[student_col].astype(str).str.strip() != ""]
+
+    # Fill NaN in other relevant columns
+    fill_cols = [object_col]
+    if attr_col: fill_cols.append(attr_col)
+    if group_col: fill_cols.append(group_col)
+    df[fill_cols] = df[fill_cols].fillna("NA").astype(str)
+	
     edge_dict = Counter([tuple(e) for e in df[[student_col,object_col]].values])
     edgelist = [tuple([it[0][0],it[0][1],{'weight':it[1]}]) for it in edge_dict.items()]
     
@@ -115,7 +124,15 @@ def get_tripartite(df,student_col,object1_col,object2_col,group_col = None):
     ... })
     """  
     df_ = df.copy()
-    df_['joint_objects'] = df_[object1_col].str.cat(df_[object2_col], sep='**', na_rep='NA')
+    # Drop rows with NaN or empty student_col
+    df_ = df_.dropna(subset=[student_col])
+    df_ = df_[df_[student_col].astype(str).str.strip() != ""]
+    # Fill NaN in other columns and convert to string 
+    fill_cols = [object1_col, object2_col]
+    if group_col: fill_cols.append(group_col)
+    df_[fill_cols] = df_[fill_cols].fillna("NA").astype(str)
+    df_['joint_objects'] = df_[object1_col].str.cat(df_[object2_col], sep='**')
+
     edge_dict = Counter([tuple(e) for e in df_[[student_col,'joint_objects']].values])
     edgelist = [tuple([it[0][0],it[0][1],{'weight':it[1]}]) for it in edge_dict.items()]
     

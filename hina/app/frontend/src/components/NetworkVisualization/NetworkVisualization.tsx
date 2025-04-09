@@ -163,7 +163,6 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
               "label": "data(id)", // Always show label for highlighted nodes
               "height": 30,
               "width": 30,
-              // Removed shadow properties that were causing errors
             },
           },
           {
@@ -172,8 +171,11 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
               "line-color": "#ccc",
               "target-arrow-color": "#ccc",
               "curve-style": "bezier",
-              "width": "data(weight)",
-              "label": showEdgeWeights ? "data(label)" : "",
+              "width": (ele) => {
+                const weight = ele.data('weight');
+                return Math.min(1 + Math.sqrt(weight), 8);
+              },              
+			  "label": showEdgeWeights ? "data(label)" : "",
               "font-size": "10px",
               "text-rotation": "autorotate",
               "text-margin-y": 0,
@@ -189,7 +191,10 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
             selector: "edge.highlight",
             style: {
               "line-color": "#FF5733",
-              "width": "data(weight)",
+			  "width": (ele) => {
+                const weight = ele.data('weight');
+                return Math.min(1 + Math.sqrt(weight), 8);
+              },   
               "target-arrow-color": "#FF5733",
               "opacity": 1
             }

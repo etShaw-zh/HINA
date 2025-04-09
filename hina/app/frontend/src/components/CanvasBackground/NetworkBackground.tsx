@@ -14,7 +14,7 @@ const NetworkBackground: React.FC = () => {
   const particles = useRef<Particle[]>([]);
   const animationFrameId = useRef<number>();
   
-  const initializeParticles = (width: number, height: number, count: number = 100) => {
+  const initializeParticles = (width: number, height: number, count: number = 666) => {
     const newParticles: Particle[] = [];
     for (let i = 0; i < count; i++) {
       newParticles.push({
@@ -22,7 +22,7 @@ const NetworkBackground: React.FC = () => {
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 1.5 + 2,
+        radius: Math.random() * 1.5 + 1,
       });
     }
     particles.current = newParticles;

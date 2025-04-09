@@ -228,14 +228,15 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
               onChange={(value) => setLayout(value || "spring")}
               data={LAYOUT_OPTIONS}
             />
-            <NumberInput
-              label="Fixed Number of Cluster (Optional)"
-              value={numberCluster === "" ? undefined : Number(numberCluster)}
-              onChange={(val) => setNumberCluster(val?.toString() || "")}
-              placeholder="None"
-              min={1}
-              allowDecimal={false}
-            />
+			<NumberInput
+				key={`cluster-input-${selectedFileName || 'none'}`}
+				label="Fixed Number of Cluster (Optional)"
+				placeholder="None"
+				value={numberCluster === "" ? undefined : Number(numberCluster)}
+				onChange={(val) => setNumberCluster(val?.toString() || "")}
+				min={1}
+				allowDecimal={false}
+			/>
           </Group>
 
           {/* BUTTONS SECTION */}
