@@ -108,7 +108,7 @@ This example demonstrates how to use the `get_bipartite` and `get_tripartite` fu
 .. code-block:: python
 
     import pandas as pd
-    from hina.construction.network_construct import get_bipartite,get_tripartite
+    from hina.construction import get_bipartite,get_tripartite
 
 **Step 2: Define the dataset**
 

@@ -1,106 +1,104 @@
-Individual
+hina.individual
 ++++++++++++
 
 Tutorial
 ========
 
-The `individual` module provides functions to compute node-level measures for analyzing the quantity and diversity of individuals' interactions in the learning process. These measures quantify how frequently individuals engage in tasks and the diversity of their engagement patterns.
+The `individual` module provides functions for computing node-level measures related to the participation of individuals in learning processes. The module focuses on analyzing the quantity and diversity of interactions based on the connections between individuals and tasks. This module provides  node-level measures for understanding individual participation patterns.
 
-New package contributions can incorporate other node-level measures for understanding individuals’ participation patterns.
+.. list-table:: Functions
 
-Currently, the module contains the `quantity_diversity.py` file, which includes:
+Currently, the module contains the following Python files:
 
-- `get_bipartite`: Constructs a bipartite network projection from a dataset.
-- `quantity_and_diversity`: Computes measures of interaction quantity and diversity for individuals.
-
-Inputs include:
-
-- **df**: A pandas DataFrame containing individual interactions.
-- **student_col**: The column name representing individuals (students).
-- **task_col**: The column name representing tasks.
-
-Outputs include:
-
-- **Quantity**: A dictionary mapping individuals to their total weighted participation in tasks.
-- **Diversity**: A dictionary mapping individuals to their diversity score based on the entropy of their task distribution.
-
-Individual
-==========
-
-This module provides functions for computing node-level measures related to participation in learning networks.
+- `quantity.py`: Provides functions to calculate the quantity of individual interactions with tasks.
+- `diversity.py`: Provides functions to calculate the diversity of individual interactions based on task distributions.
 
 .. list-table:: Functions
    :header-rows: 1
 
    * - Function
      - Description
-   * - `get_bipartite(df, col1, col2) <#get-bipartite>`_
-     - Constructs a bipartite network from dataset columns.
-   * - `quantity_and_diversity(df, student_col, task_col) <#quantity-and-diversity>`_
-     - Computes node-level measures of interaction quantity and diversity.
+   * - `quantity(B, attr=None, group=None, return_type='all') <#quantity>`_
+     - Computes various quantities and normalized quantities for student nodes in a bipartite graph.
+   * - `diversity(B, attr=None) <#diversity>`_
+     - Computes the diversity value of individual nodes in a bipartite graph based on a specified attribute or the object nodeset.
 
 Reference
 ---------
 
-.. _get-bipartite:
+.. _quantity:
 
 .. raw:: html
 
-   <div id="get-bipartite" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">get_bipartite(df, col1, col2)</span> 
-       <a href="../Code/quantity_diversity.html#get-bipartite" class="source-link">[source]</a>
+   <div id="quantity" class="function-header">
+       <span class="class-name">function</span> <span class="function-name">quantity(B, attr=None, group=None, return_type='all')</span> 
+       <a href="../Code/quantity_diversity.html#quantity" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Constructs a bipartite network projection from dataset columns.
+Computes various quantities and normalized quantities for student nodes in a bipartite graph, gauging the quantity of individual involvement in the studied objects.
 
 **Parameters**:
 
 .. raw:: html
 
    <div class="parameter-block">
-       (df, col1, col2)
+       (B, attr=None, group=None, return_type='all')
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing interaction records.</li>
-       <li><span class="param-name">col1</span>: The column name representing one set of nodes (e.g., individuals).</li>
-       <li><span class="param-name">col2</span>: The column name representing the second set of nodes (e.g., tasks). If a tuple of column names is provided, attributes will be merged into a composite index.</li>
+       <li><span class="param-name">B</span>: A bipartite graph with weighted edges. Nodes are expected to have attributes if <code>attr</code> or <code>group</code> is provided.</li>
+       <li><span class="param-name">attr</span>: The name of the object node attribute used to categorize the connected object nodes. If provided, the function calculates quantity by category. Default is <code>None</code>.</li>
+       <li><span class="param-name">group</span>: The name of the student node attribute used to group nodes. If provided, the function calculates normalized quantity by group. Default is <code>None</code>.</li>
+       <li><span class="param-name">return_type</span>: Specifies the type of results to return. Options are:
+		<ul>
+            <li><code>'all'</code>: Returns all computed quantities (default).</li>
+            <li><code>'quantity'</code>: Returns only the raw quantity for each node.</li>
+            <li><code>'quantity_by_category'</code>: Returns only the quantity partitioned by category.</li>
+            <li><code>'normalized_quantity'</code>: Returns only the normalized quantity for each node.</li>
+            <li><code>'normalized_quantity_by_group'</code>: Returns only the normalized quantity by group.</li>
+		</ul>
    </ul>
 
 **Returns**:
-  - **set**: A set of tuples `(i, j, w)`, where `i` and `j` are node labels, and `w` is the edge weight (interaction frequency).
+  - **dict**: A dictionary containing the computed quantities based on the `return_type` parameter. Possible keys include:
 
-.. _quantity-and-diversity:
+    - ``'quantity'``: A dictionary mapping each node to its total edge weight.
+    - ``'normalized_quantity'``: A dictionary mapping each node to its normalized edge weight.
+    - ``'quantity_by_category'``: A dictionary mapping (node, category) tuples to their total edge weight.
+    - ``'normalized_quantity_by_group'``: A dictionary mapping each node to its normalized edge weight within its group.
+
+  - **dataframe**: A dataframe containing the diversity value of each student node.
+
+
+.. _diversity:
 
 .. raw:: html
 
-   <div id="quantity-and-diversity" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">quantity_and_diversity(df, student_col, task_col)</span> 
-       <a href="../Code/quantity_diversity.html#quantity-and-diversity" class="source-link">[source]</a>
+   <div id="diversity" class="function-header">
+       <span class="class-name">function</span> <span class="function-name">diversity(B, attr=None)</span> 
+       <a href="../Code/quantity_diversity.html#diversity" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Computes node-level measures of interaction quantity and diversity.
+Computes the diversity value of individual nodes in a bipartite graph based on a specified attribute or the object nodeset.
 
 **Parameters**:
 
 .. raw:: html
 
    <div class="parameter-block">
-       (df, student_col, task_col, weight_col)
+       (B, attr=None)
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing interaction records.</li>
-       <li><span class="param-name">student_col</span>: The column name representing individuals.</li>
-       <li><span class="param-name">task_col</span>: The column name representing tasks.</li>
+       <li><span class="param-name">B</span>: A bipartite graph. Nodes are expected to have a 'bipartite' attribute indicating their partition.</li>
+       <li><span class="param-name">attr</span>: The column name of the attribute related to the studied objects. If provided, diversity is calculated based on the categories of the specified attribute. Default is <code>None</code>.</li>
    </ul>
 
 **Returns**:
-  - **tuple**: Two dictionaries:
-    - **quantities**: `{node: quantity}` mapping individuals to their total weighted participation.
-    - **diversities**: `{node: diversity}` mapping individuals to their diversity score (entropy of task distribution).
+  - **dict**: A dictionary where keys are nodes and values are their diversity values, indicating how evenly their connections are distributed across different categories.
+  - **dataframe**: A dataframe containing the diversity value of each student node.
 
 Demo
 ====
@@ -108,15 +106,14 @@ Demo
 Example Code
 ------------
 
-This example demonstrates how to use the `quantity_and_diversity` function to compute node-level measures.
+This example demonstrates how to use the `quantity` and `diversity` functions to compute node-level measures.
 
 **Step 1: Import necessary libraries**
 
 .. code-block:: python
 
     import pandas as pd
-    from hina.construction.network_construct import get_bipartite
-    from hina.individual.quantity_diversity import quantity_and_diversity
+    from hina.individual import quantity, diversity
 
 **Step 2: Define the dataset**
 
@@ -124,82 +121,55 @@ A dataset containing student-task interactions:
 
 .. code-block:: python
 
-    data = {
-        'student': ['Student 1', 'Student 2', 'Student 1', \
-                    'Student 1', 'Student 1','Student 2',\
-                    'Student 2','Student 1','Student 2'],
-        'task_category_1': ['Code 1', 'Code 1', 'Code 2', 'Code 2', 'Code 2', 'Code 3',\
-                 'Code 3', 'Code 4', 'Code 4'],
-        'task_category_2': ['Code A', 'Code A', 'Code A', 'Code A', 'Code A', 'Code B',\
-                 'Code B', 'Code B', 'Code B']
-    }
-   df = pd.DataFrame(data)
+    df = pd.DataFrame({
+         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
+         'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring'],
+         'object2': ['tilt head', 'shake head', 'nod head', 'nod head'],
+         'group': ['A', 'B', 'A', 'B'],
+         'attr': ['cognitive', 'cognitive', 'metacognitive', 'metacognitive']
+     })
 
-**Step 3a: Construct the bipartite network**
+**Step 3: Construct the bipartite network representation**
 
-We create a bipartite network representation of the interactions between students and task codes in category 1.
+We create a bipartite network representation of the interactions between students and objects in the 'object1' category, adding the additional attribute 'attr' storing object codes.
 
 .. code-block:: python
 
-    bipartite_graph = get_bipartite(df, 'student', 'task_category_1')
-    print("Bipartite Network with First Set of Task Codes:\n", bipartite_graph)
+    B = get_bipartite(df,student_col='student', object_col='object1', attr_col='attr', group_col='group')
 
-**Step 3b: Construct an alternative bipartite network**
+**Step 4a: Compute quantity measures**
 
-We create a bipartite network representation of the interactions between students and task codes in category 2.
-
-.. code-block:: python
-
-    bipartite_graph = get_bipartite(df, 'student', 'task_category_2')
-    print("Bipartite Network with Second Set of Task Codes:\n", bipartite_graph)
-
-**Step 4a: Compute quantity and diversity measures**
-
-Calculate the participation quantity and diversity for each student relative to the task codes in category 1.
+We calculate the quantity of interactions for each student relative to the object.
 
 .. code-block:: python
 
-    quantities, diversities = quantity_and_diversity(df, 'student', 'task_category_1')
-    print("Quantities for Code Category 1:\n", quantities)
-    print("Diversities for Code Category 1:\n", diversities)
+    quantities = quantity(B, attr='attr', group='group', return_type='all')
+    print("Quantities for bipartite network:\n", quantities[0])
 
-**Step 4b: Compute quantity and diversity measures for alternative task codes**
+**Step 4b: Compute diversity measures**
 
-Calculate the participation quantity and diversity for each student relative to the task codes in category 2.
+We calculate the diversity of interactions for each student relative to the object.
 
 .. code-block:: python
 
-    quantities, diversities = quantity_and_diversity(df, 'student', 'task_category_2')
-    print("Quantities for Code Category 2:\n", quantities)
-    print("Diversities for Code Category 2:\n", diversities)
-
-
+	diversities = diversity(B, attr='attr')
+	print("Diversities for Tbipartite network:\n", diversities[0])
 
 Example Output
 --------------
 
 .. code-block:: console
 
-    Bipartite Network with First Set of Task Codes:
-    {('Student 2', 'Code 3', 2), ('Student 1', 'Code 4', 1), ('Student 1', 'Code 2', 3), ('Student 1', 'Code 1', 1), ('Student 2', 'Code 1', 1), ('Student 2', 'Code 4', 1)}
+	Quantities for bipartite network:
+	{'quantity': {'Alice': 2, 'Bob': 1, 'Charlie': 1}, 
+	'normalized_quantity': {'Alice': 0.5, 'Bob': 0.25, 'Charlie': 0.25}, 
+	'quantity_by_category': defaultdict(<class 'float'>, {('Alice', 'cognitive'): 1.0, ('Alice', 'metacognitive'): 1.0, ('Bob', 'cognitive'): 1.0, ('Charlie', 'metacognitive'): 1.0}), 
+	'normalized_quantity_by_group': {'Alice': 1.0, 'Bob': 0.5, 'Charlie': 0.5}}
 
-   Bipartite Network with Second Set of Task Codes:
-    {('Student 1', 'Code A', 4), ('Student 1', 'Code B', 1), ('Student 2', 'Code A', 1), ('Student 2', 'Code B', 3)}
-   
-   Quantities for Code Category 1:
-    {'Student 2': 0.4444444444444444, 'Student 1': 0.5555555555555556}
-  
-   Diversities for Code Category 1:
-    {'Student 2': 0.75, 'Student 1': 0.6854752972273345}
-  
-   Quantities for Code Category 2:
-    {'Student 1': 0.5555555555555556, 'Student 2': 0.4444444444444444}
- 
-   Diversities for Code Category 2:
-    {'Student 1': 0.7219280948873623, 'Student 2': 0.8112781244591328}
+	Diversities for Tbipartite network:
+	{'Alice': 1.0, 'Bob': -0.0, 'Charlie': -0.0}
 
 Paper Source
 ============
 
 If you use this function in your work, please cite:
-
