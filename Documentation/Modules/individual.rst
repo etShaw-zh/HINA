@@ -114,6 +114,7 @@ This example demonstrates how to use the `quantity` and `diversity` functions to
 
     import pandas as pd
     from hina.individual import quantity, diversity
+    from hina.construction import get_bipartite
 
 **Step 2: Define the dataset**
 
@@ -173,3 +174,5 @@ Paper Source
 ============
 
 If you use this function in your work, please cite:
+
+Feng, S., Gibson, D., & Gasevic, D. (2025). Analyzing students' emerging roles based on quantity and heterogeneity of individual contributions in small group online collaborative learning using bipartite network analysis. Journal of Learning Analytics, 12(1), 253–270.

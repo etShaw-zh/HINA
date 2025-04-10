@@ -1,18 +1,16 @@
-Mesoscale
+hina.mesoscale
 ++++++++++++
 
 Tutorial
 ========
 
-The `mesoscale` module provides methods for clustering one set of nodes in a heterogeneous interaction network based on their shared interactions with nodes in another node set. The clustering methods employed automatically learn the number of clusters from the heterogeneity in the interaction data to find the mesoscale representation.
-
-New package contributions can incorporate other algorithms for understanding the mesoscale structure of interaction networks.
+The `mesoscale` module provides methods for clustering one set of nodes in a heterogeneous interaction network based on their shared interactions with nodes in another node set. The clustering methods employed automatically learn the number of clusters from the heterogeneity in the interaction data to find the mesoscale representation. This module can incorporate other algorithms for understanding the mesoscale structure of interaction networks.
 
 Currently, the module contains the `clustering.py` file, which includes:
 
-- `bipartite_communities`: Identifies communities in a bipartite network by optimizing a Minimum Description Length (MDL) objective that modifies the microcanonical stochastic block model for the intended clustering task.
+- `hina_communities`: Identifies communities in a bipartite/tripartite network by optimizing a Minimum Description Length (MDL) objective that modifies the microcanonical stochastic block model for the intended clustering task.
 
-The MDL bipartite community detection method bipartite_communities (custom developed for the HINA package) finds a community partition of the nodes in the first node set using an information theoretic objective function that automatically selects for the optimal number of clusters. This objective scores a partition of the nodes according to how well it allows for the transmission of the bipartite graph while exploiting redundancies in the edges coming from members of the same community. It develops a description length objective by breaking the information transmission process into three steps: (1) Transmit community labels of nodes in the first set; (2) Transmit total edge weight contributions from each of the communities; (3) Transmit weights of each edge from Set 1 to Set 2 (the graph) given the constraints imposed by (1) and (2). Following these steps, the objective we use is:
+The MDL hina community detection method hina_communities (custom developed for the HINA package) finds a community partition of the nodes in the first node set using an information theoretic objective function that automatically selects for the optimal number of clusters. This objective scores a partition of the nodes according to how well it allows for the transmission of the bipartite/tripartite graph while exploiting redundancies in the edges coming from members of the same community. It develops a description length objective by breaking the information transmission process into three steps: (1) Transmit community labels of nodes in the first set; (2) Transmit total edge weight contributions from each of the communities; (3) Transmit weights of each edge from Set 1 to Set 2 (the graph) given the constraints imposed by (1) and (2). Following these steps, the objective we use is:
 
 .. math::
 
@@ -22,48 +20,33 @@ where:
     - :math:`b` is a partition of the nodes in the first node set into :math:`B` non-empty communities such that :math:`b_i` is the community of node :math:`i`
     - :math:`N_1` and :math:`N_2` are the sizes of the first node set and second node set respectively
     - :math:`n_r` is the size of community :math:`r \in \{1, \dots, B\}`
-    - :math:`W` is the total weight of the edges in the bipartite graph
+    - :math:`W` is the total weight of the edges in the bipartite/tripartite graph
     - :math:`w_{rj}` is the total weight of the edges from nodes in community :math:`r` to node :math:`j` in the second node set
 
 The method optimizes this MDL objective approximately using a fast agglomerative scheme in which we start with every node in its own cluster and iteratively merge the pair of communities that produces the greatest decrease to the description length until all nodes are grouped together. Afterwards, we scan over all solution candidates to identify the MDL-optimal partition.
-
-Inputs for bipartite_communities:
-
-- **G**: A bipartite network represented as a set of tuples :math:`(i,j,w)` representing edge between nodes :math:`i` and :math:`j` of weight/frequency :math:`w`.
-- **fix_B**: Fixes the number of clusters at specified value (optional, if `None`, the algorithm determines it automatically).
-
-Outputs include:
-
-- **Cluster labels**: A dictionary mapping nodes to their respective cluster labels.
-- **Compression ratio**: The description length divided by the naive description length, indicating the effectiveness of the inferred community structure.
-
-mesoscale
-=========
-
-This module provides methods for detecting mesoscale structures in bipartite interaction networks.
 
 .. list-table:: Functions
    :header-rows: 1
 
    * - Function
      - Description
-   * - `bipartite_communities(G, fix_B=None) <#bipartite-communities>`_
-     - Identifies bipartite communities by optimizing the MDL objective.
+   * - `hina_communities(G, fix_B=None) <#hina_communities>`_
+     - Identifies bipartite/tripartite communities by optimizing the MDL objective.
 
 Reference
 ---------
 
-.. _bipartite-communities:
+.. _hina_communities:
 
 .. raw:: html
 
-   <div id="bipartite-communities" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">bipartite_communities(G, fix_B=None)</span> 
-       <a href="../Code/clustering.html#bipartite-communities" class="source-link">[source]</a>
+   <div id="hina-communities" class="function-header">
+       <span class="class-name">function</span> <span class="function-name">hina_communities(G, fix_B=None)</span> 
+       <a href="../Code/clustering.html#hina-communities" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Optimizes an MDL objective to find bipartite communities in the network.
+Optimizes a Minimum Description Length (MDL) objective to identify communities in a bipartite/tripartite network. The MDL objective quantifies the trade-off between the complexity of the community structure and the efficiency of encoding the network information. The algorithm begins by assigning each node in the first node set to its own community, then iteratively merges communities that produce the greatest decrease in the total description length. The optimal partition is chosen either automatically or by fixing the number of communities via the `fix_B` parameter.
 
 **Parameters**:
 
@@ -74,13 +57,33 @@ Optimizes an MDL objective to find bipartite communities in the network.
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">G</span>: A weighted edge set represented as tuples <code>(i, j, w_ij)</code>, where <code>w_ij</code> is a positive integer.</li>
-       <li><span class="param-name">fix_B</span>: Fixed number of clusters (optional). If <code>None</code>, the number of clusters is learned automatically.</li>
+       <li>
+           <span class="param-name">G</span>: A bipartite network represented as a NetworkX graph with weighted edges.
+           <ul>
+               <li>Edges are expected to be represented as tuples <code>(i, j, w)</code>, where <code>i</code> and <code>j</code> are node labels and <code>w</code> is a positive integer.</li>
+           </ul>
+       </li>
+       <li>
+           <span class="param-name">fix_B</span>: (Optional) An integer specifying a fixed number of communities.
+           <span class="default-value">Default: <code>None</code></span>.
+           <ul>
+               <li>If set to <code>None</code>, the algorithm automatically determines the optimal number of communities.</li>
+               <li>If an integer is provided, the nodes will be partitioned into exactly that many communities.</li>
+           </ul>
+       </li>
    </ul>
 
 **Returns**:
-  - **dict**: Dictionary mapping nodes to their respective community labels.
-  - **float**: Compression ratio (description length with inferred communities divided by naive description length).
+  - **dict**: A dictionary containing:
+
+    - ``number of communities``: The number of communities detected.
+    - ``node communities``: A dictionary mapping each node (as a string) to its community label.
+    - ``community structure quality value``: A float representing the compression ratio (i.e. the inferred description length divided by the naive description length).
+    - ``updated graph object``: The original input graph updated with a node attribute (e.g., ``communities``) indicating each node's community assignment.
+    - ``sub graphs for each community``: A dictionary where keys are community labels and values are the corresponding subgraphs containing nodes of that community.
+    - For tripartite networks, an additional key:
+
+      - ``object-object graphs for each community``: A dictionary mapping community labels to projected graphs of object interactions within each community.
 
 Demo
 ====
@@ -88,7 +91,7 @@ Demo
 Example Code
 ------------
 
-This example demonstrates how to use `bipartite_communities` for clustering nodes in a bipartite network.
+This example demonstrates how to use `hina_communities` for clustering nodes in a bipartite network.
 
 **Step 1: Import necessary libraries**
 
@@ -96,59 +99,72 @@ This example demonstrates how to use `bipartite_communities` for clustering node
 
     import pandas as pd
     from hina.construction import get_bipartite
-    from hina.mesoscale import bipartite_communities
+    from hina.dyad import prune_edges
 
-**Step 2: Define the bipartite graph**
+**Step 2: Define the dataset**
 
-We define a bipartite graph based on the `synthetic_data_simple' example file.
+A dataset containing student-task interactions:
 
 .. code-block:: python
 
-    df = pd.read_csv('synthetic_data_simple.csv')
-    G = get_bipartite(df,'student id','task')
+    df = pd.DataFrame({
+         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
+         'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring'],
+         'object2': ['tilt head', 'shake head', 'nod head', 'nod head'],
+         'group': ['A', 'B', 'A', 'B'],
+         'attr': ['cognitive', 'cognitive', 'metacognitive', 'metacognitive']
+     })
 
-**Step 3: Compute bipartite communities using MDL optimization**
+**Step 3: Construct the bipartite network representation**
+
+We create a bipartite network representation of the interactions between students and objects in the 'object1' category, adding the additional attribute 'attr' storing object codes.
+
+.. code-block:: python
+
+    B = get_bipartite(df,student_col='student', object_col='object1', attr_col='attr', group_col='group')
+
+**Step 4a: Compute bipartite communities using MDL optimization**
 
 We identify communities in the bipartite network by minimizing the MDL objective.
 
 .. code-block:: python
 
-   community_labels, compression_ratio = bipartite_communities(G)
+    result_no_fix = hina_communities(B)
 
-   print("Community Labels, B learned:\n", community_labels,'\n')
-   print("Compression Ratio, B learned:\n", compression_ratio)
+    print("Community Summary (No Number of Community Fixing):\n", result_no_fix,'\n')
 
-
-**Step 4: Apply clustering with a fixed number of clusters**
+**Step 4b: Apply clustering with a fixed number of clusters**
 
 If desired, we can fix the number of clusters manually.
 
 .. code-block:: python
 
-    community_labels_fixed, compression_ratio_fixed = bipartite_communities(G, fix_B=2)
+    result_fix = hina_communities(B, fix_B=2)
 
-    print("Community Labels, B=2:\n", community_labels_fixed,'\n')
-    print("Compression Ratio, B=2:\n", compression_ratio_fixed)
+    print("Community Summary (Number of Two Community Fixing):\n", result_fix,'\n')
 
 Example Output
 --------------
 
 .. code-block:: console
 
-    Community Labels, B learned:
-       {'student_3': 2, 'student_2': 0, 'student_26': 1, 'student_24': 0, 'student_0': 1, 'student_20': 3, 'student_18': 1, 'student_9': 0, 'student_16': 1, 'student_17': 0, 'student_7': 3, 'student_21': 1, 'student_14': 0, 'student_15': 1, 'student_29': 0, 'student_22': 0, 'student_5': 1, 'student_6': 1, 'student_25': 3, 'student_8': 2, 'student_28': 2, 'student_23': 2, 'student_4': 0, 'student_10': 1, 'student_1': 1, 'student_27': 0, 'student_13': 2, 'student_19': 0, 'student_12': 0, 'student_11': 1} 
+    Community Summary (No Number of Community Fixing):
+    {'number of communities': 3,
+     'node communities': {'Charlie': 0, 'Bob': 1, 'Alice': 2},
+     'community structure quality value': 1.0, 
+     'updated graph object': <networkx.classes.graph.Graph object at 0x31870bd40>, 
+     'sub graphs for each community': {0: <networkx.classes.graph.Graph object at 0x318709910>, 1: <networkx.classes.graph.Graph object at 0x31870b6b0>, 2: <networkx.classes.graph.Graph object at 0x3187086b0>}} 
 
-    Compression Ratio, B learned:
-       0.7439771231064406
-
-    Community Labels, B=2:
-       {'student_3': 'Merge_at_Beq_4', 'student_2': 'Merge_at_Beq_3', 'student_26': 'Merge_at_Beq_3', 'student_24': 'Merge_at_Beq_3', 'student_0': 'Merge_at_Beq_3', 'student_20': 'Merge_at_Beq_4', 'student_18': 'Merge_at_Beq_3', 'student_9': 'Merge_at_Beq_3', 'student_16': 'Merge_at_Beq_3', 'student_17': 'Merge_at_Beq_3', 'student_7': 'Merge_at_Beq_4', 'student_21': 'Merge_at_Beq_3', 'student_14': 'Merge_at_Beq_3', 'student_15': 'Merge_at_Beq_3', 'student_29': 'Merge_at_Beq_3', 'student_22': 'Merge_at_Beq_3', 'student_5': 'Merge_at_Beq_3', 'student_6': 'Merge_at_Beq_3', 'student_25': 'Merge_at_Beq_4', 'student_8': 'Merge_at_Beq_4', 'student_28': 'Merge_at_Beq_4', 'student_23': 'Merge_at_Beq_4', 'student_4': 'Merge_at_Beq_3', 'student_10': 'Merge_at_Beq_3', 'student_1': 'Merge_at_Beq_3', 'student_27': 'Merge_at_Beq_3', 'student_13': 'Merge_at_Beq_4', 'student_19': 'Merge_at_Beq_3', 'student_12': 'Merge_at_Beq_3', 'student_11': 'Merge_at_Beq_3'} 
-
-    Compression Ratio, B=2:
-       0.7509732725277739
+    Community Summary (Number of Two Community Fixing):
+    {'number of communities': 2,
+     'node communities': {'Charlie': 0, 'Bob': 0, 'Alice': 1}, 
+     'community structure quality value': 1.0732048281404236, 
+     'updated graph object': <networkx.classes.graph.Graph object at 0x31870bd40>, 
+     'sub graphs for each community': {0: <networkx.classes.graph.Graph object at 0x318708860>, 1: <networkx.classes.graph.Graph object at 0x31870b6e0>}} 
 
 Paper Source
 ============
 
 If you use this function in your work, please cite:
 
+Feng, S., Gibson, D., & Gasevic, D. (2025). Analyzing students' emerging roles based on quantity and heterogeneity of individual contributions in small group online collaborative learning using bipartite network analysis. Journal of Learning Analytics, 12(1), 253–270.

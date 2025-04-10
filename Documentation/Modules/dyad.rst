@@ -1,43 +1,24 @@
-Dyad
-+++++
+hina.dyad
++++++++++
 
 Tutorial
 ========
 
-The `dyad` module provides methods to identify statistically significant edges in heterogeneous interaction networks relative to multiple null models of interaction structure. The user can specify different null models, allowing for flexibility in analyzing dyad-level interaction patterns.
+The `dyad` module provides functions for the statistical analysis of interactions in heterogeneous networks at the dyad level. This module focuses on identifying statistically significant edges by comparing observed edge weights against a binomial-based null model. The null model may be configured to fix the weighted degrees for nodes in a specified set. This module provides dyad-level analyses for heterogeneous networks.
 
-Currently, the module contains the `significant_edges.py` file, which includes the `prune_edges` function to filter statistically significant edges based on a null model.
 
-This function evaluates edges using a binomial significance test and supports different constraints on node degrees.
+Currently, the module contains the `significant_edges.py` file, which includes:
 
-Inputs:
+- `prune_edges(B, fix_deg='None', alpha=0.05)`: Prunes edges in a bipartite graph by retaining only those that are statistically significant under a specified null model.
 
-- **G**: A list of tuples representing edges `(i, j, w)`, where `i` and `j` are nodes, and `w` is the weight or frequency of interaction.
-- **alpha**: The significance level (default: `0.05`).
-- **fix_deg**: Specifies which set of nodes should have fixed degrees in the null model. Options include:
- 
-   - `'None'`: No degree constraints.
-   - `'Set 1'`: Fix weighted degrees (sum of incident edge weights) for nodes in the first set.
-   - `'Set 2'`: Fix weighted degrees (sum of incident edge weights) for nodes in the second set.
-
-Outputs:
-
-- A subset of `G` containing only the edges whose weight is statistically significant relative to the specified null model.
-
-The function can be extended with additional null models incorporating additional constraints.
-
-dyad
-====
-
-This module provides functions for statistical analysis of interactions in heterogeneous networks.
 
 .. list-table:: Functions
    :header-rows: 1
 
    * - Function
      - Description
-   * - `prune_edges(G, alpha=0.05, fix_deg='Set 1') <#prune-edges>`_
-     - Compute statistically significant edges under different null models.
+   * - `prune_edges(B, fix_deg='None', alpha=0.05) <#prune-edges>`_
+     - Computes statistically significant edges using a binomial null model with optional fixed degrees.
 
 Reference
 ---------
@@ -47,47 +28,47 @@ Reference
 .. raw:: html
 
    <div id="prune-edges" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">prune_edges(G, alpha=0.05, fix_deg='Set 1')</span> 
-       <a href="../Code/prune_edges.html#prune-edges" class="source-link">[source]</a>
+       <span class="class-name">function</span> <span class="function-name">prune_edges(B, fix_deg='None', alpha=0.05)</span>
+       <a href="../Code/significant_edges.html#prune-edges" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Compute edges that are statistically significant under a null model where the degree of nodes in a specified set is fixed, as in Feng et al. (2023).
+Prunes edges in a bipartite graph to retain only those that are statistically significant under a null model. The function uses a binomial significance test to compare each edge's weight against a threshold derived from the overall edge weight distribution or, when specified, the degree-constrained distribution for nodes whose degrees are fixed. This allows for flexible analysis of dyad-level interaction patterns.
 
 **Parameters**:
 
 .. raw:: html
 
    <div class="parameter-block">
-       (G, alpha=0.05, fix_deg='Set 1')
+       (B, fix_deg='None', alpha=0.05)
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">G</span>: A list of tuples representing the edges in the graph, where each tuple is of the form <code>(i, j, w)</code>.
+       <li>
+           <span class="param-name">B</span>: A NetworkX graph representing a bipartite network with weighted edges.
            <ul>
-               <li><code>i</code> and <code>j</code> are the node labels.</li>
-               <li><code>w</code> is the weight (or frequency) of the edge between <code>i</code> and <code>j</code>.</li>
+               <li>Nodes must have a <code>bipartite</code> attribute indicating their partition.</li>
            </ul>
        </li>
-       <li><span class="param-name">alpha</span>: The significance level for retaining edges.
+       <li>
+           <span class="param-name">alpha</span>: The significance level for retaining edges.
            <span class="default-value">Default: <code>0.05</code></span>.
        </li>
-       <li><span class="param-name">fix_deg</span>: Specifies the set of nodes whose degrees are fixed during the null model testing.
+       <li>
+           <span class="param-name">fix_deg</span>: Specifies the node set for which the weighted degrees are fixed in the null model.
            <ul>
-               <li><code>'None'</code>: No degree constraints.</li>
-               <li><code>'Set 1'</code>: Fix weighted degrees (sum of incident edge weights) for nodes in the first set.</li>
-               <li><code>'Set 2'</code>: Fix weighted degrees (sum of incident edge weights) for nodes in the second set.</li>
+               <li><code>'None'</code>: No degree constraints are applied.</li>
+               <li>Any student or object column string (e.g., <code>'student'</code> or <code>'object1'</code>) will fix the weighted degrees for nodes whose <code>bipartite</code> attribute matches that string.</li>
            </ul>
-           <span class="default-value">Default: <code>'Set 1'</code></span>.
+           <span class="default-value">Default: <code>'None'</code></span>.
        </li>
    </ul>
 
 **Returns**:
-  - **set**: A set of edges that are statistically significant based on the null model.
+  - **dict**: A dictionary containing:
 
-**Notes**:
-- Uses the binomial distribution to determine significance thresholds for edge weights.
-- Can be extended to incorporate other dyad-level analyses for interaction networks.
+    - ``pruned network``: A NetworkX graph representing the pruned network with only statistically significant edges.
+    - ``significant edges``: A set of tuples ``(i, j, w)``, where ``i`` and ``j`` are node labels and ``w`` is the weight of the edge.
 
 Demo
 ====
@@ -95,79 +76,75 @@ Demo
 Example Code
 ------------
 
-This example demonstrates how to use the `prune_edges` function for filtering significant edges in a graph using different null models.
+This example demonstrates how to use the `prune_edges` function to filter significant edges in a bipartite network.
 
 **Step 1: Import necessary libraries**
 
 .. code-block:: python
 
-    from hina.dyad.significant_edges import prune_edges
+    import pandas as pd
+    from hina.construction import get_bipartite
+    from hina.dyad import prune_edges
 
-**Step 2: Define the graph**
+**Step 2: Define the dataset**
 
-A small weighted interaction network is defined as follows:
+A dataset containing student-task interactions:
 
 .. code-block:: python
 
-    G = [('Student 1','Task 1',1),\
-     ('Student 1','Task 2',2),\
-     ('Student 1','Task 3',10),\
-     ('Student 2','Task 1',5),\
-     ('Student 2','Task 2',10),\
-     ('Student 2','Task 3',20),\
-     ('Student 3','Task 1',10),\
-     ('Student 3','Task 2',15),\
-     ('Student 3','Task 3',30)]
+    df = pd.DataFrame({
+         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
+         'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring'],
+         'object2': ['tilt head', 'shake head', 'nod head', 'nod head'],
+         'group': ['A', 'B', 'A', 'B'],
+         'attr': ['cognitive', 'cognitive', 'metacognitive', 'metacognitive']
+     })
 
-**Step 3: Compute significant edges with no degree fixing**
+**Step 3: Construct the bipartite network representation**
 
-This method tests edge significance without fixing the degree of any nodes, preferring edges with higher overall weight.
+We create a bipartite network representation of the interactions between students and objects in the 'object1' category, adding the additional attribute 'attr' storing object codes.
+
+.. code-block:: python
+
+    B = get_bipartite(df,student_col='student', object_col='object1', attr_col='attr', group_col='group')
+
+**Step 4: Compute significant edges without fixing degrees**
 
 .. code-block:: python
 
     alpha = 0.05  # Significance level
-    result = prune_edges(G, alpha, fix_deg=None)
+    result_none = prune_edges(B, fix_deg='None', alpha=alpha)
+    print("Significant Edges (No Degree Fixing):", result_none['significant edges'])
 
-    print("Significant Edges (No Degree Fixing):", result)
-
-**Step 4: Compute significant edges with fixed degrees for Set 1**
-
-This method tests edge significance while fixing weighted degrees for nodes in "Set 1", preferring edges whose weight is high relative to other edges attached to the same Set 1 node.
+**Step 5: Compute significant edges with fixed degrees for Student nodes**
 
 .. code-block:: python
 
-    result_set1 = prune_edges(G, alpha, fix_deg='Set 1')
+    result_student= prune_edges(B, alpha=alpha, fix_deg='student')
+    print("Significant Edges (Fixing Degree for Student):", result_student['significant edges'])
 
-    print("Significant Edges (Fixing Degree for Set 1):", result_set1)
-
-**Step 5: Compute significant edges with fixed degrees for Set 2**
-
-This method tests edge significance while fixing weighted degrees for nodes in "Set 2", preferring edges whose weight is high relative to other edges attached to the same Set 2 node.
+**Step 6: Compute significant edges with fixed degrees for Object1 nodes**
 
 .. code-block:: python
 
-    result_set2 = prune_edges(G, alpha, fix_deg='Set 2')
-
-    print("Significant Edges (Fixing Degree for Set 2):", result_set2)
+    result_object = prune_edges(B, alpha=alpha, fix_deg='object1')
+    print("Significant Edges (Fixing Degree for Object1):", result_object['significant edges'])
 
 Example Output
 --------------
 
-The function outputs a set of edges that are statistically significant under the given null model.
-
 .. code-block:: console
 
-    Significant Edges (No Degree Fixing): 
-     {('Student 2', 'Task 3', 20), ('Student 3', 'Task 3', 30)} 
-
-    Significant Edges (Fixing Degree for Set 1): 
-     {('Student 2', 'Task 3', 20), ('Student 3', 'Task 3', 30), ('Student 1', 'Task 3', 10)} 
-    
-    Significant Edges (Fixing Degree for Set 2): 
-     {('Student 3', 'Task 3', 30), ('Student 3', 'Task 2', 15), ('Student 3', 'Task 1', 10)} 
+    Significant Edges (No Degree Fixing):
+     {('Alice', 'evaluating', 1), ('Bob', 'answer questions', 1), ('Charlie', 'monitoring', 1), ('Alice', 'ask questions', 1)}
+    Significant Edges (Fixing Degree for Student):
+     {('Bob', 'answer questions', 1), ('Charlie', 'monitoring', 1)}
+    Significant Edges (Fixing Degree for Object1):
+     {('Alice', 'evaluating', 1), ('Bob', 'answer questions', 1), ('Charlie', 'monitoring', 1), ('Alice', 'ask questions', 1)}
 
 Paper Source
 ============
 
 If you use this function in your work, please cite:
 
+Feng, S., Gibson, D., & Gasevic, D. (2025). Analyzing students' emerging roles based on quantity and heterogeneity of individual contributions in small group online collaborative learning using bipartite network analysis. Journal of Learning Analytics, 12(1), 253–270.

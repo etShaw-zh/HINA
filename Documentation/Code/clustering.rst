@@ -6,47 +6,83 @@ Source Code
 
 .. code-block:: python
 
-  import numpy as np
-  from scipy.special import loggamma
-  import heapq
-  from collections import Counter
+    import numpy as np
+    from scipy.special import loggamma
+    import heapq
+    import networkx as nx
+    from collections import Counter
+    from collections import defaultdict
 
 
-.. _bipartite-communities:
+.. _hina-communities:
 
 .. code-block:: python
 
-    def bipartite_communities(G,fix_B=None):
+    def hina_communities(G,fix_B=None):
         """
-        Optimizes MDL objective to find bipartite communities in nodes corresponding to first entry in each edge of G 
-            (can reverse orientation of edges in the input G to get communities in second set)
-        Inputs:
-            -G: weighted edge set of form {(i,j,w_ij)}, where w_ij is a positive integer
-            -fix_B allows user to fix number of clusters if they wish
-        returns:
-            -dict of form {node:community_label} for the nodes in the first node set
-            -compression ratio = (description length)/(naive description length) telling us how well the 
-                inferred communities compress the network structure
-        MDL objective has the following components:
-            -information to transmit community labels of N1 nodes in Set 1
-            -information to transmit total weight contributions across the N2 nodes from each of B communities
-            -information to transmit weights of each edge from Set 1 to Set 2 (i.e. G) given these constraints
-        Optimizes MDL objective with fast approximate greedy merge scheme using min heap
+        Identifies bipartite communities in a graph by optimizing a Minimum Description Length (MDL) objective.
+
+        This function partitions the nodes of a bipartite graph into communities by minimizing the MDL objective,
+        which balances the complexity of the community structure with the accuracy of representing the graph.
+        The function supports fixing the number of communities (`fix_B`) and can handle tripartite networks.
+
+        Parameters:
+        -----------
+        G : networkx.Graph
+            A bipartite or tripartite graph with weighted edges. Nodes must have a 'bipartite' attribute
+            indicating their partition (e.g., 'student', 'coded behaviors'). If the graph is tripartite, nodes should
+            have a 'tripartite' attribute set to `True`.
+        fix_B : int or str, optional
+            If specified, fixes the number of communities to this value. If `None`, the function automatically
+            determines the optimal number of communities. Default is `None`.
+
+        Returns:
+        --------
+        dict
+            A dictionary containing the following keys:
+            - 'number of communities': The number of communities identified.
+            - 'node communities': A dictionary mapping each node to its community label.
+            - 'community structure quality value': A measure of how well the inferred communities compress
+            the network structure, calculated as the compression ratio (description length / naive description length).
+            - 'updated graph object': The input graph with an added 'communities' attribute for each node.
+            - 'sub graphs for each community': A dictionary where keys are community labels and values are subgraphs of nodes
+            belonging to that community.
+            - 'object-object graphs for each community' (only for tripartite networks): A dictionary where keys
+            are community labels and values are projected graphs representing relationships between objects
+            within each community. 
         """
+        G_info = set([(i,j,w['weight'])for i,j,w in G.edges(data=True)])
+
+        v = set()
+        node_bipartite_list = [x for x in [data['bipartite'] for n, data in G.nodes(data=True)]\
+                        if not (x in v or v.add(x))]
+        # if fix_B == None:
+        #     set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+        #     print('set1,set2',set1,set2)
+        # elif fix_B == node_bipartite_list[0]:
+        #     set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+        # elif fix_B == node_bipartite_list[1]:
+        #     set2,set1 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+        set1,set2 = set([e[0] for e in G_info]),set([e[1] for e in G_info])
+
         
-        set1,set2 = set([e[0] for e in G]),set([e[1] for e in G])
         N1,N2 = len(set1),len(set2)
-        W = sum([e[2] for e in G])
+        W = sum([e[2] for e in G_info])
 
         cluster2nodes = {i:set([i]) for i in set1}
         node2cluster = {i:i for i in set1}
         cluster2weights = {}
-        for e in G:
+        for e in G_info:
             i,j,w = e
-            c = node2cluster[i]
-            if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set2})
-            cluster2weights[c][j] += w
-            
+            if fix_B != node_bipartite_list[1]:
+                c = node2cluster[i]
+                if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set2})
+                cluster2weights[c][j] += w
+            else: 
+                c = node2cluster[j]
+                if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set1})
+                cluster2weights[c][i] += w
+
         def logchoose(n,k):
             """
             log binomial coefficient
@@ -58,7 +94,7 @@ Source Code
             log multiset coefficient
             """
             return logchoose(n+k-1,k)
-        
+
         def C(B):
             """
             constants in the description length (only depend on size B of partition)
@@ -82,7 +118,7 @@ Source Code
             nrs = len(cluster2nodes[r]) + len(cluster2nodes[s])
             weights = cluster2weights[r] + cluster2weights[s]
             aft = -loggamma(nrs) + sum(logmultiset(nrs,w) for w in weights.values())
-            return aft - bef 
+            return aft - bef
 
         past_merges = []
         for c1 in cluster2nodes:
@@ -98,8 +134,8 @@ Source Code
 
         B,H = N1,H0
         while B > 1:
-            
-            dF,pair = heapq.heappop(past_merges) 
+
+            dF,pair = heapq.heappop(past_merges)
             while not(pair[0] in cluster2nodes) or not(pair[1] in cluster2nodes):
                 dF,pair = heapq.heappop(past_merges)
 
@@ -113,24 +149,92 @@ Source Code
             past_partitions.append(node2cluster.copy())
 
             H += dF + C(B-1) - C(B)
-            
+
             for c3 in cluster2nodes:
                 if c3 != c12:
                     dF = merge_dF(c3,c12)
                     heapq.heappush(past_merges,(dF,(c3,c12)))
-            
+
             Hs.append(H)
             B -= 1
 
-            if B == fix_B:
-                community_labels = {str(i[0]):str(i[1]) for i in node2cluster.items()}
-                Hmdl = H
-                return community_labels,Hmdl/H0
-                
-
-        best_ind = np.argmin(Hs)
+        if fix_B is None:
+            best_ind = np.argmin(Hs)
+        else:
+            best_ind = len(Hs)-fix_B
         Hmdl = Hs[best_ind]
         community_labels = past_partitions[best_ind]
-        community_labels = {str(i[0]):str(i[1]) for i in community_labels.items()}
+        old_labels = list(set(community_labels.values()))
+        labelmap = dict(zip(old_labels,range(len(old_labels))))
+        community_labels = {str(i[0]):labelmap[str(i[1])] for i in community_labels.items()}
 
-        return community_labels,Hmdl/H0
+        nx.set_node_attributes(G, community_labels, 'communities')
+
+        grouped_nodes = defaultdict(list)
+        for node, community in community_labels.items():
+            grouped_nodes[community].append(node)
+
+    # Create subgraphs for each community
+        sub_Gs = {}
+        for community, u_nodes in grouped_nodes.items():
+            G_sub = nx.Graph()
+            for u_node in u_nodes:
+                G_sub.add_node(u_node, **G.nodes[u_node])
+            v_nodes = set()
+            for u_node in u_nodes:
+                for v_node in G.neighbors(u_node):
+                    v_nodes.add(v_node)
+                    G_sub.add_node(v_node, **G.nodes[v_node])
+            for u_node in u_nodes:
+                for v_node in G.neighbors(u_node):
+                    if G.has_edge(u_node, v_node):
+                        G_sub.add_edge(u_node, v_node, **G.edges[u_node, v_node])
+            sub_Gs[community] = G_sub
+
+    # Create the projected subgraphs for each community for tripartite network
+        
+        sub_Gs_object = {}
+
+        if any(j.get('tripartite') == True for i, j in G.nodes(data=True)):
+            for i, g in sub_Gs.items():
+                objects_objects = [[j,w['weight']] for i,j,w in g.edges(data=True)]
+                bipartite_attrs = list(set([j['bipartite'] for i, j in g.nodes(data=True)]))
+                combined_attr = None
+                student_attr = None
+                for attr in bipartite_attrs:
+                    if isinstance(attr, str) and '(' in attr and ')' in attr and ',' in attr:
+                        combined_attr = attr
+                    else:
+                        student_attr = attr            
+                if combined_attr:
+                    attr1, attr2 = combined_attr.strip("()").split(",")
+                    attr1 = attr1.strip()
+                    attr2 = attr2.strip()
+                else:
+                    attr_str = bipartite_attrs[0] if isinstance(bipartite_attrs[0], str) else bipartite_attrs[1]
+                    attr1, attr2 = attr_str.strip("()").split(",")        
+
+                pair_count = defaultdict(int)
+                for n in objects_objects:
+                    pair = tuple(item.replace(' ', '') for item in n[0].split('**'))
+                    pair_count[pair] += n[1]
+                w_edges = [(object1, object2, {'weight': count}) for (object1, object2), count in pair_count.items()]
+                G_ = nx.Graph()
+                G_.add_edges_from(w_edges)
+                for node in G_.nodes():
+                    if node in [edge[0] for edge in w_edges]:  
+                        G_.nodes[node]['bipartite'] = attr1
+                    else:  
+                        G_.nodes[node]['bipartite'] = attr2
+                sub_Gs_object[i] = G_
+
+        if any(j.get('tripartite') == True for i, j in G.nodes(data=True)):
+                results = {'number of communities': len(set(community_labels.values())), \
+                "node communities": community_labels, "community structure quality value":1-Hmdl/H0,\
+                'updated graph object':G, 'sub graphs for each community':sub_Gs, 'object-object graphs for each community': sub_Gs_object}
+        else:
+            results = {'number of communities': len(set(community_labels.values())), \
+                "node communities": community_labels, "community structure quality value":Hmdl/H0,\
+                'updated graph object':G, 'sub graphs for each community':sub_Gs}
+        
+        return results

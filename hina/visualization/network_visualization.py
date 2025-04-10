@@ -2,9 +2,8 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-from hina.dyad.significant_edges import prune_edges
-import networkx as nx
-import matplotlib.pyplot as plt
+from hina.dyad import prune_edges
+from hina.mesoscale import hina_communities
 
 def plot_hina(B, layout='bipartite', group_name = [None, None], pruning_kwargs=None, NetworkX_kwargs=None):
     """

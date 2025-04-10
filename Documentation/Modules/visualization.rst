@@ -1,45 +1,25 @@
-Visualization
+hina.visualization
 +++++++++++++
 
 Tutorial
 ========
 
-The `visualization` module provides network visualization functions for networks at the group or cohort level, enabling users to project heterogeneous interaction networks onto any subset of node types (e.g., students, tasks, behavioral codes). It also includes functions for visualizing significant interaction structure and clustering results.
-
-The module allows for the inclusion of various metadata, such as inferred student clusters or contribution metrics, and provides a web-based interface for interactive visualizations and user engagement.
+The `visualization` module provides functions for visualizing heterogeneous interaction networks. Users can generate interactive plots that project bipartite networks onto specified layouts, optionally filter nodes based on group attributes, and display community structures with distinct node colors and positions.
 
 Currently, the module contains the `network_visualization.py` file, which includes:
 
-- `plot_HINA`: Visualizes a bipartite network with specified attributes and layout.
-- `plot_bipartite_clusters`: Plots bipartite network with specified cluster labels indicated with node colors and positions.
-
-Inputs include:
-
-- **df**: A pandas DataFrame containing network data.
-- **group**: A string indicating which group to filter and plot (e.g., `'All'` for the entire dataset).
-- **attribute_1** and **attribute_2**: The column names representing two sets of nodes (e.g., students and tasks).
-- **pruning**: Boolean or dictionary indicating whether to prune edges using statistical significance testing.
-- **layout**: Layout method for node positioning (e.g., `'spring'`, `'bipartite'`, `'circular'`).
-- **NetworkX_kwargs**: Additional arguments for `NetworkX` visualization.
-
-Outputs include:
-
-- Visualizations of the bipartite network with or without cluster labels and pruning.
-
-Visualization
-============
-
-This module provides functions for visualizing heterogeneous interaction networks and bipartite community structure.
+- `plot_hina`: Visualizes a bipartite network with customizable layout, optional node filtering, and optional edge pruning.
+- `plot_bipartite_clusters`: Visualizes a bipartite network with community structure by arranging nodes in a circular layout with colors and shapes that reflect cluster memberships.
 
 .. list-table:: Functions
    :header-rows: 1
 
    * - Function
      - Description
-   * - `plot_HINA(df, group='All', attribute_1=None, attribute_2=None, ...) <#plot-hina>`_
-     - Plots a bipartite network visualization with specified attributes and layout.
-   * - `plot_bipartite_clusters(G, community_labels, ...) <#plot-bipartite-clusters>`_
-     - Plots bipartite network with specified cluster labels indicated with node colors and positions.
+   * - `plot_hina(B, layout='bipartite', group_name=[None, None], pruning_kwargs=None, NetworkX_kwargs=None) <#plot-hina>`_
+     - Visualizes a bipartite network with customizable layout, optional node filtering, and edge pruning.
+   * - `plot_bipartite_clusters(G, noise_scale=3, radius=20., encode_labels=False, node_labels=True, edge_labels=False, scale_nodes_by_degree=False, node_scale=2000., node_kwargs={'edgecolors':'black'}, edge_kwargs={'edge_color':'black'}) <#plot-bipartite-clusters>`_
+     - Visualizes a bipartite network with community structure; nodes are arranged in a circular layout according to cluster assignments.
 
 Reference
 ---------
@@ -49,70 +29,67 @@ Reference
 .. raw:: html
 
    <div id="plot-hina" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">plot_HINA(df, group='All', attribute_1=None, attribute_2=None, pruning=False, layout='spring', NetworkX_kwargs=None)</span> 
+       <span class="class-name">function</span> <span class="function-name">plot_hina(B, layout='bipartite', group_name=[None, None], pruning_kwargs=None, NetworkX_kwargs=None)</span>
        <a href="../Code/network_visualization.html#plot-hina" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Plots a bipartite network visualization with specified attributes and layout.
+Visualizes a bipartite network using a specified layout. The function optionally prunes edges based on statistical significance if pruning parameters are provided and can filter nodes by a specified group attribute.
 
 **Parameters**:
 
 .. raw:: html
 
    <div class="parameter-block">
-       (df, group='All', attribute_1=None, attribute_2=None, pruning=False, layout='spring', NetworkX_kwargs=None)
+       (B, layout='bipartite', group_name=[None, None], pruning_kwargs=None, NetworkX_kwargs=None)
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">df</span>: A pandas DataFrame containing network data.</li>
-       <li><span class="param-name">group</span>: A string indicating which group to filter and plot (default: <code>'All'</code>).</li>
-       <li><span class="param-name">attribute_1</span>: The column name for the first node set (e.g., <code>'student id'</code>).</li>
-       <li><span class="param-name">attribute_2</span>: The column name for the second node set (e.g., <code>'task'</code>).</li>
-       <li><span class="param-name">pruning</span>: Whether to prune edges using significance testing. Can be a boolean or a dictionary with pruning parameters (default: <code>False</code>).</li>
-       <li><span class="param-name">layout</span>: Layout method for positioning nodes. Options include <code>'bipartite'</code>, <code>'spring'</code>, and <code>'circular'</code> (default: <code>'spring'</code>).</li>
-       <li><span class="param-name">NetworkX_kwargs</span>: Additional arguments for NetworkX visualization (default: <code>None</code>).</li>
+       <li><span class="param-name">B</span>: A NetworkX graph representing the bipartite network to be visualized.</li>
+       <li><span class="param-name">layout</span>: A string specifying the layout for node positioning. Options include <code>'bipartite'</code>, <code>'spring'</code>, and <code>'circular'</code>. Default is <code>'bipartite'</code>.</li>
+       <li><span class="param-name">group_name</span>: A list of two elements, where the first is the node attribute name (e.g., <code>'group'</code>) and the second is the specific value to filter by (e.g., <code>'Group 1'</code>). Default is <code>[None, None]</code>, meaning all nodes are included.</li>
+       <li><span class="param-name">pruning_kwargs</span>: Optional dictionary of parameters for pruning edges using statistical significance testing. Default is <code>None</code> (no pruning).</li>
+       <li><span class="param-name">NetworkX_kwargs</span>: Optional dictionary of additional keyword arguments for customizing the NetworkX visualization. Default is <code>None</code>.</li>
    </ul>
 
 **Returns**:
-  - **None**: Displays a plot of the bipartite network.
+  - **None**: Displays the bipartite network visualization.
 
 .. _plot-bipartite-clusters:
 
 .. raw:: html
 
    <div id="plot-bipartite-clusters" class="function-header">
-       <span class="class-name">function</span> <span class="function-name">plot_bipartite_clusters(G, community_labels, noise_scale=3, radius=20., encode_labels=False, node_labels='Set 2', edge_labels=False, scale_nodes_by_degree=False, node_scale=2000., node_kwargs={'edgecolors':'black'}, edge_kwargs={'edge_color':'black'})</span> 
+       <span class="class-name">function</span> <span class="function-name">plot_bipartite_clusters(G, noise_scale=3, radius=20., encode_labels=False, node_labels=True, edge_labels=False, scale_nodes_by_degree=False, node_scale=2000., node_kwargs={'edgecolors':'black'}, edge_kwargs={'edge_color':'black'})</span>
        <a href="../Code/network_visualization.html#plot-bipartite-clusters" class="source-link">[source]</a>
    </div>
 
 **Description**:
-Plots bipartite network with specified cluster labels indicated with node colors and positions.
+Visualizes a bipartite network with community structure by arranging nodes in a circular layout. Nodes in the first set are positioned around community centroids while nodes in the second set are arranged inside the circle. Community labels are indicated through distinct node colors and shapes.
 
 **Parameters**:
 
 .. raw:: html
 
    <div class="parameter-block">
-       (G, community_labels, noise_scale=3, radius=20., encode_labels=False, node_labels='Set 2', edge_labels=False, scale_nodes_by_degree=False, node_scale=2000., node_kwargs={'edgecolors':'black'}, edge_kwargs={'edge_color':'black'})
+       (G, noise_scale=3, radius=20., encode_labels=False, node_labels=True, edge_labels=False, scale_nodes_by_degree=False, node_scale=2000., node_kwargs={'edgecolors':'black'}, edge_kwargs={'edge_color':'black'})
    </div>
 
    <ul class="parameter-list">
-       <li><span class="param-name">G</span>: A bipartite edge set with tuples (node in Set 1, node in Set 2, weight).</li>
-       <li><span class="param-name">community_labels</span>: A dictionary mapping nodes to their community labels.</li>
-       <li><span class="param-name">noise_scale</span>: Controls node dispersion around cluster centroids (default: <code>3</code>).</li>
-       <li><span class="param-name">radius</span>: Controls the radius of the community centers (default: <code>20</code>).</li>
-       <li><span class="param-name">encode_labels</span>: If <code>True</code>, encodes each node label as a unique string (default: <code>False</code>).</li>
-       <li><span class="param-name">node_labels</span>: Defines which set of nodes to label (default: <code>'Set 2'</code>).</li>
-       <li><span class="param-name">edge_labels</span>: Whether to include edge labels (default: <code>False</code>).</li>
-       <li><span class="param-name">scale_nodes_by_degree</span>: Whether to scale node size by degree (default: <code>False</code>).</li>
-       <li><span class="param-name">node_scale</span>: Controls the average size of nodes (default: <code>2000</code>).</li>
-       <li><span class="param-name">node_kwargs</span>: Arguments for `NetworkX` node plotting (default: <code>{'edgecolors':'black'}</code>).</li>
-       <li><span class="param-name">edge_kwargs</span>: Arguments for `NetworkX` edge plotting (default: <code>{'edge_color':'black'}</code>).</li>
+       <li><span class="param-name">G</span>: A NetworkX graph representing the bipartite network with weighted edges.</li>
+       <li><span class="param-name">noise_scale</span>: A float controlling the dispersion of nodes in the first set around their community centroids. Default is <code>3</code>.</li>
+       <li><span class="param-name">radius</span>: A float defining the radius for positioning community centers. Default is <code>20</code>.</li>
+       <li><span class="param-name">encode_labels</span>: A boolean indicating whether to encode node labels into unique identifiers. Default is <code>False</code>.</li>
+       <li><span class="param-name">node_labels</span>: Specifies whether to display labels for nodes. This can be <code>True</code> to label all nodes (or a string such as <code>'Both Sets'</code> for customized labeling). Default is <code>True</code>.</li>
+       <li><span class="param-name">edge_labels</span>: A boolean indicating whether to display edge weights as labels. Default is <code>False</code>.</li>
+       <li><span class="param-name">scale_nodes_by_degree</span>: A boolean indicating whether to scale node sizes proportionally to their weighted degree. Default is <code>False</code>.</li>
+       <li><span class="param-name">node_scale</span>: A float controlling the average node size. Default is <code>2000</code>.</li>
+       <li><span class="param-name">node_kwargs</span>: A dictionary of additional keyword arguments for customizing node appearance. Default is <code>{'edgecolors': 'black'}</code>.</li>
+       <li><span class="param-name">edge_kwargs</span>: A dictionary of additional keyword arguments for customizing edge appearance. Default is <code>{'edge_color': 'black'}</code>.</li>
    </ul>
 
 **Returns**:
-  - **None**: Displays a plot of the bipartite clusters.
+  - **None**: Displays the network visualization with community grouping.
 
 Demo
 ====
@@ -120,7 +97,7 @@ Demo
 Example Code
 ------------
 
-This example demonstrates how to visualize a bipartite network, clustered network, and bipartite communities.
+This example demonstrates how to visualize a heterogeneous interaction network and its community structure.
 
 **Step 1: Import necessary libraries**
 
@@ -128,75 +105,52 @@ This example demonstrates how to visualize a bipartite network, clustered networ
 
     import pandas as pd
     from hina.construction import get_bipartite
-    from hina.mesoscale import bipartite_communities 
-    from hina.visualization import plot_HINA, plot_bipartite_clusters
+    from hina.visualization import plot_hina, plot_bipartite_clusters
 
 **Step 2: Load the example dataset**
 
 .. code-block:: python
 
-    df = pd.read_csv('synthetic_data.csv')
+    df = pd.read_excel("example_dataset.xlsx")
 
-**Step 3: Plot the bipartite network of students and tasks in all groups**
-
-.. code-block:: python
-
-    plot_HINA(df, attribute_1='student id', attribute_2='task', group='All', layout='spring')
-
-**Step 4: Plot the bipartite network of students and tasks in group 1**
+**Step 3: Construct the bipartite network representation**
 
 .. code-block:: python
 
-    plot_HINA(df, attribute_1='student id', attribute_2='task', group='Group 1', layout='spring')
+    B = get_bipartite(df,student_col='student id (student_col)', object_col='codes (obj1_col)', attr_col='code_categories (obj_attribute_col)', group_col='group (group_col)')
 
-**Step 5: Plot bipartite fixed number of clusters using MDL method**
 
-.. code-block:: python
-
-   G = get_bipartite(df,'student id','task')
-   community_labels,cr = bipartite_communities(G, fix_B=5)
-   plot_bipartite_clusters(G,community_labels, node_labels='Both Sets', edge_labels=True)
-
-**Step 6: Plot bipartite clusters inferred using MDL method**
+**Step 4: Visualize the bipartite network for all groups**
 
 .. code-block:: python
 
-   G = get_bipartite(df,'student id','task')
-   community_labels,cr = bipartite_communities(G)
-   plot_bipartite_clusters(G,community_labels, node_labels='Both Sets', edge_labels=True)
+    plot_hina(B, layout='bipartite', group_name = ['group (group_col)', None], pruning_kwargs=None, NetworkX_kwargs=None)
+
+**Step 5: Visualize bipartite clustering network with an automatically inferred number of communities**
+
+.. code-block:: python
+
+    plot_bipartite_clusters(B)
 
 Example Output
 --------------
 .. image:: Figures/visualization_demo_1.png
-    :alt: visualization Demo
+    :alt: Visualization Demo 1
     :align: center
     :width: 50%
 
-Bipartite network of students and tasks with all groups.
+Bipartite network of students and tasks for all groups.
 
 .. image:: Figures/visualization_demo_2.png
-   :alt: visualization Demo
-   :align: center
-   :width: 50%
+    :alt: Visualization Demo 4
+    :align: center
+    :width: 50%
 
-Bipartite network of students and tasks with Groups 1.
-
-.. image:: Figures/visualization_demo_3.png
-   :alt: visualization Demo
-   :align: center
-   :width: 50%
-
-Bipartite network of students and tasks with five fixed number of clusters.
-
-.. image:: Figures/visualization_demo_4.png
-   :alt: visualization Demo
-   :align: center
-   :width: 50%
-
-Bipartite network of students and tasks with inferred number of clusters.
+Bipartite clustering network with automatically inferred communities.
 
 Paper Source
 ============
 
-If you use this function in your work, please cite:
+If you use these visualization functions in your work, please cite:
 
+Feng, S., Gibson, D., & Gasevic, D. (2025). Analyzing students' emerging roles based on quantity and heterogeneity of individual contributions in small group online collaborative learning using bipartite network analysis. Journal of Learning Analytics, 12(1), 253–270.
