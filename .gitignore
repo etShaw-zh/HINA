@@ -40,3 +40,6 @@ __pycache__/
 
 # Ignore Python package build info
 *.egg-info/
+
+# Ignore readthedoc build
+Documentation/_build/

@@ -26,7 +26,32 @@ HINA is a learning analytics tool that models and analyzes heterogenous interact
 
 ## Installation
 
+**HINA** is available on PyPI and can be installed using `pip`, which will include the dependencies automatically:
+
+To ensure running in a working environment please make sure the python version `>=3.9`
+
+```bash
 pip install hina
+```
+
+For users who prefer installing dependencies manually, we provide a requirements.txt file on GitHub. To install HINA and its dependencies using this file:
+
+```bash
+git clone https://github.com/baiyueh/HINA.git
+cd HINA
+pip install -e .
+pip install -r requirements.txt
+```
+
+**HINA Dashboard APP** is available to build and run locally with Docker:
+
+```bash
+git clone https://github.com/baiyueh/HINA.git
+cd HINA
+docker compose up --build
+```
+
+Then, open the web browser and navigate to `http://localhost:8080` to access the **HINA Dashboard**.
 
 ## Modules
 

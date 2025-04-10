@@ -17,6 +17,15 @@ For users who prefer installing dependencies manually, we provide a requirements
     pip install -e .
     pip install -r requirements.txt
 
+*HINA Dashboard APP* is available to build and run locally with Docker:
+
+.. code-block:: console
+    
+    git clone https://github.com/baiyueh/HINA.git
+    cd HINA
+    docker compose up --build
+
+Then, open the web browser and navigate to `http://localhost:8080` to access the *HINA Dashboard*.
 
 **Source Code and Discussion Channel**
 
