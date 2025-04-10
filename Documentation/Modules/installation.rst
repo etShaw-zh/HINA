@@ -12,7 +12,7 @@ For users who prefer installing dependencies manually, we provide a requirements
 
 .. code-block:: console
     
-    git clone https://github.com/baiyueh/HINA.git
+    git clone https://github.com/SHF-NAILResearchGroup/HINA.git
     cd HINA
     pip install -e .
     pip install -r requirements.txt
@@ -21,7 +21,7 @@ For users who prefer installing dependencies manually, we provide a requirements
 
 .. code-block:: console
     
-    git clone https://github.com/baiyueh/HINA.git
+    git clone https://github.com/SHF-NAILResearchGroup/HINA.git
     cd HINA
     docker compose up --build
 

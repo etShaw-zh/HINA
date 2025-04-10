@@ -37,7 +37,7 @@ pip install hina
 For users who prefer installing dependencies manually, we provide a requirements.txt file on GitHub. To install HINA and its dependencies using this file:
 
 ```bash
-git clone https://github.com/baiyueh/HINA.git
+git clone https://github.com/SHF-NAILResearchGroup/HINA.git
 cd HINA
 pip install -e .
 pip install -r requirements.txt
@@ -46,7 +46,7 @@ pip install -r requirements.txt
 **HINA Dashboard APP** is available to build and run locally with Docker:
 
 ```bash
-git clone https://github.com/baiyueh/HINA.git
+git clone https://github.com/SHF-NAILResearchGroup/HINA.git
 cd HINA
 docker compose up --build
 ```
