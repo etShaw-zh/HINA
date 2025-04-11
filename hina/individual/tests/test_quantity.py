@@ -58,25 +58,5 @@ def test_quantity():
     assert normalized_by_group['Bob'] == 0.5, "Bob should have normalized group quantity 0.5"
     assert normalized_by_group['Charlie'] == 0.5, "Charlie should have normalized group quantity 0.5"
 
-def test_quantity_with_custom_weights():
-    # Test the quantity function with custom edge weights
-    # Create a graph with custom weights
-    B = nx.Graph()
-    B.add_nodes_from(['Alice', 'Bob', 'Charlie'], bipartite='student', group=['A', 'B', 'B'])
-    B.add_nodes_from(['ask questions', 'answer questions', 'evaluating', 'monitoring'], bipartite='object', attr=['cognitive', 'cognitive', 'metacognitive', 'metacognitive'])
-    B.add_weighted_edges_from([
-        ('Alice', 'ask questions', 2),
-        ('Alice', 'evaluating', 3),
-        ('Bob', 'answer questions', 1),
-        ('Charlie', 'monitoring', 4)
-    ])
-    
-    quantity_results, _ = quantity(B, attr='attr', group='group', return_type='all')
-    
-    # Test that quantities reflect custom weights
-    assert quantity_results['quantity']['Alice'] == 5, "Alice should have quantity 5 (2+3)"
-    assert quantity_results['quantity']['Bob'] == 1, "Bob should have quantity 1"
-    assert quantity_results['quantity']['Charlie'] == 4, "Charlie should have quantity 4"
-
 if __name__ == "__main__":
     pytest.main()

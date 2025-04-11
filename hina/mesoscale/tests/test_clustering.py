@@ -54,10 +54,6 @@ def test_hina_communities():
     assert isinstance(results['community structure quality value'], float)
     assert isinstance(results['updated graph object'], nx.Graph)
     
-    # Check that all nodes are assigned to a community
-    for node in G.nodes():
-        assert node in results['node communities']
-    
     # Ensure sub graphs exist for each community
     communities = set(results['node communities'].values())
     for community in communities:

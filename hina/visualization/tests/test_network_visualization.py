@@ -26,8 +26,8 @@ def create_test_graph():
         group_col='group'
     )
     return B
-	
-def test_plot_hina_basic(create_test_graph):
+
+def test_plot_hina_basic():
     # Test basic functionality of plot_hina
     B = create_test_graph()
     
@@ -36,8 +36,8 @@ def test_plot_hina_basic(create_test_graph):
     assert isinstance(fig, plt.Figure)
     plt.close(fig)
 
-def test_plot_hina_with_layout(create_test_graph):
-    # Test plot_hina with different layout options.
+def test_plot_hina_with_layout():
+    # Test plot_hina with different layout options
     B = create_test_graph()
     
     # Test with bipartite layout
@@ -55,7 +55,7 @@ def test_plot_hina_with_layout(create_test_graph):
     assert isinstance(fig, plt.Figure)
     plt.close(fig)
 
-def test_plot_hina_with_group_filtering(create_test_graph):
+def test_plot_hina_with_group_filtering():
     # Test plot_hina with group filtering
     B = create_test_graph()
     
@@ -69,7 +69,7 @@ def test_plot_hina_with_group_filtering(create_test_graph):
     assert isinstance(fig, plt.Figure)
     plt.close(fig)
 
-def test_plot_hina_with_pruning(create_test_graph):
+def test_plot_hina_with_pruning():
     # Test plot_hina with pruning parameters
     B = create_test_graph()
     
@@ -79,9 +79,9 @@ def test_plot_hina_with_pruning(create_test_graph):
     assert isinstance(fig, plt.Figure)
     plt.close(fig)
 
-def test_plot_hina_with_networkx_kwargs(create_test_graph):
+def test_plot_hina_with_networkx_kwargs():
     # Test plot_hina with custom NetworkX parameters
-    B = create_test_graph
+    B = create_test_graph()  # Fixed: call the function to get the graph
     
     # Test with custom NetworkX parameters
     networkx_kwargs = {'node_color': 'red', 'node_size': 100}
@@ -89,7 +89,7 @@ def test_plot_hina_with_networkx_kwargs(create_test_graph):
     assert isinstance(fig, plt.Figure)
     plt.close(fig)
 
-def test_plot_bipartite_clusters_auto(create_test_graph):
+def test_plot_bipartite_clusters_auto():
     # Test plot_bipartite_clusters with automatic community detection
     B = create_test_graph()
     
@@ -98,7 +98,7 @@ def test_plot_bipartite_clusters_auto(create_test_graph):
     assert isinstance(fig, plt.Figure)
     plt.close(fig)
 
-def test_plot_bipartite_clusters_fixed(create_test_graph):
+def test_plot_bipartite_clusters_fixed():
     # Test plot_bipartite_clusters with fixed number of communities
     B = create_test_graph()
     
