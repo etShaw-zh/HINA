@@ -1,5 +1,5 @@
 import pytest
-from hina.utils.graph_tools import save_network
+from hina.utils import save_network
 import os
 
 def test_save_network_gml(tmp_path):

@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import networkx as nx
-from hina.construction.network_construct import get_bipartite, get_tripartite
+from hina.construction import get_bipartite, get_tripartite
 
 def test_get_bipartite():
     

@@ -1,29 +1,82 @@
 import pytest
 import networkx as nx
 import numpy as np
-from hina.individual.quantity import quantity
+import pandas as pd
+from hina.individual import diversity
+from hina.individual import quantity
+from hina.construction import get_bipartite
+
+def create_test_dataframe():
+    # Create a sample DataFrame for testing
+    df = pd.DataFrame({
+        'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
+        'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring'],
+        'object2': ['tilt head', 'shake head', 'nod head', 'nod head'],
+        'group': ['A', 'B', 'A', 'B'],
+        'attr': ['cognitive', 'cognitive', 'metacognitive', 'metacognitive']
+    })
+    return df
 
 def create_test_graph():
-    B = nx.Graph()
+    # Create a bipartite network
+    df = create_test_dataframe()
+    B = get_bipartite(
+        df,
+        student_col='student', 
+        object_col='object1', 
+        attr_col='attr', 
+        group_col='group'
+    )
+    return B
+
+def test_quantity():
+    # Test the quantity function
+    B = create_test_graph()
+    
+    quantity_results, _ = quantity(B, attr='attr', group='group', return_type='all')
+    
+    # Test quantity values
+    assert quantity_results['quantity']['Alice'] == 2, "Alice should have quantity 2"
+    assert quantity_results['quantity']['Bob'] == 1, "Bob should have quantity 1"
+    assert quantity_results['quantity']['Charlie'] == 1, "Charlie should have quantity 1"
+    
+    # Test normalized quantity values
+    assert quantity_results['normalized_quantity']['Alice'] == 0.5, "Alice should have normalized quantity 0.5"
+    assert quantity_results['normalized_quantity']['Bob'] == 0.25, "Bob should have normalized quantity 0.25"
+    assert quantity_results['normalized_quantity']['Charlie'] == 0.25, "Charlie should have normalized quantity 0.25"
+    
+    # Test quantity by category
+    categories = quantity_results['quantity_by_category']
+    assert categories[('Alice', 'cognitive')] == 1.0, "Alice should have 1 cognitive interaction"
+    assert categories[('Alice', 'metacognitive')] == 1.0, "Alice should have 1 metacognitive interaction"
+    assert categories[('Bob', 'cognitive')] == 1.0, "Bob should have 1 cognitive interaction"
+    assert categories[('Charlie', 'metacognitive')] == 1.0, "Charlie should have 1 metacognitive interaction"
+    
+    # Test normalized quantity by group
+    normalized_by_group = quantity_results['normalized_quantity_by_group']
+    assert normalized_by_group['Alice'] == 1.0, "Alice should have normalized group quantity 1.0"
+    assert normalized_by_group['Bob'] == 0.5, "Bob should have normalized group quantity 0.5"
+    assert normalized_by_group['Charlie'] == 0.5, "Charlie should have normalized group quantity 0.5"
+
+def test_quantity_with_custom_weights():
+    # Test the quantity function with custom edge weights
+    # Create a graph with custom weights
     B = nx.Graph()
     B.add_nodes_from(['Alice', 'Bob', 'Charlie'], bipartite='student', group=['A', 'B', 'B'])
     B.add_nodes_from(['ask questions', 'answer questions', 'evaluating', 'monitoring'], bipartite='object', attr=['cognitive', 'cognitive', 'metacognitive', 'metacognitive'])
     B.add_weighted_edges_from([
         ('Alice', 'ask questions', 2),
-        ('Alice', 'evaluating', 1),
-        ('Bob', 'answer questions', 3),
-        ('Charlie', 'monitoring', 1)
+        ('Alice', 'evaluating', 3),
+        ('Bob', 'answer questions', 1),
+        ('Charlie', 'monitoring', 4)
     ])
-    return B
-
-
-def test_quantity():
-    B = create_test_graph()
-    # Test quantity calculation without attributes or groups
-    result = quantity(B)
-    assert 'quantity' in result[0], "Quantity should be computed."
-    assert 'normalized_quantity' in result[0], "Normalized quantity should be computed."
     
+    quantity_results, _ = quantity(B, attr='attr', group='group', return_type='all')
+    
+    # Test that quantities reflect custom weights
+    assert quantity_results['quantity']['Alice'] == 5, "Alice should have quantity 5 (2+3)"
+    assert quantity_results['quantity']['Bob'] == 1, "Bob should have quantity 1"
+    assert quantity_results['quantity']['Charlie'] == 4, "Charlie should have quantity 4"
 
 if __name__ == "__main__":
     pytest.main()
