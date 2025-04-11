@@ -84,15 +84,14 @@ def test_plot_hina_with_networkx_kwargs():
     B = create_test_graph()
     
     plt.figure()
-    networkx_kwargs = {'width': 2.0, 'alpha': 0.7, 'edge_color': 'blue'}
+    networkx_kwargs = {'alpha': 0.7, 'edge_color': 'blue'}
     plot_hina(B, NetworkX_kwargs=networkx_kwargs)
     plt.close()
 
-def test_plot_bipartite_clusters_auto():
-    # Test plot_bipartite_clusters with automatic community detection
+def test_plot_bipartite_clusters():
+    # Test plot_bipartite_clusters with community detection
     B = create_test_graph()
     
-    # Test with automatic community detection
     plt.figure()
     plot_bipartite_clusters(B)
     plt.close()
