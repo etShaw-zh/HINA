@@ -34,7 +34,7 @@ def test_plot_hina_basic():
     # Test with default parameters
     plt.figure()  # Create a new figure
     result = plot_hina(B)
-	plt.close()
+    plt.close() 
 
 def test_plot_hina_with_layout():
     # Test plot_hina with different layout options
