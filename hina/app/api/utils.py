@@ -207,10 +207,10 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
             'data': {
                 'id': node_str,
                 'label': node_str,
-                'color': data.get('color', 'black')  
+                'color': data.get('color', 'black'),
+				'type': data.get('type', '')
             },
             'position': {'x': x, 'y': y},
-            'classes': data.get('type', '')
         })
     for u, v, d in G.edges(data=True):
         elements.append({
@@ -218,7 +218,8 @@ def cy_elements_from_graph(G: nx.Graph, pos: dict):
                 'source': str(u),
                 'target': str(v),
                 'weight': d.get('weight', 0),
-                'label': d.get('label', str(d.get('weight', '')))
+                'label': d.get('label', str(d.get('weight', ''))),
+				'type': data.get('type', '')
             }
         })
     return elements

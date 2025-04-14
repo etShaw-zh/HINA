@@ -42,6 +42,15 @@ export function Webinterface() {
     zoom,
     cyRef,
     highlightedNodeId,
+    studentNodeSize,
+    objectNodeSize,
+    object1NodeSize,
+    object2NodeSize,
+    isObjectOnlyMode,
+    setStudentNodeSize,
+    setObjectNodeSize,
+    setObject1NodeSize,
+    setObject2NodeSize,
     
     // Actions
     handleFileUpload,
@@ -143,6 +152,15 @@ export function Webinterface() {
                     setZoom={setZoom}
                     cyRef={cyRef}
                     highlightedNodeId={highlightedNodeId}
+                    studentNodeSize={studentNodeSize}
+                    objectNodeSize={objectNodeSize}
+                    object1NodeSize={object1NodeSize}
+                    object2NodeSize={object2NodeSize}
+                    isObjectOnlyMode={isObjectOnlyMode}
+                    setStudentNodeSize={setStudentNodeSize}
+                    setObjectNodeSize={setObjectNodeSize}
+                    setObject1NodeSize={setObject1NodeSize}
+                    setObject2NodeSize={setObject2NodeSize}
                   />
                 </Grid.Col>
                 

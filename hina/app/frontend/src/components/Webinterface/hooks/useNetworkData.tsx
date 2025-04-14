@@ -7,7 +7,7 @@ import { rem } from '@mantine/core';
 
 
 // Set axios base URL for local development
-// axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = 'http://localhost:8000';
 
 // Types
 interface QDData {
@@ -29,58 +29,65 @@ interface ClusterLabelsData {
 type SortConfig = { key: string; direction: "asc" | "desc" } | null;
 
 export function useNetworkData() {
-	// Basic state
-	const [uploadedData, setUploadedData] = useState<string | null>(null);
-	const [initialRenderDone, setInitialRenderDone] = useState(false);
-	const [columns, setColumns] = useState<string[]>([]);
-	const [elements, setElements] = useState<any[]>([]);
-	
-	// Input parameters
-	const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-	const [groupCol, _setGroupCol] = useState<string>("none");
-	const [group, setGroup] = useState<string>("All");  
-	const [groups, setGroups] = useState<string[]>([]);
-	const [student, setStudent] = useState<string>("");
-	const [object1, setObject1] = useState<string>("");
-	const [object2, setObject2] = useState<string>("none");
-	const [attr, setAttr] = useState<string>("none");
-	const [numberCluster, setNumberCluster] = useState<string>("");
-	const [cluster, setCluster] = useState<string>("");
-	const [pruning, setPruning] = useState<string>("none");
-	const [alpha, setAlpha] = useState<number>(0.05);
-	const [fixDeg, setFixDeg] = useState<string>("none");
-	const [layout, setLayout] = useState<string>("bipartite");
-	
-	// Network visualization
-	const [zoom, setZoom] = useState<number>(1);
-	const [showLabels, setShowLabels] = useState<boolean>(true);
-	const [showEdgeWeights, setShowEdgeWeights] = useState<boolean>(true);
-	const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
-	const [currentNetworkView, setCurrentNetworkView] = useState<'hina' | 'cluster' | 'object' | null>(null);
-	
-	// Analysis data
-	const [qdData, setQdData] = useState<QDData | null>(null);
-	const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
-	const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
-	const [clusterOptions, setClusterOptions] = useState<string[]>(["All"]);
-	const [activeTab, setActiveTab] = useState<string | null>("node-level");
-	const [compressionRatio, setCompressionRatio] = useState<number | null>(null);
-	const [objectObjectGraphs, setObjectObjectGraphs] = useState<Record<string, any>>({});
-	const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
-	const [communityOptions, setCommunityOptions] = useState<string[]>([]);
-	
-	// Sorting configurations
-	const [quantitySortConfig, setQuantitySortConfig] = useState<SortConfig>(null);
-	const [diversitySortConfig, setDiversitySortConfig] = useState<SortConfig>(null);
-	const [normalizedQuantitySortConfig, setNormalizedQuantitySortConfig] = useState<SortConfig>(null);
-	const [categoryQuantitySortConfig, setCategoryQuantitySortConfig] = useState<SortConfig>(null);
-	const [normalizedGroupSortConfig, setNormalizedGroupSortConfig] = useState<SortConfig>(null);
-	const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
-	const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
-	
-	// Refs
-	const cyRef = useRef<any>(null);
-	const originalElementsRef = useRef<any[]>([]);
+    // Basic state
+    const [uploadedData, setUploadedData] = useState<string | null>(null);
+    const [initialRenderDone, setInitialRenderDone] = useState(false);
+    const [columns, setColumns] = useState<string[]>([]);
+    const [elements, setElements] = useState<any[]>([]);
+    
+    // Input parameters
+    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+    const [groupCol, _setGroupCol] = useState<string>("none");
+    const [group, setGroup] = useState<string>("All");  
+    const [groups, setGroups] = useState<string[]>([]);
+    const [student, setStudent] = useState<string>("");
+    const [object1, setObject1] = useState<string>("");
+    const [object2, setObject2] = useState<string>("none");
+    const [attr, setAttr] = useState<string>("none");
+    const [numberCluster, setNumberCluster] = useState<string>("");
+    const [cluster, setCluster] = useState<string>("");
+    const [pruning, setPruning] = useState<string>("none");
+    const [alpha, setAlpha] = useState<number>(0.05);
+    const [fixDeg, setFixDeg] = useState<string>("none");
+    const [layout, setLayout] = useState<string>("bipartite");
+    
+    // Network visualization
+    const [zoom, setZoom] = useState<number>(1);
+    const [showLabels, setShowLabels] = useState<boolean>(true);
+    const [showEdgeWeights, setShowEdgeWeights] = useState<boolean>(true);
+    const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
+    const [currentNetworkView, setCurrentNetworkView] = useState<'hina' | 'cluster' | 'object' | null>(null);
+    
+    // Node size states
+    const [studentNodeSize, setStudentNodeSize] = useState<number>(20);
+    const [objectNodeSize, setObjectNodeSize] = useState<number>(20);
+    const [object1NodeSize, setObject1NodeSize] = useState<number>(20);
+    const [object2NodeSize, setObject2NodeSize] = useState<number>(20);
+    const [isObjectOnlyMode, setIsObjectOnlyMode] = useState<boolean>(false);
+    
+    // Analysis data
+    const [qdData, setQdData] = useState<QDData | null>(null);
+    const [dyadicAnalysis, setDyadicAnalysis] = useState<DyadicAnalysisData | null>(null);
+    const [clusterLabels, setClusterLabels] = useState<ClusterLabelsData | null>(null);
+    const [clusterOptions, setClusterOptions] = useState<string[]>(["All"]);
+    const [activeTab, setActiveTab] = useState<string | null>("node-level");
+    const [compressionRatio, setCompressionRatio] = useState<number | null>(null);
+    const [objectObjectGraphs, setObjectObjectGraphs] = useState<Record<string, any>>({});
+    const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
+    const [communityOptions, setCommunityOptions] = useState<string[]>([]);
+    
+    // Sorting configurations
+    const [quantitySortConfig, setQuantitySortConfig] = useState<SortConfig>(null);
+    const [diversitySortConfig, setDiversitySortConfig] = useState<SortConfig>(null);
+    const [normalizedQuantitySortConfig, setNormalizedQuantitySortConfig] = useState<SortConfig>(null);
+    const [categoryQuantitySortConfig, setCategoryQuantitySortConfig] = useState<SortConfig>(null);
+    const [normalizedGroupSortConfig, setNormalizedGroupSortConfig] = useState<SortConfig>(null);
+    const [dyadicSigSortConfig, setDyadicSigSortConfig] = useState<SortConfig>(null);
+    const [clusterSortConfig, setClusterSortConfig] = useState<SortConfig>(null);
+    
+    // Refs
+    const cyRef = useRef<any>(null);
+    const originalElementsRef = useRef<any[]>([]);
 
 	// Constants for options
 	const LAYOUT_OPTIONS = [
@@ -197,7 +204,7 @@ export function useNetworkData() {
 			withBorder: true,
 			autoClose: 6000,
 			withCloseButton: true,
-			position: 'bottom-left',
+			position: 'bottom-right',
 		});
 	};
 	// Success notification function
@@ -210,7 +217,7 @@ export function useNetworkData() {
 			icon: <IconTimeline />,
 			autoClose: 3000,
 			withCloseButton: true,
-			position: 'bottom-left',
+			position: 'bottom-right',
 		});
 	};
 
@@ -534,6 +541,114 @@ export function useNetworkData() {
 		}
 	};
 
+    // Update the graph when node sizes change
+    useEffect(() => {
+        if (cyRef.current) {
+            if (isObjectOnlyMode) {
+                cyRef.current.style()
+                    .selector("node[type='object1'], node.object1")
+                    .style({
+                        'height': object1NodeSize,
+                        'width': object1NodeSize
+                    })
+                    .update();
+                    
+                cyRef.current.style()
+                    .selector("node[type='object2'], node.object2")
+                    .style({
+                        'height': object2NodeSize,
+                        'width': object2NodeSize
+                    })
+                    .update();
+            } else {
+                // Standard mode - update student and all object nodes together
+                cyRef.current.style()
+                    .selector("node[type='student'], node.student")
+                    .style({
+                        'height': studentNodeSize,
+                        'width': studentNodeSize
+                    })
+                    .update();
+                
+                cyRef.current.style()
+                    .selector("node[type='object1'], node[type='object2'], node[type='object1_object2'], node.object1, node.object2, node.object1_object2")
+                    .style({
+                        'height': objectNodeSize,
+                        'width': objectNodeSize
+                    })
+                    .update();
+            }
+
+            cyRef.current.style()
+                .selector("node.highlight")
+                .style({
+                    'height': (ele) => {
+                        if (isObjectOnlyMode) {
+                            // Object-only mode highlight sizes
+                            if (ele.hasClass('object1') || ele.data('type') === 'object1') {
+                                return Math.max(30, object1NodeSize * 1.5);
+                            } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
+                                return Math.max(30, object2NodeSize * 1.5);
+                            }
+                        } else {
+                            // Standard mode highlight sizes
+                            if (ele.hasClass('student') || ele.data('type') === 'student') {
+                                return Math.max(30, studentNodeSize * 1.5);
+                            } else if (
+                                ele.hasClass('object1') || 
+                                ele.hasClass('object2') || 
+                                ele.hasClass('object1_object2') ||
+                                ele.data('type') === 'object1' ||
+                                ele.data('type') === 'object2' ||
+                                ele.data('type') === 'object1_object2'
+                            ) {
+                                return Math.max(30, objectNodeSize * 1.5);
+                            }
+                        }
+                        return 30;
+                    },
+                    'width': (ele) => {
+                        if (isObjectOnlyMode) {
+                            // Object-only mode highlight sizes
+                            if (ele.hasClass('object1') || ele.data('type') === 'object1') {
+                                return Math.max(30, object1NodeSize * 1.5);
+                            } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
+                                return Math.max(30, object2NodeSize * 1.5);
+                            }
+                        } else {
+                            // Standard mode highlight sizes
+                            if (ele.hasClass('student') || ele.data('type') === 'student') {
+                                return Math.max(30, studentNodeSize * 1.5);
+                            } else if (
+                                ele.hasClass('object1') || 
+                                ele.hasClass('object2') || 
+                                ele.hasClass('object1_object2') ||
+                                ele.data('type') === 'object1' ||
+                                ele.data('type') === 'object2' ||
+                                ele.data('type') === 'object1_object2'
+                            ) {
+                                return Math.max(30, objectNodeSize * 1.5);
+                            }
+                        }
+                        return 30;
+                    }
+                })
+                .update();
+        }
+    }, [studentNodeSize, objectNodeSize, object1NodeSize, object2NodeSize, isObjectOnlyMode]);
+
+    // When mode changes, sync the slider values
+    useEffect(() => {
+        if (isObjectOnlyMode) {
+            setObject1NodeSize(objectNodeSize);
+            setObject2NodeSize(objectNodeSize);
+        } else {
+            if (object1NodeSize !== object2NodeSize) {
+                setObjectNodeSize(Math.round((object1NodeSize + object2NodeSize) / 2));
+            }
+        }
+    }, [isObjectOnlyMode]);
+
 	// Zoom functions
 	const zoomIn = () => {
 		if (cyRef.current) {
@@ -560,6 +675,11 @@ export function useNetworkData() {
 		setZoom(cyRef.current.zoom());
 		cyRef.current.elements().removeClass("highlight");
 		setHighlightedNodeId(null);
+        const defaultNodeSize = 20;
+        setStudentNodeSize(defaultNodeSize);
+        setObjectNodeSize(defaultNodeSize);
+        setObject1NodeSize(defaultNodeSize);
+        setObject2NodeSize(defaultNodeSize);
 		}
 	};
 
@@ -947,6 +1067,41 @@ export function useNetworkData() {
 		};
 	}, [highlightedNodeId]);
 
+    useEffect(() => {
+        const defaultNodeSize = 20;
+        setStudentNodeSize(defaultNodeSize);
+        setObjectNodeSize(defaultNodeSize);
+        setObject1NodeSize(defaultNodeSize);
+        setObject2NodeSize(defaultNodeSize);    
+        if (elements.length > 0 || currentNetworkView === 'object') {
+            const nodeTypes = new Set<string>();
+            let hasStudentNodes = false;
+            let hasObject1Nodes = false;
+            let hasObject2Nodes = false;
+            let hasOtherNodes = false;
+            
+            elements.forEach(element => {
+                if (element.group === 'nodes') {
+                    const dataType = element.data?.type || '';
+                    const classes = element.classes ? element.classes.toString() : '';
+                    if (dataType === 'student' || classes.includes('student')) {
+                        hasStudentNodes = true;
+                    } else if (dataType === 'object1' || classes.includes('object1')) {
+                        hasObject1Nodes = true;
+                    } else if (dataType === 'object2' || classes.includes('object2')) {
+                        hasObject2Nodes = true;
+                    } else if (dataType !== 'object1_object2' && !classes.includes('object1_object2')) {
+                        hasOtherNodes = true;
+                    }
+                }
+            });
+            const shouldBeObjectOnlyMode = 
+                (hasObject1Nodes && hasObject2Nodes && !hasStudentNodes && !hasOtherNodes) || 
+                currentNetworkView === 'object';
+            setIsObjectOnlyMode(shouldBeObjectOnlyMode);
+        }
+    }, [elements, currentNetworkView]);
+    
 	// Update groups when groupCol or uploadedData changes
 	useEffect(() => {
 		if (uploadedData && groupCol !== "none") {
@@ -997,80 +1152,90 @@ export function useNetworkData() {
 		}
 	}, [clusterLabels]);
 
-	// Return all the state and functions needed by components
-	return {
-		// Data and state
-		selectedFileName,
-		uploadedData,
-		columns,
-		elements,
-		groups,
-		group,
-		student,
-		object1,
-		object2,
-		attr,
-		groupCol,
-		numberCluster,
-		pruning,
-		alpha,
-		fixDeg,
-		layout,
-		currentNetworkView,
-		qdData,
-		dyadicAnalysis,
-		dyadicSigTableData,
-		quantityTableData,
-		diversityTableData,
-		normalizedQuantityTableData,
-		categoryQuantityTableData,
-		normalizedGroupTableData,
-		clusterTableData,
-		clusterLabels,
-		cluster,
-		clusterOptions,
-		compressionRatio,
-		activeTab,
-		showLabels,
-		showEdgeWeights,
-		zoom,
-		selectedCommunityId,
-		communityOptions,
-		hasExportData,
-		cyRef,
-		highlightedNodeId,
-		
-		// Actions
-		handleFileUpload,
-		updateHinaNetwork,
-		updateClusteredNetwork,
-		updateObjectNetwork,
-		handleGroupChange,
-		handleClusterChange,
-		handleCommunityChange,
-		setStudent,
-		setObject1,
-		setObject2,
-		setAttr,
-		setGroupCol,
-		setPruning,
-		setAlpha,
-		setFixDeg,
-		setLayout,
-		setNumberCluster,
-		setActiveTab,
-		setShowLabels,
-		setShowEdgeWeights,
-		setZoom,
-		getAvailableColumns,
-		toggleSort,
-		LAYOUT_OPTIONS,
-		PRUNING_OPTIONS,
-		DEG_OPTIONS,
-		handleSave,
-		zoomIn,
-		zoomOut,
-		resetView,
-		exportToXLSX,
-	};
+    return {
+        // Data and state
+        selectedFileName,
+        uploadedData,
+        columns,
+        elements,
+        groups,
+        group,
+        student,
+        object1,
+        object2,
+        attr,
+        groupCol,
+        numberCluster,
+        pruning,
+        alpha,
+        fixDeg,
+        layout,
+        currentNetworkView,
+        qdData,
+        dyadicAnalysis,
+        dyadicSigTableData,
+        quantityTableData,
+        diversityTableData,
+        normalizedQuantityTableData,
+        categoryQuantityTableData,
+        normalizedGroupTableData,
+        clusterTableData,
+        clusterLabels,
+        cluster,
+        clusterOptions,
+        compressionRatio,
+        activeTab,
+        showLabels,
+        showEdgeWeights,
+        zoom,
+        selectedCommunityId,
+        communityOptions,
+        hasExportData,
+        cyRef,
+        highlightedNodeId,
+        
+        // Node size states
+        studentNodeSize,
+        objectNodeSize,
+        object1NodeSize,
+        object2NodeSize,
+        isObjectOnlyMode,
+        setStudentNodeSize,
+        setObjectNodeSize,
+        setObject1NodeSize,
+        setObject2NodeSize,
+        
+        // Actions
+        handleFileUpload,
+        updateHinaNetwork,
+        updateClusteredNetwork,
+        updateObjectNetwork,
+        handleGroupChange,
+        handleClusterChange,
+        handleCommunityChange,
+        setStudent,
+        setObject1,
+        setObject2,
+        setAttr,
+        setGroupCol,
+        setPruning,
+        setAlpha,
+        setFixDeg,
+        setLayout,
+        setNumberCluster,
+        setActiveTab,
+        setShowLabels,
+        setShowEdgeWeights,
+        setZoom,
+        getAvailableColumns,
+        toggleSort,
+        LAYOUT_OPTIONS,
+        PRUNING_OPTIONS,
+        DEG_OPTIONS,
+        handleSave,
+        zoomIn,
+        zoomOut,
+        resetView,
+        exportToXLSX,
+    };
 }

@@ -247,7 +247,7 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
               gradient={{ from: 'indigo', to: 'cyan', deg: 90 }} 
               onClick={updateHinaNetwork}
             >
-              Update HINA Network
+              Run HINA
             </Button>
             <Button
               rightSection={<IconRefresh size={14} />}
@@ -255,7 +255,7 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
               gradient={{ from: 'indigo', to: 'cyan', deg: 90 }}  
               onClick={updateClusteredNetwork}
             >
-              Update Clustered Network
+             Cluster Visualization
             </Button>
             <Button
               rightSection={<IconRefresh size={14} />}
@@ -264,7 +264,7 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
               onClick={updateObjectNetwork}
               disabled={object2 === "none"}
             >
-              Update Tripartite Network
+              Tripartite Projection
             </Button>
           </Group>
         </Paper>   

@@ -93,12 +93,19 @@ A dataset containing student-task interactions:
 .. code-block:: python
 
     df = pd.DataFrame({
-         'student': ['Alice', 'Bob', 'Alice', 'Charlie'],
-         'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring'],
-         'object2': ['tilt head', 'shake head', 'nod head', 'nod head'],
-         'group': ['A', 'B', 'A', 'B'],
-         'attr': ['cognitive', 'cognitive', 'metacognitive', 'metacognitive']
-     })
+        'student': ['Alice', 'Bob', 'Alice', 'Charlie', 'Bob', 'Alice', 'Charlie', 'Alice', 'Bob', 'Charlie',
+                    'Alice', 'Bob', 'Charlie', 'Bob', 'Alice', 'Alice', 'Bob', 'Charlie'],
+        'object1': ['ask questions', 'answer questions', 'evaluating', 'monitoring', 'ask questions', 'evaluating', 
+                    'monitoring', 'ask questions', 'answer questions', 'evaluating', 'ask questions', 'answer questions', 
+                    'evaluating', 'monitoring', 'ask questions', 'ask questions', 'answer questions', 'evaluating'],
+        'object2': ['tilt head', 'shake head', 'nod head', 'nod head', 'tilt head', 'shake head', 'nod head', 
+                    'tilt head', 'shake head', 'nod head', 'shake head', 'nod head', 'tilt head', 'shake head', 
+                    'tilt head', 'tilt head', 'shake head', 'nod head'],
+        'group': ['A', 'B', 'A', 'B', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'A', 'A', 'B', 'B'],
+        'attr': ['cognitive', 'cognitive', 'metacognitive', 'cognitive', 'metacognitive', 
+                'cognitive', 'cognitive', 'metacognitive', 'cognitive', 'cognitive', 'metacognitive', 
+                'metacognitive', 'cognitive', 'cognitive', 'cognitive', 'cognitive', 'metacognitive', 'metacognitive']
+    })
 
 **Step 3: Construct the bipartite network representation**
 
@@ -135,12 +142,14 @@ Example Output
 
 .. code-block:: console
 
-    Significant Edges (No Degree Fixing):
-     {('Alice', 'evaluating', 1), ('Bob', 'answer questions', 1), ('Charlie', 'monitoring', 1), ('Alice', 'ask questions', 1)}
-    Significant Edges (Fixing Degree for Student):
-     {('Bob', 'answer questions', 1), ('Charlie', 'monitoring', 1)}
-    Significant Edges (Fixing Degree for Object1):
-     {('Alice', 'evaluating', 1), ('Bob', 'answer questions', 1), ('Charlie', 'monitoring', 1), ('Alice', 'ask questions', 1)}
+    Significant Edges (No Degree Fixing): 
+    {('Bob', 'answer questions', 4), ('Alice', 'ask questions', 5)}
+
+    Significant Edges (Fixing Degree for Student): 
+    {('Bob', 'answer questions', 4), ('Charlie', 'evaluating', 3), ('Alice', 'ask questions', 5)}
+    
+    Significant Edges (Fixing Degree for Object1): 
+    {('Bob', 'answer questions', 4), ('Charlie', 'monitoring', 2), ('Charlie', 'evaluating', 3), ('Alice', 'ask questions', 5)}
 
 Paper Source
 ============
