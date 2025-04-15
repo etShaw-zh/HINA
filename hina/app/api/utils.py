@@ -274,8 +274,9 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
     # Check if tripartite graph
     is_tripartite = object2_col is not None and object2_col not in ['none', 'null', 'undefined', '']
     student_nodes = set(df[student_col].astype(str).values)
-    object1_nodes = set(df[object1_col].astype(str).values)
-    
+    object1_values = df[object1_col].fillna('NA').astype(str).values
+    object1_nodes = set(object1_values)
+        
     # Create a set of combined nodes for tripartite case
     combined_nodes = set()
     if is_tripartite:

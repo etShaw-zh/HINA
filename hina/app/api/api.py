@@ -155,12 +155,13 @@ async def build_object_network_endpoint(
         
         # Set attributes for nodes based on bipartite attribute
         for node, attrs in G.nodes(data=True):
+            node_str = str(node)
             bipartite_value = str(attrs.get('bipartite', ''))
             if object1_col in bipartite_value:
-                G.nodes[node]['color'] = 'blue'
+                G.nodes[node]['color'] = 'blue' if node_str != 'NA' else 'black'
                 G.nodes[node]['type'] = 'object1'
             else:
-                G.nodes[node]['color'] = 'green'
+                G.nodes[node]['color'] = 'green' if node_str != 'NA' else 'black'
                 G.nodes[node]['type'] = 'object2'
         
         if layout == 'spring':

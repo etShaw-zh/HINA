@@ -380,6 +380,7 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
                         label="Labels"
                         size="sm"
                         styles={{ label: { fontWeight: 'bold' } }}
+                        disabled={highlightedNodeId !== null}
                     />
                     <Switch
                         checked={showEdgeWeights}
@@ -456,7 +457,7 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
                                             thumbSize={14}
                                             step={2}
                                             label={null}
-                                            color="blue"
+                                            color="indigo"
                                         />
                                     </Group>
                                     
@@ -494,7 +495,7 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
                                             thumbSize={14}
                                             step={2}
                                             label={null}
-                                            color="indigo"
+                                            color="grey"
                                         />
                                     </Group>
                                     
@@ -511,7 +512,7 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
                                             thumbSize={14}
                                             step={2}
                                             label={null}
-                                            color="cyan"
+                                            color="green"
                                         />
                                     </Group>
                                 </>

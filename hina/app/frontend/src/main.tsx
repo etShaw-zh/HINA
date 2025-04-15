@@ -9,7 +9,7 @@ import '@mantine/notifications/styles.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <MantineProvider>
-            <Notifications position="bottom-right" zIndex={1000} /> 
+            <Notifications zIndex={1000} /> 
             <App />
         </MantineProvider>
     </React.StrictMode>,

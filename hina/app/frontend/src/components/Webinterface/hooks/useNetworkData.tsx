@@ -88,6 +88,8 @@ export function useNetworkData() {
     // Refs
     const cyRef = useRef<any>(null);
     const originalElementsRef = useRef<any[]>([]);
+    const nodeSizesInitialized = useRef<boolean>(false);
+    const prevNetworkView = useRef<'hina' | 'cluster' | 'object' | null>(null);
 
 	// Constants for options
 	const LAYOUT_OPTIONS = [
@@ -119,6 +121,97 @@ export function useNetworkData() {
 		}
 		return options;
 	}, [student, object1, object2]);
+
+    const applyNodeSizes = () => {
+        if (!cyRef.current) return;
+        
+        if (isObjectOnlyMode) {
+            // Object-only mode
+            cyRef.current.style()
+                .selector("node[type='object1'], node.object1")
+                .style({
+                    'height': object1NodeSize,
+                    'width': object1NodeSize
+                })
+                .update();
+                
+            cyRef.current.style()
+                .selector("node[type='object2'], node.object2")
+                .style({
+                    'height': object2NodeSize,
+                    'width': object2NodeSize
+                })
+                .update();
+        } else {
+            // Standard mode
+            cyRef.current.style()
+                .selector("node[type='student'], node.student")
+                .style({
+                    'height': studentNodeSize,
+                    'width': studentNodeSize
+                })
+                .update();
+            
+            cyRef.current.style()
+                .selector("node[type='object1'], node[type='object2'], node[type='object1_object2'], node.object1, node.object2, node.object1_object2")
+                .style({
+                    'height': objectNodeSize,
+                    'width': objectNodeSize
+                })
+                .update();
+        }
+        cyRef.current.style()
+            .selector("node.highlight")
+            .style({
+                'height': (ele) => {
+                    if (isObjectOnlyMode) {
+                        if (ele.hasClass('object1') || ele.data('type') === 'object1') {
+                            return Math.max(30, object1NodeSize * 1.5);
+                        } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
+                            return Math.max(30, object2NodeSize * 1.5);
+                        }
+                    } else {
+                        if (ele.hasClass('student') || ele.data('type') === 'student') {
+                            return Math.max(30, studentNodeSize * 1.5);
+                        } else if (
+                            ele.hasClass('object1') || 
+                            ele.hasClass('object2') || 
+                            ele.hasClass('object1_object2') ||
+                            ele.data('type') === 'object1' ||
+                            ele.data('type') === 'object2' ||
+                            ele.data('type') === 'object1_object2'
+                        ) {
+                            return Math.max(30, objectNodeSize * 1.5);
+                        }
+                    }
+                    return 30;
+                },
+                'width': (ele) => {
+                    if (isObjectOnlyMode) {
+                        if (ele.hasClass('object1') || ele.data('type') === 'object1') {
+                            return Math.max(30, object1NodeSize * 1.5);
+                        } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
+                            return Math.max(30, object2NodeSize * 1.5);
+                        }
+                    } else {
+                        if (ele.hasClass('student') || ele.data('type') === 'student') {
+                            return Math.max(30, studentNodeSize * 1.5);
+                        } else if (
+                            ele.hasClass('object1') || 
+                            ele.hasClass('object2') || 
+                            ele.hasClass('object1_object2') ||
+                            ele.data('type') === 'object1' ||
+                            ele.data('type') === 'object2' ||
+                            ele.data('type') === 'object1_object2'
+                        ) {
+                            return Math.max(30, objectNodeSize * 1.5);
+                        }
+                    }
+                    return 30;
+                }
+            })
+            .update();
+    };
 
     // Function to store the filename and reset state
 	const handleFileUpload = async (file: File | null) => {
@@ -464,59 +557,83 @@ export function useNetworkData() {
 	};
 
 	// Fetch a selected Object Graph
-	const fetchObjectGraph = async (params: URLSearchParams) => {
-		try {
-		const res = await axios.post("/build-object-network", params);
-		if (res && res.data && res.data.elements) {
-			setElements(res.data.elements);
-			setCurrentNetworkView('object');
-			const edges = res.data.elements.filter((el: any) => el.data.source);
-			if (edges.length > 0) {
-			const significantEdges = edges.map((edge: any) => [
-				edge.data.source,
-				edge.data.target,
-				edge.data.weight || 1
-			]);
-			setDyadicAnalysis(significantEdges);
-			showSuccessNotification("Dyadic Analysis", `Identified ${significantEdges.length} edges in the object-object graph`);
-			//   console.log(`Found ${significantEdges.length} edges for dyadic analysis`);
-			} else {
-			setDyadicAnalysis([]);
-			showAPIErrorNotification("Analysis Warning", "No significant edges found in the object-object graph");
-			console.log("No significant edges found in the object graph");
-			}
-		} else {
-			console.error("Invalid response structure:", res);
-			showAPIErrorNotification("Response Error", "Invalid response structure from the server");
-		}
-		setTimeout(() => {
-			if (cyRef.current) {
-			cyRef.current.fit();
-			const defaultZoom = cyRef.current.zoom() * 0.9;
-			cyRef.current.zoom(defaultZoom);
-			setZoom(cyRef.current.zoom());
-			cyRef.current.center();
-			}
-		}, 10);
-		} catch (error) {
-		console.error("Error getting object graph:", error);
-		console.error("Error details:", error.response?.data || error.message);
-		showAPIErrorNotification("Graph Error", `Failed to build Tripartite network: ${error.response?.data?.detail || error.message}`);
-		}
-	};
+    const fetchObjectGraph = async (params: URLSearchParams, savedSizes?: {
+        student: number;
+        object: number;
+        object1: number;
+        object2: number;
+    }) => {
+        try {
+            const res = await axios.post("/build-object-network", params);
+            if (res && res.data && res.data.elements) {
+                setElements(res.data.elements);
+                setCurrentNetworkView('object');
+                const edges = res.data.elements.filter((el: any) => el.data.source);
+                if (edges.length > 0) {
+                    const significantEdges = edges.map((edge: any) => [
+                        edge.data.source,
+                        edge.data.target,
+                        edge.data.weight || 1
+                    ]);
+                    setDyadicAnalysis(significantEdges);
+                    showSuccessNotification("Dyadic Analysis", `Identified ${significantEdges.length} edges in the object-object graph`);
+                } else {
+                    setDyadicAnalysis([]);
+                    showAPIErrorNotification("Analysis Warning", "No significant edges found in the object-object graph");
+                    console.log("No significant edges found in the object graph");
+                }
+            } else {
+                console.error("Invalid response structure:", res);
+                showAPIErrorNotification("Response Error", "Invalid response structure from the server");
+            }
+            
+            setTimeout(() => {
+                if (cyRef.current) {
+                    cyRef.current.fit();
+                    const defaultZoom = cyRef.current.zoom() * 0.9;
+                    cyRef.current.zoom(defaultZoom);
+                    setZoom(cyRef.current.zoom());
+                    cyRef.current.center();
+                    
+                    if (savedSizes) {
+                        setStudentNodeSize(savedSizes.student);
+                        setObjectNodeSize(savedSizes.object);
+                        setObject1NodeSize(savedSizes.object1);
+                        setObject2NodeSize(savedSizes.object2);
+                    }
+                    setTimeout(() => applyNodeSizes(), 0);
+                }
+            }, 50);
+        } catch (error) {
+            console.error("Error getting object graph:", error);
+            console.error("Error details:", error.response?.data || error.message);
+            showAPIErrorNotification("Graph Error", `Failed to build Tripartite network: ${error.response?.data?.detail || error.message}`);
+        }
+    };
 
 	// Update the selected community ID and Object Graph
 	const handleCommunityChange = (value: string) => {
+        const currentSizes = {
+            student: studentNodeSize,
+            object: objectNodeSize,
+            object1: object1NodeSize,
+            object2: object2NodeSize
+        };
 		setSelectedCommunityId(value);    
-		if (value && objectObjectGraphs && Object.keys(objectObjectGraphs).length > 0) {
-		const objectParams = new URLSearchParams();
-		const objectGraphsData = JSON.stringify(objectObjectGraphs);
-		objectParams.append("data", objectGraphsData);
-		objectParams.append("community_id", value); 
-		objectParams.append("object1_col", object1);
-		objectParams.append("object2_col", object2);
-		objectParams.append("layout", layout);
-		fetchObjectGraph(objectParams);
+            if (value && objectObjectGraphs && Object.keys(objectObjectGraphs).length > 0) {
+            const objectParams = new URLSearchParams();
+            const objectGraphsData = JSON.stringify(objectObjectGraphs);
+            objectParams.append("data", objectGraphsData);
+            objectParams.append("community_id", value); 
+            objectParams.append("object1_col", object1);
+            objectParams.append("object2_col", object2);
+            objectParams.append("layout", layout);
+            fetchObjectGraph(objectParams, currentSizes);
+            setTimeout(() => {
+                if (cyRef.current) {
+                    applyNodeSizes();
+                }
+            }, 50);
 		}
 	};
 
@@ -544,108 +661,18 @@ export function useNetworkData() {
     // Update the graph when node sizes change
     useEffect(() => {
         if (cyRef.current) {
-            if (isObjectOnlyMode) {
-                cyRef.current.style()
-                    .selector("node[type='object1'], node.object1")
-                    .style({
-                        'height': object1NodeSize,
-                        'width': object1NodeSize
-                    })
-                    .update();
-                    
-                cyRef.current.style()
-                    .selector("node[type='object2'], node.object2")
-                    .style({
-                        'height': object2NodeSize,
-                        'width': object2NodeSize
-                    })
-                    .update();
-            } else {
-                // Standard mode - update student and all object nodes together
-                cyRef.current.style()
-                    .selector("node[type='student'], node.student")
-                    .style({
-                        'height': studentNodeSize,
-                        'width': studentNodeSize
-                    })
-                    .update();
-                
-                cyRef.current.style()
-                    .selector("node[type='object1'], node[type='object2'], node[type='object1_object2'], node.object1, node.object2, node.object1_object2")
-                    .style({
-                        'height': objectNodeSize,
-                        'width': objectNodeSize
-                    })
-                    .update();
-            }
-
-            cyRef.current.style()
-                .selector("node.highlight")
-                .style({
-                    'height': (ele) => {
-                        if (isObjectOnlyMode) {
-                            // Object-only mode highlight sizes
-                            if (ele.hasClass('object1') || ele.data('type') === 'object1') {
-                                return Math.max(30, object1NodeSize * 1.5);
-                            } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
-                                return Math.max(30, object2NodeSize * 1.5);
-                            }
-                        } else {
-                            // Standard mode highlight sizes
-                            if (ele.hasClass('student') || ele.data('type') === 'student') {
-                                return Math.max(30, studentNodeSize * 1.5);
-                            } else if (
-                                ele.hasClass('object1') || 
-                                ele.hasClass('object2') || 
-                                ele.hasClass('object1_object2') ||
-                                ele.data('type') === 'object1' ||
-                                ele.data('type') === 'object2' ||
-                                ele.data('type') === 'object1_object2'
-                            ) {
-                                return Math.max(30, objectNodeSize * 1.5);
-                            }
-                        }
-                        return 30;
-                    },
-                    'width': (ele) => {
-                        if (isObjectOnlyMode) {
-                            // Object-only mode highlight sizes
-                            if (ele.hasClass('object1') || ele.data('type') === 'object1') {
-                                return Math.max(30, object1NodeSize * 1.5);
-                            } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
-                                return Math.max(30, object2NodeSize * 1.5);
-                            }
-                        } else {
-                            // Standard mode highlight sizes
-                            if (ele.hasClass('student') || ele.data('type') === 'student') {
-                                return Math.max(30, studentNodeSize * 1.5);
-                            } else if (
-                                ele.hasClass('object1') || 
-                                ele.hasClass('object2') || 
-                                ele.hasClass('object1_object2') ||
-                                ele.data('type') === 'object1' ||
-                                ele.data('type') === 'object2' ||
-                                ele.data('type') === 'object1_object2'
-                            ) {
-                                return Math.max(30, objectNodeSize * 1.5);
-                            }
-                        }
-                        return 30;
-                    }
-                })
-                .update();
+            applyNodeSizes();
         }
     }, [studentNodeSize, objectNodeSize, object1NodeSize, object2NodeSize, isObjectOnlyMode]);
 
+
     // When mode changes, sync the slider values
     useEffect(() => {
-        if (isObjectOnlyMode) {
+        if (isObjectOnlyMode && object1NodeSize === 20 && object2NodeSize === 20) {
             setObject1NodeSize(objectNodeSize);
             setObject2NodeSize(objectNodeSize);
-        } else {
-            if (object1NodeSize !== object2NodeSize) {
-                setObjectNodeSize(Math.round((object1NodeSize + object2NodeSize) / 2));
-            }
+        } else if (!isObjectOnlyMode && object1NodeSize !== object2NodeSize) {
+            setObjectNodeSize(Math.round((object1NodeSize + object2NodeSize) / 2));
         }
     }, [isObjectOnlyMode]);
 
@@ -656,6 +683,7 @@ export function useNetworkData() {
 		const newZoom = Math.min(currentZoom * 1.2, 3);
 		cyRef.current.zoom(newZoom);
 		setZoom(newZoom);
+        setTimeout(() => applyNodeSizes(), 0);
 		}
 	};  
 
@@ -665,6 +693,7 @@ export function useNetworkData() {
 		const newZoom = Math.max(currentZoom / 1.2, 0.1);
 		cyRef.current.zoom(newZoom);
 		setZoom(newZoom);
+        setTimeout(() => applyNodeSizes(), 0);
 		}
 	};
 
@@ -682,6 +711,17 @@ export function useNetworkData() {
         setObject2NodeSize(defaultNodeSize);
 		}
 	};
+
+    // Label and weight switch handling 
+    const setShowLabelsWithSize = (value: boolean) => {
+        setShowLabels(value);
+        setTimeout(() => applyNodeSizes(), 0);
+    };
+
+    const setShowEdgeWeightsWithSize = (value: boolean) => {
+        setShowEdgeWeights(value);
+        setTimeout(() => applyNodeSizes(), 0);
+    };
 
 	// Sorting function for table data
 	const applySorting = <T extends Record<string, any>>(
@@ -752,14 +792,19 @@ export function useNetworkData() {
 	
 		axios.post("/build-hina-network", params)
 			.then(res => {
-			setElements(res.data.elements);
-			if (res.data.significant_edges) {
-				setDyadicAnalysis(res.data.significant_edges);
-			} else {
-				setDyadicAnalysis(null);
-			}
-			fetchQuantityAndDiversity();
-			})
+                setElements(res.data.elements);
+                if (res.data.significant_edges) {
+                    setDyadicAnalysis(res.data.significant_edges);
+                } else {
+                    setDyadicAnalysis(null);
+                }
+                fetchQuantityAndDiversity();
+                setTimeout(() => {
+                    if (cyRef.current) {
+                        applyNodeSizes();
+                    }
+                }, 50);
+            })
 			.catch(error => {
 			console.error("Error updating HINA network:", error);
 			});
@@ -767,45 +812,60 @@ export function useNetworkData() {
 	};
 
 	// Updated handleClusterChange function
-	const handleClusterChange = (value: string | null) => {
-		const newValue = value || "All";
-		setCluster(newValue);
-		const fullElements = originalElementsRef.current;        
-		if (newValue === "All") {
-		setElements([...fullElements]);
-		return;
-		}    
-		const filteredStudentIds = Object.entries(clusterLabels || {})
-		.filter(([node, label]) => String(label) === newValue)
-		.map(([node]) => node);
-
-		if (filteredStudentIds.length === 0) {
-		setElements([...fullElements]);
-		return;
-		}
-		const studentIdSet = new Set(filteredStudentIds);
-		// Get student nodes in the selected cluster
-		const filteredStudentNodes = fullElements.filter(el => 
-		!el.data.source && studentIdSet.has(el.data.id)
-		);
-		// Find edges connecting to filtered student nodes
-		const filteredEdges = fullElements.filter(el => 
-		el.data.source && (studentIdSet.has(el.data.source) || studentIdSet.has(el.data.target))
-		);    
-		const connectedNodeIds = new Set<string>();
-		filteredEdges.forEach(edge => {
-		connectedNodeIds.add(edge.data.source);
-		connectedNodeIds.add(edge.data.target);
-		});
-		// Find object nodes that are connected to students in the selected cluster
-		const filteredObjectNodes = fullElements.filter(el => 
-		!el.data.source && 
-		!studentIdSet.has(el.data.id) &&
-		connectedNodeIds.has(el.data.id)
-		);  
-		const newElements = [...filteredStudentNodes, ...filteredObjectNodes, ...filteredEdges];
-		setElements(newElements);
-	};
+    const handleClusterChange = (value: string | null) => {
+        const newValue = value || "All";
+        setCluster(newValue);
+        const fullElements = originalElementsRef.current;        
+        if (newValue === "All") {
+            setElements([...fullElements]);
+            setTimeout(() => {
+                if (cyRef.current) {
+                    applyNodeSizes();
+                }
+            }, 50);
+            return;
+        }    
+        const filteredStudentIds = Object.entries(clusterLabels || {})
+            .filter(([node, label]) => String(label) === newValue)
+            .map(([node]) => node);
+    
+        if (filteredStudentIds.length === 0) {
+            setElements([...fullElements]);
+            setTimeout(() => {
+                if (cyRef.current) {
+                    applyNodeSizes();
+                }
+            }, 50);
+            return;
+        }
+        const studentIdSet = new Set(filteredStudentIds);
+        // Get student nodes in the selected cluster
+        const filteredStudentNodes = fullElements.filter(el => 
+            !el.data.source && studentIdSet.has(el.data.id)
+        );
+        // Find edges connecting to filtered student nodes
+        const filteredEdges = fullElements.filter(el => 
+            el.data.source && (studentIdSet.has(el.data.source) || studentIdSet.has(el.data.target))
+        );    
+        const connectedNodeIds = new Set<string>();
+        filteredEdges.forEach(edge => {
+            connectedNodeIds.add(edge.data.source);
+            connectedNodeIds.add(edge.data.target);
+        });
+        // Find object nodes that are connected to students in the selected cluster
+        const filteredObjectNodes = fullElements.filter(el => 
+            !el.data.source && 
+            !studentIdSet.has(el.data.id) &&
+            connectedNodeIds.has(el.data.id)
+        );  
+        const newElements = [...filteredStudentNodes, ...filteredObjectNodes, ...filteredEdges];
+        setElements(newElements);
+        setTimeout(() => {
+            if (cyRef.current) {
+                applyNodeSizes();
+            }
+        }, 50);
+    };
 
 	// Export to XLSX
 	const exportToXLSX = () => {
@@ -1002,43 +1062,51 @@ export function useNetworkData() {
 		const cy = cyRef.current;
 		
 		const handleTap = (evt: any) => {
-		const clickedNode = evt.target;
-		const clickedNodeId = clickedNode.id();
-		if (highlightedNodeId === clickedNodeId) {
-			cy.elements().removeClass("highlight");
-			setHighlightedNodeId(null);
-		} else {
-			cy.elements().removeClass("highlight");
-			
-			// Add highlight to the clicked node
-			clickedNode.addClass("highlight");
-			setHighlightedNodeId(clickedNodeId);
-			
-			// Highlight connected edges
-			const connectedEdges = clickedNode.connectedEdges();
-			connectedEdges.addClass("highlight");
-			
-			// Highlight nodes connected to this node
-			const connectedNodes = clickedNode.neighborhood('node');
-			connectedNodes.addClass("highlight");
-		}
+            const clickedNode = evt.target;
+            const clickedNodeId = clickedNode.id();
+            const currentSizes = {
+                student: studentNodeSize,
+                object: objectNodeSize,
+                object1: object1NodeSize,
+                object2: object2NodeSize
+            };
+            if (highlightedNodeId === clickedNodeId) {
+                cy.elements().removeClass("highlight");
+                setHighlightedNodeId(null);
+            } else {
+                cy.elements().removeClass("highlight");
+                
+                // Add highlight to the clicked node
+                clickedNode.addClass("highlight");
+                setHighlightedNodeId(clickedNodeId);
+                
+                // Highlight connected edges
+                const connectedEdges = clickedNode.connectedEdges();
+                connectedEdges.addClass("highlight");
+                
+                // Highlight nodes connected to this node
+                const connectedNodes = clickedNode.neighborhood('node');
+                connectedNodes.addClass("highlight");
+
+                setTimeout(() => applyNodeSizes(), 0);
+            }
 		};
 		
-		const handleBackgroundTap = (evt: any) => {
-		if (evt.target === cy) {
-			cy.elements().removeClass("highlight");
-			setHighlightedNodeId(null);
-		}
-		};
-		
-		cy.on("tap", "node", handleTap);
-		cy.on("tap", handleBackgroundTap);
-		
-		return () => {
-		cy.removeListener("tap", "node", handleTap);
-		cy.removeListener("tap", handleBackgroundTap);
-		};
-	}, [elements, highlightedNodeId]);
+        const handleBackgroundTap = (evt: any) => {
+            if (evt.target === cy) {
+                cy.elements().removeClass("highlight");
+                setHighlightedNodeId(null);
+                setTimeout(() => applyNodeSizes(), 0);
+            }
+        };
+        cy.on("tap", "node", handleTap);
+        cy.on("tap", handleBackgroundTap);
+        return () => {
+            cy.removeListener("tap", "node", handleTap);
+            cy.removeListener("tap", handleBackgroundTap);
+        };
+    }, [elements, highlightedNodeId, studentNodeSize, objectNodeSize, object1NodeSize, object2NodeSize]);
+
 
 	// Node highlighting animation
 	useEffect(() => {
@@ -1068,12 +1136,7 @@ export function useNetworkData() {
 	}, [highlightedNodeId]);
 
     useEffect(() => {
-        const defaultNodeSize = 20;
-        setStudentNodeSize(defaultNodeSize);
-        setObjectNodeSize(defaultNodeSize);
-        setObject1NodeSize(defaultNodeSize);
-        setObject2NodeSize(defaultNodeSize);    
-        if (elements.length > 0 || currentNetworkView === 'object') {
+        if (elements.length > 0) {
             const nodeTypes = new Set<string>();
             let hasStudentNodes = false;
             let hasObject1Nodes = false;
@@ -1084,6 +1147,7 @@ export function useNetworkData() {
                 if (element.group === 'nodes') {
                     const dataType = element.data?.type || '';
                     const classes = element.classes ? element.classes.toString() : '';
+                    
                     if (dataType === 'student' || classes.includes('student')) {
                         hasStudentNodes = true;
                     } else if (dataType === 'object1' || classes.includes('object1')) {
@@ -1095,10 +1159,30 @@ export function useNetworkData() {
                     }
                 }
             });
+            
             const shouldBeObjectOnlyMode = 
                 (hasObject1Nodes && hasObject2Nodes && !hasStudentNodes && !hasOtherNodes) || 
                 currentNetworkView === 'object';
+            
+            const networkViewChanged = prevNetworkView.current !== currentNetworkView;            
+            prevNetworkView.current = currentNetworkView;
             setIsObjectOnlyMode(shouldBeObjectOnlyMode);
+            
+            // Reset node sizes:
+            if (networkViewChanged || 
+                originalElementsRef.current.length === 0 || 
+                !nodeSizesInitialized.current) {
+
+                const defaultNodeSize = 20;
+                setStudentNodeSize(defaultNodeSize);
+                setObjectNodeSize(defaultNodeSize);
+                setObject1NodeSize(defaultNodeSize);
+                setObject2NodeSize(defaultNodeSize);
+                nodeSizesInitialized.current = true;
+                if (cyRef.current) {
+                    setTimeout(() => applyNodeSizes(), 50);
+                }
+            }
         }
     }, [elements, currentNetworkView]);
     
@@ -1224,8 +1308,8 @@ export function useNetworkData() {
         setLayout,
         setNumberCluster,
         setActiveTab,
-        setShowLabels,
-        setShowEdgeWeights,
+        setShowLabels: setShowLabelsWithSize,
+        setShowEdgeWeights: setShowEdgeWeightsWithSize,
         setZoom,
         getAvailableColumns,
         toggleSort,
