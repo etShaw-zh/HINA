@@ -1,6 +1,6 @@
 import React from "react";
 import CytoscapeComponent from "react-cytoscapejs";
-import { Paper, ActionIcon, Switch, Select, Menu, Button, Slider, Text, Group } from "@mantine/core";
+import { Paper, ActionIcon, Switch, Select, Menu, Button, Slider, Text, Group, LoadingOverlay } from "@mantine/core";
 import { IconZoomIn, IconZoomOut, IconDownload } from "@tabler/icons-react";
 
 interface NetworkVisualizationProps {
@@ -77,6 +77,12 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     setObject2NodeSize
 }) => {
     const [initialRenderDone, setInitialRenderDone] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
+    React.useEffect(() => {
+        if (elements.length > 0) {
+            setLoading(true);
+        }
+    }, [elements]);
 
     const NetworkFilters = () => {
         if (!elements.length) return null;
@@ -149,200 +155,211 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
             <div style={{ position: "absolute", top: "5px", left: "10px", zIndex: 999 }}>
                 <NetworkFilters />
             </div>
-            
-            <CytoscapeComponent
-                elements={elements}
-                style={{ width: "100%", height: "100%" }}
-                layout={{ name: "preset" }}
-                userZoomingEnabled={false}
-                userPanningEnabled={true}
-                stylesheet={[
-                    {
-                        // Student nodes
-                        selector: "node[type='student'], node.student",
-                        style: {
-                            "background-color": "data(color)",
-                            "border-width": 1,
-                            "border-color": "#000000",
-                            "height": studentNodeSize,
-                            "width": studentNodeSize,
-                            "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
-                            "text-valign": "center",
-                            "color": "#fff",
-                            "text-outline-width": 2,
-                            "text-outline-color": "data(color)"
-                        },
-                    },
-                    {
-                        // Object1 nodes in object-only mode
-                        selector: "node[type='object1'], node.object1",
-                        style: {
-                            "background-color": "data(color)",
-                            "border-width": 1,
-                            "border-color": "#000000",
-                            "height": isObjectOnlyMode ? object1NodeSize : objectNodeSize,
-                            "width": isObjectOnlyMode ? object1NodeSize : objectNodeSize,
-                            "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
-                            "text-valign": "center",
-                            "color": "#fff",
-                            "text-outline-width": 2,
-                            "text-outline-color": "data(color)"
-                        },
-                    },
-                    {
-                        // Object2 nodes in object-only mode
-                        selector: "node[type='object2'], node.object2",
-                        style: {
-                            "background-color": "data(color)",
-                            "border-width": 1,
-                            "border-color": "#000000",
-                            "height": isObjectOnlyMode ? object2NodeSize : objectNodeSize,
-                            "width": isObjectOnlyMode ? object2NodeSize : objectNodeSize,
-                            "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
-                            "text-valign": "center",
-                            "color": "#fff",
-                            "text-outline-width": 2,
-                            "text-outline-color": "data(color)"
-                        },
-                    },
-                    {
-                        // Combined object nodes
-                        selector: "node[type='object1_object2'], node.object1_object2",
-                        style: {
-                            "background-color": "data(color)",
-                            "border-width": 1,
-                            "border-color": "#000000",
-                            "height": objectNodeSize,
-                            "width": objectNodeSize,
-                            "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
-                            "text-valign": "center",
-                            "color": "#fff",
-                            "text-outline-width": 2,
-                            "text-outline-color": "data(color)"
-                        },
-                    },
-                    {
-                        // Unknown nodes
-                        selector: "node",
-                        style: {
-                            "background-color": "data(color)",
-                            "border-width": 1,
-                            "border-color": "#000000",
-                            "height": 20,
-                            "width": 20,
-                            "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
-                            "text-valign": "center",
-                            "color": "#fff",
-                            "text-outline-width": 2,
-                            "text-outline-color": "data(color)"
-                        },
-                    },
-                    {
-                        selector: "node.highlight",
-                        style: {
-                            "background-color": "data(color)",
-                            "border-width": 8,
-                            "border-color": "#a593f5",
-                            "border-opacity": 0.8,
-                            "label": "data(id)", // Always show label for highlighted nodes
-                            "height": (ele) => {
-                                if (isObjectOnlyMode) {
-                                    if (ele.hasClass('object1') || ele.data('type') === 'object1') {
-                                        return Math.max(30, object1NodeSize * 1.5);
-                                    } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
-                                        return Math.max(30, object2NodeSize * 1.5);
-                                    }
-                                } else {
-                                    if (ele.hasClass('student') || ele.data('type') === 'student') {
-                                        return Math.max(30, studentNodeSize * 1.5);
-                                    } else if (
-                                        ele.hasClass('object1') || 
-                                        ele.hasClass('object2') || 
-                                        ele.hasClass('object1_object2') ||
-                                        ele.data('type') === 'object1' ||
-                                        ele.data('type') === 'object2' ||
-                                        ele.data('type') === 'object1_object2'
-                                    ) {
-                                        return Math.max(30, objectNodeSize * 1.5);
-                                    }
-                                }
-                                return 30;
-                            },
-                            "width": (ele) => {
-                                // Apply different sizing logic based on mode
-                                if (isObjectOnlyMode) {
-                                    if (ele.hasClass('object1') || ele.data('type') === 'object1') {
-                                        return Math.max(30, object1NodeSize * 1.5);
-                                    } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
-                                        return Math.max(30, object2NodeSize * 1.5);
-                                    }
-                                } else {
-                                    if (ele.hasClass('student') || ele.data('type') === 'student') {
-                                        return Math.max(30, studentNodeSize * 1.5);
-                                    } else if (
-                                        ele.hasClass('object1') || 
-                                        ele.hasClass('object2') || 
-                                        ele.hasClass('object1_object2') ||
-                                        ele.data('type') === 'object1' ||
-                                        ele.data('type') === 'object2' ||
-                                        ele.data('type') === 'object1_object2'
-                                    ) {
-                                        return Math.max(30, objectNodeSize * 1.5);
-                                    }
-                                }
-                                return 30;
+
+            <div style={{ position: "relative", height: "100%" }}>
+                <LoadingOverlay 
+                    visible={loading} 
+                    overlayProps={{ radius: 'sm', blur: 2 }}
+                    loaderProps={{ size: 'xl', color: 'indigo', type: 'bars' }}
+                    zIndex={100}
+                />
+                <CytoscapeComponent
+                    elements={elements}
+                    style={{ width: "100%", height: "100%" }}
+                    layout={{ name: "preset" }}
+                    userZoomingEnabled={false}
+                    userPanningEnabled={true}
+                    stylesheet={[
+                        {
+                            // Student nodes
+                            selector: "node[type='student'], node.student",
+                            style: {
+                                "background-color": "data(color)",
+                                "border-width": 1,
+                                "border-color": "#000000",
+                                "height": studentNodeSize,
+                                "width": studentNodeSize,
+                                "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
+                                "text-valign": "center",
+                                "color": "#fff",
+                                "text-outline-width": 2,
+                                "text-outline-color": "data(color)"
                             },
                         },
-                    },
-                    {
-                        selector: "edge",
-                        style: {
-                            "line-color": "#ccc",
-                            "target-arrow-color": "#ccc",
-                            "curve-style": "bezier",
-                            "width": (ele) => {
-                                const weight = ele.data('weight');
-                                return Math.min(1 + Math.sqrt(weight), 8);
-                            },              
-                            "label": showEdgeWeights ? "data(label)" : "",
-                            "font-size": "10px",
-                            "text-rotation": "autorotate",
-                            "text-margin-y": 0,
-                            "text-halign": "center",
-                            "text-valign": "center",
-                            "color": "#000",
-                            "text-background-color": "#fff",
-                            "text-background-opacity": 1,
-                            "text-background-padding": "2px",
+                        {
+                            // Object1 nodes in object-only mode
+                            selector: "node[type='object1'], node.object1",
+                            style: {
+                                "background-color": "data(color)",
+                                "border-width": 1,
+                                "border-color": "#000000",
+                                "height": isObjectOnlyMode ? object1NodeSize : objectNodeSize,
+                                "width": isObjectOnlyMode ? object1NodeSize : objectNodeSize,
+                                "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
+                                "text-valign": "center",
+                                "color": "#fff",
+                                "text-outline-width": 2,
+                                "text-outline-color": "data(color)"
+                            },
                         },
-                    },
-                    {
-                        selector: "edge.highlight",
-                        style: {
-                            "line-color": "#FF5733",
-                            "width": (ele) => {
-                                const weight = ele.data('weight');
-                                return Math.min(1 + Math.sqrt(weight), 8);
-                            },   
-                            "target-arrow-color": "#FF5733",
-                            "opacity": 1
+                        {
+                            // Object2 nodes in object-only mode
+                            selector: "node[type='object2'], node.object2",
+                            style: {
+                                "background-color": "data(color)",
+                                "border-width": 1,
+                                "border-color": "#000000",
+                                "height": isObjectOnlyMode ? object2NodeSize : objectNodeSize,
+                                "width": isObjectOnlyMode ? object2NodeSize : objectNodeSize,
+                                "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
+                                "text-valign": "center",
+                                "color": "#fff",
+                                "text-outline-width": 2,
+                                "text-outline-color": "data(color)"
+                            },
+                        },
+                        {
+                            // Combined object nodes
+                            selector: "node[type='object1_object2'], node.object1_object2",
+                            style: {
+                                "background-color": "data(color)",
+                                "border-width": 1,
+                                "border-color": "#000000",
+                                "height": objectNodeSize,
+                                "width": objectNodeSize,
+                                "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
+                                "text-valign": "center",
+                                "color": "#fff",
+                                "text-outline-width": 2,
+                                "text-outline-color": "data(color)"
+                            },
+                        },
+                        {
+                            // Unknown nodes
+                            selector: "node",
+                            style: {
+                                "background-color": "data(color)",
+                                "border-width": 1,
+                                "border-color": "#000000",
+                                "height": 20,
+                                "width": 20,
+                                "label": showLabels && (highlightedNodeId === null || `data(id)` === highlightedNodeId) ? "data(id)" : "",
+                                "text-valign": "center",
+                                "color": "#fff",
+                                "text-outline-width": 2,
+                                "text-outline-color": "data(color)"
+                            },
+                        },
+                        {
+                            selector: "node.highlight",
+                            style: {
+                                "background-color": "data(color)",
+                                "border-width": 8,
+                                "border-color": "#a593f5",
+                                "border-opacity": 0.8,
+                                "label": "data(id)", // Always show label for highlighted nodes
+                                "height": (ele) => {
+                                    if (isObjectOnlyMode) {
+                                        if (ele.hasClass('object1') || ele.data('type') === 'object1') {
+                                            return Math.max(30, object1NodeSize * 1.5);
+                                        } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
+                                            return Math.max(30, object2NodeSize * 1.5);
+                                        }
+                                    } else {
+                                        if (ele.hasClass('student') || ele.data('type') === 'student') {
+                                            return Math.max(30, studentNodeSize * 1.5);
+                                        } else if (
+                                            ele.hasClass('object1') || 
+                                            ele.hasClass('object2') || 
+                                            ele.hasClass('object1_object2') ||
+                                            ele.data('type') === 'object1' ||
+                                            ele.data('type') === 'object2' ||
+                                            ele.data('type') === 'object1_object2'
+                                        ) {
+                                            return Math.max(30, objectNodeSize * 1.5);
+                                        }
+                                    }
+                                    return 30;
+                                },
+                                "width": (ele) => {
+                                    // Apply different sizing logic based on mode
+                                    if (isObjectOnlyMode) {
+                                        if (ele.hasClass('object1') || ele.data('type') === 'object1') {
+                                            return Math.max(30, object1NodeSize * 1.5);
+                                        } else if (ele.hasClass('object2') || ele.data('type') === 'object2') {
+                                            return Math.max(30, object2NodeSize * 1.5);
+                                        }
+                                    } else {
+                                        if (ele.hasClass('student') || ele.data('type') === 'student') {
+                                            return Math.max(30, studentNodeSize * 1.5);
+                                        } else if (
+                                            ele.hasClass('object1') || 
+                                            ele.hasClass('object2') || 
+                                            ele.hasClass('object1_object2') ||
+                                            ele.data('type') === 'object1' ||
+                                            ele.data('type') === 'object2' ||
+                                            ele.data('type') === 'object1_object2'
+                                        ) {
+                                            return Math.max(30, objectNodeSize * 1.5);
+                                        }
+                                    }
+                                    return 30;
+                                },
+                            },
+                        },
+                        {
+                            selector: "edge",
+                            style: {
+                                "line-color": "#ccc",
+                                "target-arrow-color": "#ccc",
+                                "curve-style": "bezier",
+                                "width": (ele) => {
+                                    const weight = ele.data('weight');
+                                    return Math.min(1 + Math.sqrt(weight), 8);
+                                },              
+                                "label": showEdgeWeights ? "data(label)" : "",
+                                "font-size": "10px",
+                                "text-rotation": "autorotate",
+                                "text-margin-y": 0,
+                                "text-halign": "center",
+                                "text-valign": "center",
+                                "color": "#000",
+                                "text-background-color": "#fff",
+                                "text-background-opacity": 1,
+                                "text-background-padding": "2px",
+                            },
+                        },
+                        {
+                            selector: "edge.highlight",
+                            style: {
+                                "line-color": "#FF5733",
+                                "width": (ele) => {
+                                    const weight = ele.data('weight');
+                                    return Math.min(1 + Math.sqrt(weight), 8);
+                                },   
+                                "target-arrow-color": "#FF5733",
+                                "opacity": 1
+                            }
                         }
-                    }
-                ]}
-                cy={(cy) => {
-                    cyRef.current = cy;
-                    if (!initialRenderDone && elements.length > 0) {
-                        setTimeout(() => {
-                            cy.fit();
-                            const defaultZoom = cy.zoom() * 0.9;
-                            cy.zoom(defaultZoom);
-                            setZoom(cy.zoom());
-                            cy.center();
-                            setInitialRenderDone(true); 
-                        }, 10);
-                    }
-                }}
-            />
+                    ]}
+                    cy={(cy) => {
+                        cyRef.current = cy;
+                        if (!initialRenderDone && elements.length > 0) {
+                            setTimeout(() => {
+                                cy.fit();
+                                const defaultZoom = cy.zoom() * 0.9;
+                                cy.zoom(defaultZoom);
+                                setZoom(cy.zoom());
+                                cy.center();
+                                setInitialRenderDone(true); 
+                                setLoading(false); 
+                            }, 100);
+                        } else {
+                            setLoading(false);
+                        }
+                    }}
+                />
+            </div>
         
             {elements.length > 0 && (
                 <div style={{ 
