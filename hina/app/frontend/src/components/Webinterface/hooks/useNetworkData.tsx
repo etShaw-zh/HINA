@@ -7,7 +7,7 @@ import { rem } from '@mantine/core';
 
 
 // Set axios base URL for local development
-axios.defaults.baseURL = 'http://localhost:8000';
+// axios.defaults.baseURL = 'http://localhost:8000';
 
 // Types
 interface QDData {

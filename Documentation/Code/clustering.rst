@@ -193,9 +193,8 @@ Source Code
 
     # Create the projected subgraphs for each community for tripartite network
         
-        sub_Gs_object = {}
-
         if any(j.get('tripartite') == True for i, j in G.nodes(data=True)):
+            sub_Gs_object = {}
             for i, g in sub_Gs.items():
                 objects_objects = [[j,w['weight']] for i,j,w in g.edges(data=True)]
                 bipartite_attrs = list(set([j['bipartite'] for i, j in g.nodes(data=True)]))
@@ -205,28 +204,36 @@ Source Code
                     if isinstance(attr, str) and '(' in attr and ')' in attr and ',' in attr:
                         combined_attr = attr
                     else:
-                        student_attr = attr            
-                if combined_attr:
-                    attr1, attr2 = combined_attr.strip("()").split(",")
-                    attr1 = attr1.strip()
-                    attr2 = attr2.strip()
-                else:
-                    attr_str = bipartite_attrs[0] if isinstance(bipartite_attrs[0], str) else bipartite_attrs[1]
-                    attr1, attr2 = attr_str.strip("()").split(",")        
-
-                pair_count = defaultdict(int)
-                for n in objects_objects:
-                    pair = tuple(item.replace(' ', '') for item in n[0].split('**'))
-                    pair_count[pair] += n[1]
-                w_edges = [(object1, object2, {'weight': count}) for (object1, object2), count in pair_count.items()]
-                G_ = nx.Graph()
-                G_.add_edges_from(w_edges)
-                for node in G_.nodes():
-                    if node in [edge[0] for edge in w_edges]:  
-                        G_.nodes[node]['bipartite'] = attr1
-                    else:  
-                        G_.nodes[node]['bipartite'] = attr2
-                sub_Gs_object[i] = G_
+                        student_attr = attr
+                try:
+                    if combined_attr:
+                        attr1, attr2 = combined_attr.strip("()").split(",")
+                        attr1 = attr1.strip()
+                        attr2 = attr2.strip()
+                    else:
+                        attr1, attr2 = "object1", "object2"
+                    pair_count = defaultdict(int)
+                    for n in objects_objects:
+                        if '**' in n[0]:
+                            parts = n[0].split('**')
+                            if len(parts) == 2:
+                                pair = (parts[0].strip(), parts[1].strip())
+                                pair_count[pair] += n[1]
+                    w_edges = [(object1, object2, {'weight': count}) 
+                            for (object1, object2), count in pair_count.items() 
+                            if object1 != 'NA' and object2 != 'NA']
+                    G_ = nx.Graph()
+                    G_.add_edges_from(w_edges)
+                    for node in G_.nodes():
+                        if node in [edge[0] for edge in w_edges]:
+                            G_.nodes[node]['bipartite'] = attr1
+                        else:
+                            G_.nodes[node]['bipartite'] = attr2
+                            
+                    sub_Gs_object[i] = G_
+                except Exception as e:
+                    print(f"Error processing community {i}: {str(e)}")
+                    sub_Gs_object[i] = nx.Graph()
 
         if any(j.get('tripartite') == True for i, j in G.nodes(data=True)):
                 results = {'number of communities': len(set(community_labels.values())), \

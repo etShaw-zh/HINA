@@ -152,6 +152,8 @@ async def build_object_network_endpoint(
         graph_data = object_graphs_data[community_id]
         # print(f"Graph data for community {community_id}: {graph_data}")
         G = nx.node_link_graph(graph_data)
+        if len(G.nodes()) == 0:
+            return {"elements": [], "community_id": community_id}
         
         # Set attributes for nodes based on bipartite attribute
         for node, attrs in G.nodes(data=True):
@@ -185,6 +187,7 @@ async def build_object_network_endpoint(
     except Exception as e:
         print(f"Error in build_object_network_endpoint: {str(e)}")
         # raise HTTPException(status_code=500, detail=str(e))
+        return {"elements": [], "community_id": community_id, "error": str(e)}
 
 @app.post("/quantity-diversity")
 async def quantity_diversity_endpoint(

@@ -4,7 +4,7 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.colors as mcolors
-from hina.dyad.significant_edges import prune_edges
+from hina.dyad import prune_edges
 from hina.mesoscale import hina_communities
 from hina.construction import get_bipartite, get_tripartite
 from hina.individual import quantity, diversity
@@ -75,18 +75,20 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
     is_tripartite = object2_col is not None and object2_col not in ['none', 'null', 'undefined', '']
     if is_tripartite:
         G = get_tripartite(df, student_col, object1_col, object2_col, group_col)
-        # Debug 
         print("\n=== Tripartite Graph Nodes ===")
-        for i, attr in G.nodes(data=True):
-            print(f"Node: {i}, Tripartite: {attr.get('tripartite')}")
         print("\n=== Tripartite Graph Edges ===")
     else:
         G = get_bipartite(df, student_col, object1_col, attr_col, group_col)
-        # Debug 
         print("\n=== Bipartite Graph Nodes ===")
-        for i, attr in G.nodes(data=True):
-            print(f"Node: {i}, Bipartite: {attr.get('bipartite')}")
         print("\n=== Bipartite Graph Edges ===")
+        
+    G_str = nx.Graph()
+    for node, attrs in G.nodes(data=True):
+        node_str = str(node)
+        G_str.add_node(node_str, **attrs)
+    for u, v, data in G.edges(data=True):
+        G_str.add_edge(str(u), str(v), **data)
+    G = G_str
         
     G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in G.edges(data=True)]
 
@@ -96,21 +98,40 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
             significant_edges_result = prune_edges(G, **pruning)
         else:
             significant_edges_result = prune_edges(G)
+        
         if isinstance(significant_edges_result, dict) and "significant edges" in significant_edges_result:
             significant_edges = significant_edges_result["significant edges"]
+            nx_G = significant_edges_result["pruned network"]
+            G_edges_ordered = list(significant_edges)
         else:
             significant_edges = significant_edges_result or set()
+            nx_G = nx.Graph()
+            for node, attrs in G.nodes(data=True):
+                node_str = str(node)
+                new_attrs = dict(attrs)
+                if 'bipartite' in new_attrs:
+                    new_attrs['bipartite'] = str(new_attrs['bipartite'])
+                nx_G.add_node(node_str, **new_attrs)
             
-        G_edges_ordered = list(significant_edges)
-    
-    # Create a new graph with the significant edges
-    nx_G = nx.Graph()
-    for node, attrs in G.nodes(data=True):
-        node_str = str(node)
-        nx_G.add_node(node_str, **attrs) 
-    
-    for edge in G_edges_ordered:
-        nx_G.add_edge(edge[0], edge[1], weight=int(edge[2]))
+            for u, v, w in significant_edges:
+                u_str = str(u)
+                v_str = str(v)
+                nx_G.add_edge(u_str, v_str, weight=w)
+            
+            G_edges_ordered = [(str(u), str(v), w) for u, v, w in significant_edges]
+    else:
+        nx_G = nx.Graph()
+        for node, attrs in G.nodes(data=True):
+            node_str = str(node)
+            new_attrs = dict(attrs)
+            if 'bipartite' in new_attrs:
+                new_attrs['bipartite'] = str(new_attrs['bipartite'])
+            nx_G.add_node(node_str, **new_attrs)
+        
+        for edge in G_edges_ordered:
+            u_str = str(edge[0])
+            v_str = str(edge[1])
+            nx_G.add_edge(u_str, v_str, weight=int(edge[2]))
     
     for node in list(nx_G.nodes()):
         if nx_G.degree(node) == 0:
@@ -133,6 +154,9 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         elif node_str in df[object1_col].astype(str).values:
             nx_G.nodes[node]['type'] = 'object1'
             nx_G.nodes[node]['color'] = 'blue'
+        elif node_str == 'NA':
+            nx_G.nodes[node]['type'] = 'unknown'
+            nx_G.nodes[node]['color'] = 'black'
         else:
             nx_G.nodes[node]['type'] = 'unknown'
             nx_G.nodes[node]['color'] = 'black'
@@ -142,7 +166,7 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         d['label'] = str(d.get('weight', ''))
 
     return nx_G, G_edges_ordered
-    
+
 def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str):
     """
     Build a NetworkX graph for the HINA network, supporting both bipartite and tripartite networks.
@@ -234,7 +258,7 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
       - Nodes in object2_col are fixed as green.
     """
     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
-
+    # print("G_edges_ordered", G_edges_ordered)
     if number_cluster not in (None, "", "none"):
         try:
             number_cluster = int(number_cluster)

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='hina',
-    version='0.5.7',
+    version='0.5.8',
     description='Heterogenous Interaction Network Analysis in Python',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
