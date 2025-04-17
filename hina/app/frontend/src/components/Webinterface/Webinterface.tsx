@@ -52,6 +52,12 @@ export function Webinterface() {
     setObject1NodeSize,
     setObject2NodeSize,
     
+    // Loadings
+    loading,
+    nodeLevelLoading,
+    dyadicLoading,
+    clusterLoading,
+    
     // Actions
     handleFileUpload,
     updateHinaNetwork,
@@ -129,6 +135,7 @@ export function Webinterface() {
                 <Grid.Col span={8}>
                   <NetworkVisualization
                     elements={elements}
+                    isLoading={loading}
                     currentNetworkView={currentNetworkView}
                     groups={groups}
                     group={group}
@@ -173,6 +180,9 @@ export function Webinterface() {
                     clusterLabels={clusterLabels}
                     compressionRatio={compressionRatio}
                     exportToXLSX={exportToXLSX}
+                    nodeLevelLoading={nodeLevelLoading}
+                    dyadicLoading={dyadicLoading}
+                    clusterLoading={clusterLoading}
                   />
                 </Grid.Col>
               </Grid>

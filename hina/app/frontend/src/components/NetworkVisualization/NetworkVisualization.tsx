@@ -1,10 +1,11 @@
-import React from "react";
+import { useEffect, useState, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import { Paper, ActionIcon, Switch, Select, Menu, Button, Slider, Text, Group, LoadingOverlay } from "@mantine/core";
 import { IconZoomIn, IconZoomOut, IconDownload } from "@tabler/icons-react";
 
 interface NetworkVisualizationProps {
     elements: any[];
+    isLoading?: boolean;
     currentNetworkView: 'hina' | 'cluster' | 'object' | null;
     groups: string[];
     group: string;
@@ -43,6 +44,7 @@ interface NetworkVisualizationProps {
 
 export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     elements,
+    isLoading = false, 
     currentNetworkView,
     groups,
     group,
@@ -76,11 +78,15 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     setObject1NodeSize,
     setObject2NodeSize
 }) => {
-    const [initialRenderDone, setInitialRenderDone] = React.useState(false);
-    const [loading, setLoading] = React.useState(false);
-    React.useEffect(() => {
-        if (elements.length > 0) {
-            setLoading(true);
+    const [initialRenderDone, setInitialRenderDone] = useState(false);
+    const [internalLoading, setInternalLoading] = useState(false);
+    const prevElementsRef = useRef<any[]>([]);
+    const loading = isLoading || internalLoading;
+    
+    useEffect(() => {
+        if (elements.length !== prevElementsRef.current.length) {
+            setInternalLoading(true);
+            prevElementsRef.current = [...elements];
         }
     }, [elements]);
 
@@ -352,10 +358,10 @@ export const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
                                 setZoom(cy.zoom());
                                 cy.center();
                                 setInitialRenderDone(true); 
-                                setLoading(false); 
-                            }, 100);
+                                setInternalLoading(false);
+                            }, 300);
                         } else {
-                            setLoading(false);
+                            setInternalLoading(false);
                         }
                     }}
                 />

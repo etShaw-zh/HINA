@@ -9,6 +9,8 @@ import {
   ScrollArea,
   Accordion,
   Group,
+  Badge,
+  Loader,
 } from "@mantine/core";
 import { IconDownload, IconSortAscending, IconSortDescending, IconArrowsSort } from "@tabler/icons-react";
 
@@ -20,6 +22,9 @@ interface AnalysisPanelProps {
   clusterLabels: Record<string, string> | null;
   compressionRatio: number | null;
   exportToXLSX: () => void;
+  nodeLevelLoading?: boolean;
+  dyadicLoading?: boolean;
+  clusterLoading?: boolean;
 }
 
 type SortConfig = { key: string; direction: "asc" | "desc" } | null;
@@ -32,6 +37,9 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   clusterLabels,
   compressionRatio,
   exportToXLSX,
+  nodeLevelLoading,
+  dyadicLoading,
+  clusterLoading,
 }) => {
   // Sort configurations for various tables
   const [quantitySortConfig, setQuantitySortConfig] = useState<SortConfig>(null);
@@ -193,19 +201,49 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
     return false;
   }, [activeTab, qdData, dyadicAnalysis, clusterLabels]);
 
+
   return (
     <ScrollArea h={700}>
       <Paper withBorder shadow="sm">
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
-            <Tabs.Tab value="node-level">Node-Level</Tabs.Tab>
-            <Tabs.Tab value="dyadic">Dyadic Analysis</Tabs.Tab>
-            <Tabs.Tab value="cluster">Mesoscale Clustering</Tabs.Tab>
+            <Tabs.Tab 
+                value="node-level"
+            >
+                <Group gap="xs" wrap="nowrap">
+                    <span>Node-Level</span>
+                    {nodeLevelLoading && <Loader size="xs" color="indigo" />}
+                    {!nodeLevelLoading && qdData && <Badge size="xs" variant="light" color="green">Ready</Badge>}
+                </Group>
+            </Tabs.Tab>
+            <Tabs.Tab 
+                value="dyadic"
+            >
+                <Group gap="xs" wrap="nowrap">
+                    <span>Dyadic Analysis</span>
+                    {dyadicLoading && <Loader size="xs" color="indigo" />}
+                    {!dyadicLoading && dyadicAnalysis && <Badge size="xs" variant="light" color="green">Ready</Badge>}
+                </Group>
+            </Tabs.Tab>
+            <Tabs.Tab 
+                value="cluster"
+            >
+                <Group gap="xs" wrap="nowrap">
+                    <span>Mesoscale Clustering</span>
+                    {clusterLoading && <Loader size="xs" color="indigo" />}
+                    {!clusterLoading && clusterLabels && <Badge size="xs" variant="light" color="green">Ready</Badge>}
+                </Group>
+            </Tabs.Tab>
           </Tabs.List>
 
           {/* Node-Level Tab Content */}
           <Tabs.Panel value="node-level">
-            {activeTab === "node-level" && qdData && (
+              {nodeLevelLoading ? (
+                <Group py="xl" justify="center">
+                    <Loader size="lg" color="indigo" />
+                    <Text>Loading node-level metrics...</Text>
+                </Group>
+              ) : activeTab === "node-level" && qdData ? (
               <Accordion transitionDuration={500}>
                 {/* Quantity Table */}
                 <Accordion.Item value="quantity">
@@ -417,12 +455,19 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                   </Accordion.Item>
                 )}
               </Accordion>
-            )}
+              ) : (
+                <Text p="md">No Node-Level data available. Run HINA to get metrics.</Text>
+              )}
           </Tabs.Panel>
 
           {/* Dyadic Analysis Tab Content */}
           <Tabs.Panel value="dyadic">
-            {dyadicAnalysis ? (
+              {dyadicLoading ? (
+                <Group py="xl" justify="center">
+                    <Loader size="lg" color="indigo" />
+                    <Text>Loading dyadic analysis...</Text>
+                </Group>
+              ) : dyadicAnalysis ? (
               <Paper withBorder shadow="sm" p="md">
                 <Title order={3} mb="md">
                   Significant Edges ({dyadicAnalysis.length})
@@ -474,7 +519,12 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
 
           {/* Mesoscale Clustering Tab Content */}
           <Tabs.Panel value="cluster">
-            {clusterLabels ? (
+              {clusterLoading ? (
+                <Group py="xl" justify="center">
+                    <Loader size="lg" color="indigo" />
+                    <Text>Loading clustering results...</Text>
+                </Group>
+              ) : clusterLabels ? (
               <Accordion transitionDuration={500}>
                 {/* Cluster Labels Table */}
                 <Accordion.Item value="cluster-labels">

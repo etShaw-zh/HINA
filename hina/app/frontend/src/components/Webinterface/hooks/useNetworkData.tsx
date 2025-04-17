@@ -35,6 +35,12 @@ export function useNetworkData() {
     const [columns, setColumns] = useState<string[]>([]);
     const [elements, setElements] = useState<any[]>([]);
     
+    // Loading state
+    const [loading, setLoading] = useState(false);
+    const [nodeLevelLoading, setNodeLevelLoading] = useState(false);
+    const [dyadicLoading, setDyadicLoading] = useState(false);
+    const [clusterLoading, setClusterLoading] = useState(false);
+    
     // Input parameters
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
     const [groupCol, _setGroupCol] = useState<string>("none");
@@ -337,25 +343,38 @@ export function useNetworkData() {
 		}
 	};
 
-	const updateGroups = (data: string, groupColumn: string) => {
-		if (!data || groupColumn === "none") {
-		setGroups(["All"]);
-		return;
-		}
-		try {
-		const df = JSON.parse(data);
-		const columnValues = df.data.map((row: any, index: number) => {
-			const colIndex = df.columns.indexOf(groupColumn);
-			return colIndex >= 0 ? String(row[colIndex]) : undefined;
-		}).filter((value: any) => value !== undefined);      
-		const uniqueValues = [...new Set(columnValues)];
-		const groupOptions: string[] = ["All", ...uniqueValues.filter((g: string) => g !== "All")];
-		setGroups(groupOptions);
-		} catch (error) {
-		console.error("Error updating groups:", error);
-		setGroups(["All"]);
-		}
-	};
+    const updateGroups = (data: string, groupColumn: string) => {
+        if (!data || groupColumn === "none") {
+            setGroups(["All"]);
+            return;
+        }
+        try {
+            const df = JSON.parse(data);
+            const columnValues = df.data.map((row: any, index: number) => {
+                const colIndex = df.columns.indexOf(groupColumn);
+                return colIndex >= 0 ? String(row[colIndex]) : undefined;
+            }).filter((value: any) => {
+                if (value === undefined) return false;                
+                if (value === "" || 
+                    value === "null" || 
+                    value === "undefined" || 
+                    value === "NA" ||
+                    value === "na" ||
+                    value === "N/A" ||
+                    value === "n/a") {
+                    return false;
+                }
+                
+                return true;
+            });
+            const uniqueValues = [...new Set(columnValues)];
+            const groupOptions: string[] = ["All", ...uniqueValues.filter((g: string) => g !== "All")];
+            setGroups(groupOptions);
+        } catch (error) {
+            console.error("Error updating groups:", error);
+            setGroups(["All"]);
+        }
+    };
 
 	// Save network visualization
 	const handleSave = (full: boolean) => {
@@ -404,31 +423,42 @@ export function useNetworkData() {
 		params.append("layout", layout);  
 
 		try {
-		const res = await axios.post("/build-hina-network", params);
-		setElements(res.data.elements);
-		setCurrentNetworkView('hina');
-		if (res.data.significant_edges) {
-			setDyadicAnalysis(res.data.significant_edges);
-			showSuccessNotification("Dyadic Analysis", `Identified ${res.data.significant_edges.length} significant edges in the network`);
-		} else {
-			setDyadicAnalysis(null);
-		}
-		fetchQuantityAndDiversity();
-		showSuccessNotification("Network Updated", "HINA network has been successfully built");
+            setLoading(true);
+            setNodeLevelLoading(true); 
+            setDyadicLoading(true); 
+            
+            const res = await axios.post("/build-hina-network", params);
+            setElements(res.data.elements);
+            setCurrentNetworkView('hina');
+            if (res.data.significant_edges) {
+                setDyadicAnalysis(res.data.significant_edges);
+                showSuccessNotification("Dyadic Analysis", `Identified ${res.data.significant_edges.length} significant edges in the network`);
+            } else {
+                setDyadicAnalysis(null);
+            }
+            fetchQuantityAndDiversity();
+            showSuccessNotification("Network Updated", "HINA network has been successfully built");
+            setLoading(false);
+            setNodeLevelLoading(false); 
+            setDyadicLoading(false);
 
-		setTimeout(() => {
-			if (cyRef.current) {
-			cyRef.current.fit();
-			const defaultZoom = cyRef.current.zoom() * 0.9;
-			cyRef.current.zoom(defaultZoom);
-			setZoom(cyRef.current.zoom());
-			cyRef.current.center();
-			}
-		}, 10);
+            setTimeout(() => {
+                if (cyRef.current) {
+                cyRef.current.fit();
+                const defaultZoom = cyRef.current.zoom() * 0.9;
+                cyRef.current.zoom(defaultZoom);
+                setZoom(cyRef.current.zoom());
+                cyRef.current.center();
+                }
+            }, 10);
 		} catch (error) {
-		console.error("Error updating HINA network:", error);
-		console.error("Error details:", error.response?.data || error.message)
-		showAPIErrorNotification("Network Error", `Failed to build HINA network: ${error.response?.data?.detail || error.message}`);
+            console.error("Error updating HINA network:", error);
+            console.error("Error details:", error.response?.data || error.message)
+            showAPIErrorNotification("Network Error", `Failed to build HINA network: ${error.response?.data?.detail || error.message}`);
+            setLoading(false);
+            setNodeLevelLoading(false); 
+            setDyadicLoading(false);
+            setClusterLoading(false);
 		}
 	};
 
@@ -449,10 +479,14 @@ export function useNetworkData() {
 		params.append("fix_deg", fixDegValue);
 		params.append("layout", layout);
 		try {
-		const res = await axios.post("/build-cluster-network", params);
-		originalElementsRef.current = [...res.data.elements];
-		setElements(res.data.elements);
-		setCurrentNetworkView('cluster');
+            setLoading(true);
+            setNodeLevelLoading(true);
+            setDyadicLoading(true);
+            setClusterLoading(true);
+            const res = await axios.post("/build-cluster-network", params);
+            originalElementsRef.current = [...res.data.elements];
+            setElements(res.data.elements);
+            setCurrentNetworkView('cluster');
 		if (res.data.cluster_labels) {
 			setClusterLabels(res.data.cluster_labels);
 			const clusterCount = new Set(Object.values(res.data.cluster_labels)).size;
@@ -475,6 +509,10 @@ export function useNetworkData() {
 		}
 		fetchQuantityAndDiversity();
 		showSuccessNotification("Network Updated", "Clustered network has been successfully built");
+        setLoading(false);
+        setNodeLevelLoading(false);
+        setDyadicLoading(false);
+        setClusterLoading(false);
 
 		setTimeout(() => {
 			if (cyRef.current) {
@@ -486,8 +524,12 @@ export function useNetworkData() {
 			}
 		}, 10);
 		} catch (error) {
-		console.error("Error updating Clustered network:", error);
-		showAPIErrorNotification("Network Error", `Failed to build clustered network: ${error.response?.data?.detail || error.message}`);
+            console.error("Error updating Clustered network:", error);
+            showAPIErrorNotification("Network Error", `Failed to build clustered network: ${error.response?.data?.detail || error.message}`);
+            setLoading(false);
+            setNodeLevelLoading(false); 
+            setDyadicLoading(false);
+            setClusterLoading(false);
 		}
 	};
 
@@ -496,20 +538,24 @@ export function useNetworkData() {
 		if (!uploadedData) return;
 		
 		try {
-		const params = new URLSearchParams();
-		const fixDegValue = getFixDegValue();
+            setLoading(true);
+            setNodeLevelLoading(true);
+            setDyadicLoading(true);
+            setClusterLoading(true);
+            const params = new URLSearchParams();
+            const fixDegValue = getFixDegValue();
 
-		params.append("data", uploadedData);
-		params.append("group", group);
-		params.append("student_col", student);  
-		params.append("object1_col", object1);  
-		params.append("object2_col", object2); 
-		params.append("number_cluster", numberCluster);
-		params.append("pruning", pruning);
-		params.append("alpha", alpha.toString());
-		params.append("fix_deg", fixDegValue);
-		params.append("layout", layout);
-		const clusterResult = await axios.post("/build-cluster-network", params);
+            params.append("data", uploadedData);
+            params.append("group", group);
+            params.append("student_col", student);  
+            params.append("object1_col", object1);  
+            params.append("object2_col", object2); 
+            params.append("number_cluster", numberCluster);
+            params.append("pruning", pruning);
+            params.append("alpha", alpha.toString());
+            params.append("fix_deg", fixDegValue);
+            params.append("layout", layout);
+            const clusterResult = await axios.post("/build-cluster-network", params);
 
 		// Update cluster data from response
 		if (clusterResult.data.cluster_labels) {
@@ -545,14 +591,22 @@ export function useNetworkData() {
 			await fetchObjectGraph(objectParams);
 			fetchQuantityAndDiversity();
 			showSuccessNotification("Network Updated", "Tripartite network has been successfully built");
+            setLoading(false);
+            setNodeLevelLoading(false);
+            setDyadicLoading(false);
+            setClusterLoading(false);
 		} else {
 			console.warn("No object-object graphs found in the data");
 			showAPIErrorNotification("Network Warning", "No object-object graphs were found in the cluster data");
 		}
 		} catch (error) {
-		console.error("Error updating object network:", error);
-		console.error("Error details:", error.response?.data || error.message);
-		showAPIErrorNotification("Network Error", `Failed to build tripartite network: ${error.response?.data?.detail || error.message}`);
+            console.error("Error updating object network:", error);
+            console.error("Error details:", error.response?.data || error.message);
+            showAPIErrorNotification("Network Error", `Failed to build tripartite network: ${error.response?.data?.detail || error.message}`);
+            setLoading(false);
+            setNodeLevelLoading(false); 
+            setDyadicLoading(false);
+            setClusterLoading(false);
 		}
 	};
 
@@ -1277,6 +1331,10 @@ export function useNetworkData() {
         hasExportData,
         cyRef,
         highlightedNodeId,
+        loading,
+        nodeLevelLoading,
+        dyadicLoading,
+        clusterLoading,
         
         // Node size states
         studentNodeSize,
