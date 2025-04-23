@@ -31,6 +31,6 @@ setup(
     extras_require={
         "dev": ["pytest"],  
     },
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])+ ["hina.construction"],
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
 )
