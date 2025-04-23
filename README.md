@@ -155,13 +155,24 @@ HINA/
 │   │   ├── __init__.py
 │   │   └── test_api.py
 │   │
-│   ├── frontend/                     # Web interface (React/TypeScript)
+│   ├── frontend/                     # APP Development (React/TypeScript)
 │       ├── src/
 │           ├── components/
+│           │   ├── CanvasBackground/
+│           │   │   ├── NetworkBackground.tsx
+│           │   │   ├── UploadOverlay.tsx
 │           │   ├── Navbar/
 │           │   │   ├── NavbarMinimalColored.tsx
+│           │   ├── AnalysisPanel/
+│           │   │   ├── AnalysisPanel.tsx
+│           │   ├── DataInputPanel/
+│           │   │   ├── DataInputPanel.tsx
+│           │   ├── NetworkVisualization/
+│           │   │   ├── NetworkVisualization.tsx
 │           │   ├── Webinterface/
 │           │   │   ├── Webinterface.tsx
+│           │   │       ├── hooks
+│           │   │           ├── useNetworkData.tsx
 │           │
 │           ├── pages/
 │           │   ├── Homepage.tsx
