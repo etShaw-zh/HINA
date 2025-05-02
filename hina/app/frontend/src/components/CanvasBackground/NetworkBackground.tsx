@@ -1,4 +1,6 @@
 import React, { useRef, useEffect } from 'react';
+import { Group, Title } from '@mantine/core';
+import classes from './CanvasBackgroud.module.css';
 
 interface Particle {
   x: number;
@@ -141,19 +143,33 @@ const NetworkBackground: React.FC = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: -1,
-        backgroundColor: 'rgba(141, 182, 210, 0.21)',
-      }}
-    />
-  );
+        <>
+            <header 
+                className={classes.header}
+            >
+                <Group justify="space-between" h="100%">
+                    <Group className={classes.logo}>
+                        <img 
+                            src="/hina_icon_only.ico" 
+                            alt="HINA icon"
+                            width={32}
+                            height={32}
+                        />
+                        <Title 
+                            className={classes.title}
+                        >
+                            HINA: A Learning Analytics Tool for Heterogenous Interaction Network Analysis
+                        </Title>
+                    </Group>
+                </Group>
+            </header>
+            <canvas
+                ref={canvasRef}
+                className={classes.backgroundCanvas}
+            />
+        </>
+    );
 };
+
 
 export default NetworkBackground;

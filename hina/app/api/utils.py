@@ -88,11 +88,47 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         G_str.add_node(node_str, **attrs)
     for u, v, data in G.edges(data=True):
         G_str.add_edge(str(u), str(v), **data)
-    G = G_str
-        
+    G = G_str        
     G_edges_ordered = [order_edge(u, v, df, student_col, object1_col, int(w.get('weight', 1))) for u, v, w in G.edges(data=True)]
 
-    # Prune edges 
+    # Node type and color mapping
+    node_types = {}
+    node_colors = {}
+    student_nodes = set(df[student_col].astype(str).values)
+    object_nodes = set()
+    
+    if is_tripartite:
+        for node_str in G.nodes():
+            if "**" in str(node_str):
+                object_nodes.add(str(node_str))
+    else:
+        object_nodes = set(df[object1_col].astype(str).values)
+    
+    # Assign node types and colors
+    for node in G.nodes():
+        node_str = str(node)
+        if is_tripartite and "**" in node_str:
+            parts = node_str.split("**")
+            if len(parts) == 2:
+                obj1_val, obj2_val = parts
+                if obj1_val in df[object1_col].astype(str).values and obj2_val in df[object2_col].astype(str).values:
+                    node_types[node_str] = 'object1_object2'
+                    node_colors[node_str] = 'green'
+                    continue
+        if node_str in df[student_col].astype(str).values:
+            node_types[node_str] = 'student'
+            node_colors[node_str] = 'grey'
+        elif node_str in df[object1_col].astype(str).values:
+            node_types[node_str] = 'object1'
+            node_colors[node_str] = 'blue'
+        elif node_str == 'NA':
+            node_types[node_str] = 'unknown'
+            node_colors[node_str] = 'black'
+        else:
+            node_types[node_str] = 'unknown'
+            node_colors[node_str] = 'black'
+
+    # Prune edges
     if pruning != "none":
         if isinstance(pruning, dict):
             significant_edges_result = prune_edges(G, **pruning)
@@ -102,31 +138,93 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         if isinstance(significant_edges_result, dict) and "significant edges" in significant_edges_result:
             significant_edges = significant_edges_result["significant edges"]
             nx_G = significant_edges_result["pruned network"]
-            G_edges_ordered = list(significant_edges)
-        else:
-            significant_edges = significant_edges_result or set()
+            
+            ordered_edges = []
+            for u, v, w in significant_edges:
+                u_str = str(u)
+                v_str = str(v)
+                
+                if u_str in student_nodes and v_str in object_nodes:
+                    ordered_edges.append((u_str, v_str, w))
+                elif v_str in student_nodes and u_str in object_nodes:
+                    ordered_edges.append((v_str, u_str, w))
+                else:
+                    ordered_edge = order_edge(u_str, v_str, df, student_col, object1_col, int(w))
+                    ordered_edges.append(ordered_edge)
+            
+            G_edges_ordered = ordered_edges            
             nx_G = nx.Graph()
             for node, attrs in G.nodes(data=True):
                 node_str = str(node)
                 new_attrs = dict(attrs)
                 if 'bipartite' in new_attrs:
-                    new_attrs['bipartite'] = str(new_attrs['bipartite'])
+                    new_attrs['bipartite'] = str(new_attrs['bipartite'])                
+                if node_str in node_types:
+                    new_attrs['type'] = node_types[node_str]
+                    new_attrs['color'] = node_colors[node_str]
                 nx_G.add_node(node_str, **new_attrs)
             
+            for u, v, w in ordered_edges:
+                nx_G.add_edge(u, v, weight=w)
+            
+        else:
+            significant_edges = significant_edges_result or set()
+            nx_G = nx.Graph()
+            
+            for node, attrs in G.nodes(data=True):
+                node_str = str(node)
+                new_attrs = dict(attrs)
+                if 'bipartite' in new_attrs:
+                    new_attrs['bipartite'] = str(new_attrs['bipartite'])
+                if node_str in node_types:
+                    new_attrs['type'] = node_types[node_str]
+                    new_attrs['color'] = node_colors[node_str]
+                nx_G.add_node(node_str, **new_attrs)
+            
+            ordered_edges = []
             for u, v, w in significant_edges:
                 u_str = str(u)
                 v_str = str(v)
-                nx_G.add_edge(u_str, v_str, weight=w)
+                
+                if u_str in student_nodes and v_str in object_nodes:
+                    ordered_edges.append((u_str, v_str, w))
+                elif v_str in student_nodes and u_str in object_nodes:
+                    ordered_edges.append((v_str, u_str, w))
+                else:
+                    ordered_edge = order_edge(u_str, v_str, df, student_col, object1_col, int(w))
+                    ordered_edges.append(ordered_edge)
             
-            G_edges_ordered = [(str(u), str(v), w) for u, v, w in significant_edges]
+            for u, v, w in ordered_edges:
+                nx_G.add_edge(u, v, weight=w)
+            
+            G_edges_ordered = ordered_edges
     else:
-        nx_G = nx.Graph()
+        # No pruning
+        nx_G = nx.Graph()        
         for node, attrs in G.nodes(data=True):
             node_str = str(node)
             new_attrs = dict(attrs)
             if 'bipartite' in new_attrs:
-                new_attrs['bipartite'] = str(new_attrs['bipartite'])
+                new_attrs['bipartite'] = str(new_attrs['bipartite'])                
+            if node_str in node_types:
+                new_attrs['type'] = node_types[node_str]
+                new_attrs['color'] = node_colors[node_str]
+                
             nx_G.add_node(node_str, **new_attrs)
+
+        ordered_edges = []
+        for edge in G_edges_ordered:
+            u_str = str(edge[0])
+            v_str = str(edge[1])
+            weight = edge[2]
+            
+            if u_str in student_nodes and (v_str in object_nodes or "**" in v_str):
+                ordered_edges.append((u_str, v_str, weight))
+            elif v_str in student_nodes and (u_str in object_nodes or "**" in u_str):
+                ordered_edges.append((v_str, u_str, weight))
+            else:
+                ordered_edges.append(edge)
+        G_edges_ordered = ordered_edges
         
         for edge in G_edges_ordered:
             u_str = str(edge[0])
@@ -137,34 +235,9 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         if nx_G.degree(node) == 0:
             nx_G.remove_node(node)
     
-    # Assign node types and colors
-    for node in nx_G.nodes():
-        node_str = str(node)
-        if is_tripartite and "**" in node_str:
-            parts = node_str.split("**")
-            if len(parts) == 2:
-                obj1_val, obj2_val = parts
-                if obj1_val in df[object1_col].astype(str).values and obj2_val in df[object2_col].astype(str).values:
-                    nx_G.nodes[node]['type'] = 'object1_object2'
-                    nx_G.nodes[node]['color'] = 'green'
-                    continue
-        if node_str in df[student_col].astype(str).values:
-            nx_G.nodes[node]['type'] = 'student'
-            nx_G.nodes[node]['color'] = 'grey'
-        elif node_str in df[object1_col].astype(str).values:
-            nx_G.nodes[node]['type'] = 'object1'
-            nx_G.nodes[node]['color'] = 'blue'
-        elif node_str == 'NA':
-            nx_G.nodes[node]['type'] = 'unknown'
-            nx_G.nodes[node]['color'] = 'black'
-        else:
-            nx_G.nodes[node]['type'] = 'unknown'
-            nx_G.nodes[node]['color'] = 'black'
-    
-    # Add edge labels
     for u, v, d in nx_G.edges(data=True):
         d['label'] = str(d.get('weight', ''))
-
+    
     return nx_G, G_edges_ordered
 
 def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col: str, object1_col: str, object2_col: str, attr_col: str, pruning, layout: str):
@@ -201,6 +274,7 @@ def build_hina_network(df: pd.DataFrame, group_col: str, group: str, student_col
         df = df[df[group_col] == group]
 
     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
+    # print("G_edges_ordered_hina", nx_G.edges)
     # Set the layout
     if layout == 'bipartite':
         student_nodes = {n for n, d in nx_G.nodes(data=True) if d['type'] == 'student'}
@@ -258,7 +332,7 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
       - Nodes in object2_col are fixed as green.
     """
     nx_G, G_edges_ordered = construct_network(df, group_col, student_col, object1_col, object2_col, attr_col, pruning)
-    # print("G_edges_ordered", G_edges_ordered)
+    # print("G_edges_ordered_cluster", nx_G.edges)
     if number_cluster not in (None, "", "none"):
         try:
             number_cluster = int(number_cluster)
@@ -269,14 +343,14 @@ def build_clustered_network(df: pd.DataFrame, group_col: str, student_col: str, 
     
     # Run community detection (clustering)
     cluster_result = hina_communities(nx_G, fix_B=number_cluster)
-    print('cluster_result', cluster_result)
+    # print('cluster_result', cluster_result)
     cluster_labels = cluster_result['node communities']
     compression_ratio = cluster_result['community structure quality value']
     
     object_object_graphs = {}
     if 'object-object graphs for each community' in cluster_result:
         object_object_graphs = cluster_result['object-object graphs for each community']
-        print(f"Found {len(object_object_graphs)} object-object graphs for communities")
+        # print(f"Found {len(object_object_graphs)} object-object graphs for communities")
     
     for node in nx_G.nodes():
         nx_G.nodes[node]['cluster'] = str(cluster_labels.get(str(node), "-1"))

@@ -832,37 +832,43 @@ export function useNetworkData() {
 		const newValue = value || "All";
 		setGroup(newValue);
 		if (uploadedData) {
-		const params = new URLSearchParams();
-		params.append("data", uploadedData);
-		params.append("group_col", groupCol); 
-		params.append("group", newValue);  
-		params.append("student_col", student);  
-		params.append("object1_col", object1);  
-		params.append("attr_col", attr); 
-		params.append("pruning", pruning);
-		params.append("alpha", alpha.toString());
-		params.append("fix_deg", fixDeg);
-		params.append("layout", layout);  
-	
-		axios.post("/build-hina-network", params)
-			.then(res => {
-                setElements(res.data.elements);
-                if (res.data.significant_edges) {
-                    setDyadicAnalysis(res.data.significant_edges);
-                } else {
-                    setDyadicAnalysis(null);
-                }
-                fetchQuantityAndDiversity();
-                setTimeout(() => {
-                    if (cyRef.current) {
-                        applyNodeSizes();
+            const isTripartite = object2 !== "none" && object2 !== "";
+            const params = new URLSearchParams();
+            params.append("data", uploadedData);
+            params.append("group_col", groupCol); 
+            params.append("group", newValue);  
+            params.append("student_col", student);  
+            params.append("object1_col", object1);  
+            if (isTripartite) {
+                params.append("object2_col", object2);
+            }
+            params.append("attr_col", attr); 
+            params.append("pruning", pruning);
+            params.append("alpha", alpha.toString());
+            params.append("fix_deg", fixDeg);
+            params.append("layout", layout);  
+            setLoading(true);
+            axios.post("/build-hina-network", params)
+                .then(res => {
+                    setElements(res.data.elements);
+                    if (res.data.significant_edges) {
+                        setDyadicAnalysis(res.data.significant_edges);
+                    } else {
+                        setDyadicAnalysis(null);
                     }
-                }, 50);
-            })
-			.catch(error => {
-			console.error("Error updating HINA network:", error);
-			});
-		}
+                    fetchQuantityAndDiversity();
+                    setLoading(false);
+                    setTimeout(() => {
+                        if (cyRef.current) {
+                            applyNodeSizes();
+                        }
+                    }, 50);
+                })
+                .catch(error => {
+                console.error("Error updating HINA network:", error);
+                setLoading(false);
+                });
+            }
 	};
 
 	// Updated handleClusterChange function
