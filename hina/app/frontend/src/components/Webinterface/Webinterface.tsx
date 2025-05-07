@@ -41,6 +41,7 @@ export function Webinterface() {
     showEdgeWeights,
     zoom,
     cyRef,
+    fileInputRef,
     highlightedNodeId,
     studentNodeSize,
     objectNodeSize,
@@ -102,6 +103,7 @@ export function Webinterface() {
           <Container fluid style={{ display: 'flex', justifyContent: 'space-between' }}>
             <Paper withBorder shadow="sm" p="md" mb="md" style={{ width: "100%" }}>
               <DataInputPanel
+                fileInputRef={fileInputRef}
                 selectedFileName={selectedFileName}
                 columns={columns}
                 student={student}

@@ -19,24 +19,14 @@ const UploadOverlay: React.FC<UploadOverlayProps> = ({ onUploadClick }) => {
   };
 
   return (
-    <Center
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 10,
-        pointerEvents: 'none',
-      }}
-    >
-      <Stack align="center" spacing="md">
+    <Center className={classes.uploadOverlayContainer}>
+      <Stack align="center" gap="md">
         <input
           type="file"
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleFileSelect}
-          accept=".csv,.xlsx,.xls"
+          accept=".csv,.xlsx"
         />
 
         <Box
@@ -58,19 +48,12 @@ const UploadOverlay: React.FC<UploadOverlayProps> = ({ onUploadClick }) => {
         </Box>
 
         {selectedFile ? (
-          <Stack spacing="xs" align="center" style={{ pointerEvents: 'auto' }}>
+          <Stack align="center" style={{ pointerEvents: 'auto' }}>
             <Text 
               fw={700}
               size="md"
               c="dimmed"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(255,255,255,0.7)',
-                padding: '8px 16px',
-                borderRadius: '4px'
-              }}
+              className={classes.fileNameText}
             >
               <IconFile size={20} />
               {selectedFile.name}
@@ -92,12 +75,7 @@ const UploadOverlay: React.FC<UploadOverlayProps> = ({ onUploadClick }) => {
             fw={700} 
             size="lg" 
             c="indigo"
-            style={{ 
-              textShadow: '0 1px 2px rgba(255,255,255,0.7)',
-              background: 'transparent',
-              padding: '8px 16px',
-              borderRadius: '4px'
-            }}
+            className={classes.uploadPromptText}
           >
             Upload File to Start with HINA
           </Text>

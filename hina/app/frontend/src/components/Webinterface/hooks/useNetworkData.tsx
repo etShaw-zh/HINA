@@ -3,11 +3,10 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import { notifications } from '@mantine/notifications';
 import { IconExclamationCircle, IconTimeline } from '@tabler/icons-react';
-import { rem } from '@mantine/core';
 
 
 // Set axios base URL for local development
-// axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = 'http://localhost:8000';
 
 // Types
 interface QDData {
@@ -235,7 +234,6 @@ export function useNetworkData() {
 
 			const newColumns = res.data.columns;
 			const newData = res.data.data;
-			const newGroups = ["All", ...res.data.groups.filter((g: string) => g !== "All")];
 			setElements([]);
 			setCurrentNetworkView(null);
 			setGroups(["All"]);
@@ -285,7 +283,6 @@ export function useNetworkData() {
 			
 			setColumns(newColumns);
 			setUploadedData(newData);
-			setGroups(newGroups);
 		} catch (error) {
 			console.error("Error during file upload:", error);
 			showAPIErrorNotification("Upload Error", `Failed to upload ${file.name}: ${error.response?.data?.detail || error.message}`);

@@ -135,6 +135,7 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({
         leftSection={<IconFile size={16} />}
         value={null}
         clearable={false}
+        key={`file-input-${Date.now()}`} 
       />
       
       {columns.length > 0 && (

@@ -7,6 +7,8 @@ import base64
 import networkx as nx
 import json
 from io import StringIO
+import uuid
+from datetime import datetime
 
 app = FastAPI(title="HINA REST API")
 
@@ -32,17 +34,21 @@ app.add_middleware(
 async def upload_file(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        # Encode the file contents in base64 (without header)
-        encoded = contents 
-        df = utils.parse_contents(base64.b64encode(encoded).decode('utf-8'), file.filename)
-        groups = list(df['group'].unique()) if 'group' in df.columns else ["All"]
+        # Encode the file contents in base64 and generate uuid and timestamp
+        upload_id = str(uuid.uuid4())
+        timestamp = datetime.now().isoformat()
+        encoded = base64.b64encode(contents).decode('utf-8') 
+        df = utils.parse_contents(encoded, file.filename)
         return {
             "columns": df.columns.tolist(),
-            "groups": groups,
-            "data": df.to_json(orient="split")
+            "data": df.to_json(orient="split"),
+            "upload_id": upload_id,
+            "timestamp": timestamp,
+            "filename": file.filename
         }
     except Exception as e:
         print(f"Error in upload_file: {str(e)}")
+        return {"error": str(e)}, 500
 
 @app.post("/build-hina-network")
 async def build_hina_network_endpoint(
