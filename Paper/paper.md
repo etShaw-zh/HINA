@@ -45,16 +45,16 @@ provide learning performance indices, identify clusters, and generate dashboard 
 such as students’ interactions with learning objects [@feng2025analyzing] or students’ affiliations with different 
 coded behaviors [@feng2024heterogenous]. These heterogenous interactions can be modelled with **heterogenous 
 interaction networks (HIN)** that consist of different sets of nodes, with edges only connecting nodes between different sets. 
-Examples of heterogenous interaction networks in learning analytics are presented in Figure 1 below. HINA offers a set of flexible and 
+Examples of heterogenous interaction networks in learning analytics are presented in \autoref{fig:fig1} below. HINA offers a set of flexible and 
 adaptive methods to model a wide variety of interactions that can occur during learning processes in individual and collaborative learning contexts.  
 
-![Examples of heterogenous interaction networks for learning in HINA.](Examples.png)
+![Examples of heterogenous interaction networks for learning in HINA.\label{fig:fig1}](Examples.png)
 
 
 # Statement of need
 
 Constructivism theory of learning emphasizes that learning occurs through students’ active interactions with 
-various aspects of their environment [@vygotsky1978mind] [@piaget1976piaget]. Students’ interactions with their learning environment—for example, 
+various aspects of their environment [@vygotsky1978mind; @piaget1976piaget]. Students’ interactions with their learning environment—for example, 
 engagement with designed learning artefacts or with coded latent constructs—are inherently heterogenous, and can be captured using multimodal process data. 
 HINA offers analytical modules to model these heterogenous interactions and address questions at multiple levels of interest, for example: 
 
@@ -69,7 +69,7 @@ formats that are tailored for learning analytics applications and implementation
 
 
 These analytical features offered by HINA can analyze multimodal process data to address a wide range of research questions in 
-learning analytics. For example, studies can explore how  to gauge individual contribution based on the interactions between students and 
+learning analytics. For example, studies can explore how to gauge individual contribution based on the interactions between students and 
 learning artefacts [@feng2025analyzing], identify subgroups of students who share similar learning strategies based on their associations with 
 behavioral and cognitive constructs during learning processes [@feng2024heterogenous], uncover significant associations among behavioral engagement in 
 different modalities [@feng2024heterogenous], or design learning analytics dashboards for the visualization of heterogenous engagement to support teaching and learning practices [@feng2025analyzing].  
@@ -77,13 +77,13 @@ different modalities [@feng2024heterogenous], or design learning analytics dashb
 
 **HINA** tailors its methods—which include brand-new algorithms for pruning, clustering, and visualization in the HIN setting—specifically for 
 learning analytics researchers and teachers working with HINs derived from learning process data. This makes HINA a unique contribution to the software space that 
-provides a more specialized experience than existing packages for general network analysis [@hagberg2008exploring] [@csardi2006igraph] or network inference [@peixotographtool] [@kirkley2024paninipy].  
+provides a more specialized experience than existing packages for general network analysis [@hagberg2008exploring; @csardi2006igraph] or network inference [@peixoto2014graphtool; @kirkley2024paninipy].  
 
 
 # Current Modules 
 - **Network construction** (hina.construction)  
 
-  - Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples in Figure 1A, 1B)
+  - Provides functions to construct Heterogeneous Interaction Networks (HINs) (see examples in \autoref{fig:fig1} 1A, 1B)
     directly from input learning process data. The methods in this module are designed to handle the typical
     data format encountered for learning process data traces, supporting seamless integration with learning analytics workflows.  
 
@@ -117,7 +117,7 @@ provides a more specialized experience than existing packages for general networ
 - **Dashboard deployment** (hina.app) 
   - Provides functions to deploy a dashboard that includes a web-based interface serving multiple purposes.
     1. The dashboard serves as a web-based tool for conducting learning analytics with HINA using an intuitive user interface,
-       enabling users to conduct the individual-, dyadic- and mesoscale-level analysis available in the package without any programming.
+       enabling users to conduct the individual-, dyadic-, and mesoscale-level analysis available in the package without any programming.
     2. The dashboard also allows teachers and students to visualize, interpret, and communicate HINA results effectively.
     
     This dual functionality supports both data analysis and the sharing of actionable insights in an interactive and user-friendly manner,
