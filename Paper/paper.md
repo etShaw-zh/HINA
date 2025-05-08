@@ -62,7 +62,7 @@ HINA offers analytical modules to model these heterogenous interactions and addr
 
 - How can we identify the interactions among pairs of nodes that are statistically significant under a suitable null model? 
 
-- How can we identify subgroups of individuals that share similar learning strategies  indicated by their heterogenous interaction patterns? 
+- How can we identify subgroups of individuals that share similar learning strategies indicated by their heterogenous interaction patterns? 
 
 - How can we visualize these heterogeneous interaction networks in an interactive and informative way, using different visualization 
 formats that are tailored for learning analytics applications and implementations? 
