@@ -29,8 +29,8 @@ Then, open the web browser and navigate to `http://localhost:8080` to access the
 
 **Source Code and Discussion Channel**
 
-Available on Github, `baiyueh/HINA <https://github.com/baiyueh/HINA/>`_.
-Please report bugs, issues and feature extensions there. We also have `discussion channel <https://github.com/baiyueh/HINA/discussions>`_ available to discuss anything related to *HINA*:
+Available on Github, `SHF-NAILResearchGroup/HINA <https://github.com/SHF-NAILResearchGroup/HINA>`_.
+Please report bugs, issues and feature extensions there. We also have `discussion channel <https://github.com/SHF-NAILResearchGroup/HINA/discussions>`_ available to discuss anything related to *HINA*:
 
 
 **Testing and Continuous Integration**
@@ -43,7 +43,7 @@ To run the tests manually, users need to clone the *HINA* GitHub repository.
 
    .. code-block:: console
 
-       git clone https://github.com/baiyueh/HINA.git
+       git clone https://github.com/SHF-NAILResearchGroup/HINA.git
        cd HINA
 
 2. **Install the Required Packages**: Ensure all dependencies, including `pytest`, are installed by running the following commands:
@@ -62,4 +62,4 @@ To run the tests manually, users need to clone the *HINA* GitHub repository.
 
 4. **View the Results**: The output will display any failed tests and provide detailed information on each failed test case.
 
-GitHub Actions runs these tests automatically with the latest stable versions of Python and relevant dependencies each time code is pushed to the repository or a pull request is made. For more information about workflows runs, see `Workflows <https://github.com/baiyueh/HINA/actions>`_ in the repository.
+GitHub Actions runs these tests automatically with the latest stable versions of Python and relevant dependencies each time code is pushed to the repository or a pull request is made. For more information about workflows runs, see `Workflows <https://github.com/SHF-NAILResearchGroup/HINA/actions>`_ in the repository.

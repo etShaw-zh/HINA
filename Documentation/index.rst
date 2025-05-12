@@ -2,9 +2,6 @@
     :description lang=en:
         HINA: A Learning Analytics Tool for Heterogenous Interaction Network Analysis in Python
 
-.. .. image:: https://raw.githubusercontent.com/baiyueh/PANINIpy/main/Documentation/_static/pixel_paninipy.png
-..     :width: 250px
-
 -------------------------------------
 
 
