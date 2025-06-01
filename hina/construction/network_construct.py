@@ -1,6 +1,7 @@
 import networkx as nx 
 import pandas as pd 
 from collections import Counter
+import warnings 
 
 def get_bipartite(df,student_col,object_col,attr_col = None,group_col = None):
  
@@ -54,9 +55,18 @@ def get_bipartite(df,student_col,object_col,attr_col = None,group_col = None):
      ('answer questions', {'bipartite': 'object', 'attr': 'cognitive'})]
     """
     # Drop rows with NaN or empty student_col
+	
+    original_size = len(df)
     df = df.dropna(subset=[student_col])
     df = df[df[student_col].astype(str).str.strip() != ""]
-
+    removed_count = original_size - len(df)
+    if removed_count > 0:
+        warnings.warn(
+            f"{removed_count} rows with empty '{student_col}' values were removed",
+            UserWarning,
+            stacklevel=2  
+        )
+	    
     # Fill NaN in other relevant columns
     fill_cols = [object_col]
     if attr_col: fill_cols.append(attr_col)
@@ -125,8 +135,19 @@ def get_tripartite(df,student_col,object1_col,object2_col,group_col = None):
     """  
     df_ = df.copy()
     # Drop rows with NaN or empty student_col
+
+    original_size = len(df_)
     df_ = df_.dropna(subset=[student_col])
     df_ = df_[df_[student_col].astype(str).str.strip() != ""]
+
+    removed_count = original_size - len(df_)
+    if removed_count > 0:
+        warnings.warn(
+            f"{removed_count} rows with empty '{student_col}' values were removed",
+            UserWarning,
+            stacklevel=2  
+        )
+	    
     # Fill NaN in other columns and convert to string 
     fill_cols = [object1_col, object2_col]
     if group_col: fill_cols.append(group_col)
