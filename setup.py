@@ -31,7 +31,7 @@ setup(
         "openpyxl>=3.1.5",
     ],
     extras_require={
-        "dev": ["pytest"],  
+        "dev": ["pytest", "pytest-cov", "pytest-html"],  
     },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,

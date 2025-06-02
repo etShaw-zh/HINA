@@ -24,20 +24,19 @@ def parse_contents(encoded_contents: str, filename: str) -> pd.DataFrame:
 
 def convert_numpy_scalars(obj):
     if isinstance(obj, dict):
-        return {convert_numpy_scalars(k): convert_numpy_scalars(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_numpy_scalars(i) for i in obj]
+        return {(k): convert_numpy_scalars(v) for k, v in obj.items()}
+    # elif isinstance(obj, list):
+    #     return [convert_numpy_scalars(i) for i in obj]
     elif isinstance(obj, np.generic):  
         return obj.item()
     else:
         return obj
 
-def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight):
+def order_edge(u, v, df: pd.DataFrame, student_col: str, object_col: str, weight: int):
     """
-    Given two node identifiers u and v (which may be of any type), force
-    the edge tuple to have the node from student_col always first and the node
-    from object_col always second. If both nodes belong to the same attribute,
-    they are sorted lexicographically.
+    Given two node identifiers u and v, force the edge tuple to have the node 
+    from student_col always first and the node from object_col always second. 
+    If both nodes belong to the same attribute, they are sorted lexicographically.
     
     Parameters:
     -----------
@@ -121,9 +120,6 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         elif node_str in df[object1_col].astype(str).values:
             node_types[node_str] = 'object1'
             node_colors[node_str] = 'blue'
-        elif node_str == 'NA':
-            node_types[node_str] = 'unknown'
-            node_colors[node_str] = 'black'
         else:
             node_types[node_str] = 'unknown'
             node_colors[node_str] = 'black'
@@ -135,69 +131,39 @@ def construct_network(df: pd.DataFrame, group_col: str, student_col: str, object
         else:
             significant_edges_result = prune_edges(G)
         
+        # Extract significant edges
         if isinstance(significant_edges_result, dict) and "significant edges" in significant_edges_result:
             significant_edges = significant_edges_result["significant edges"]
-            nx_G = significant_edges_result["pruned network"]
-            
-            ordered_edges = []
-            for u, v, w in significant_edges:
-                u_str = str(u)
-                v_str = str(v)
-                
-                if u_str in student_nodes and v_str in object_nodes:
-                    ordered_edges.append((u_str, v_str, w))
-                elif v_str in student_nodes and u_str in object_nodes:
-                    ordered_edges.append((v_str, u_str, w))
-                else:
-                    ordered_edge = order_edge(u_str, v_str, df, student_col, object1_col, int(w))
-                    ordered_edges.append(ordered_edge)
-            
-            G_edges_ordered = ordered_edges            
-            nx_G = nx.Graph()
-            for node, attrs in G.nodes(data=True):
-                node_str = str(node)
-                new_attrs = dict(attrs)
-                if 'bipartite' in new_attrs:
-                    new_attrs['bipartite'] = str(new_attrs['bipartite'])                
-                if node_str in node_types:
-                    new_attrs['type'] = node_types[node_str]
-                    new_attrs['color'] = node_colors[node_str]
-                nx_G.add_node(node_str, **new_attrs)
-            
-            for u, v, w in ordered_edges:
-                nx_G.add_edge(u, v, weight=w)
-            
         else:
             significant_edges = significant_edges_result or set()
-            nx_G = nx.Graph()
+        
+        nx_G = nx.Graph()
+        for node, attrs in G.nodes(data=True):
+            node_str = str(node)
+            new_attrs = dict(attrs)
+            if 'bipartite' in new_attrs:
+                new_attrs['bipartite'] = str(new_attrs['bipartite'])                
+            if node_str in node_types:
+                new_attrs['type'] = node_types[node_str]
+                new_attrs['color'] = node_colors[node_str]
+            nx_G.add_node(node_str, **new_attrs)
+        
+        # Order edges 
+        ordered_edges = []
+        for u, v, w in significant_edges:
+            u_str = str(u)
+            v_str = str(v)
             
-            for node, attrs in G.nodes(data=True):
-                node_str = str(node)
-                new_attrs = dict(attrs)
-                if 'bipartite' in new_attrs:
-                    new_attrs['bipartite'] = str(new_attrs['bipartite'])
-                if node_str in node_types:
-                    new_attrs['type'] = node_types[node_str]
-                    new_attrs['color'] = node_colors[node_str]
-                nx_G.add_node(node_str, **new_attrs)
-            
-            ordered_edges = []
-            for u, v, w in significant_edges:
-                u_str = str(u)
-                v_str = str(v)
-                
-                if u_str in student_nodes and v_str in object_nodes:
-                    ordered_edges.append((u_str, v_str, w))
-                elif v_str in student_nodes and u_str in object_nodes:
-                    ordered_edges.append((v_str, u_str, w))
-                else:
-                    ordered_edge = order_edge(u_str, v_str, df, student_col, object1_col, int(w))
-                    ordered_edges.append(ordered_edge)
-            
-            for u, v, w in ordered_edges:
-                nx_G.add_edge(u, v, weight=w)
-            
-            G_edges_ordered = ordered_edges
+            if u_str in student_nodes and v_str in object_nodes:
+                ordered_edges.append((u_str, v_str, w))
+            else:
+                ordered_edges.append((v_str, u_str, w))
+        
+        # Add edges to the graph
+        for u, v, w in ordered_edges:
+            nx_G.add_edge(u, v, weight=w)
+        G_edges_ordered = ordered_edges
+
     else:
         # No pruning
         nx_G = nx.Graph()        

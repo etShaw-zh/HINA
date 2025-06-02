@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+import numpy as np
 import networkx as nx
 import warnings 
 from hina.construction import get_bipartite, get_tripartite
@@ -88,37 +89,38 @@ def test_get_tripartite():
         assert T.has_edge(u, v), f"Edge ({u}, {v}) is missing."
         assert T[u][v] == expected_attrs, f"Edge attributes for ({u}, {v}) are incorrect."
 
-class TestEdgeCases:
-    """New tests focusing on missing values and mixed types"""
     
-     def test_bipartite_edges(self):
-    
-        df = pd.DataFrame({
-            'student': ['Alice', '', None, 'Bob', np.nan],
-            'object': ['ask', 123, 'evaluate', None, 'ask']
-        })
-        
-        with pytest.warns(UserWarning, match="rows with empty 'student' values were removed"):
-            B = get_bipartite(df, 'student', 'object')
+def test_bipartite_edges():
 
-        assert ('Alice', 'Bob', 'ask') in B.nodes 
-        assert ('Bob', 'NA') in B.edges # None becomes 'NA' via fillna
+	df = pd.DataFrame({
+		'student': ['Alice', '', None, 'Bob', np.nan],
+		'object': ['ask', 123, 'evaluate', None, 'ask']
+	})
+
+	with pytest.warns(UserWarning, match="3 rows with empty 'student' values were removed"):
+		B = get_bipartite(df, 'student', 'object')
+
+	student_nodes = [node for node, attr in B.nodes(data=True) if attr.get('bipartite') == 'student']
+	object_nodes = [node for node, attr in B.nodes(data=True) if attr.get('bipartite') == 'object']
+
+	assert ['Alice', 'Bob'] == student_nodes
+	assert ['ask', 'NA'] == object_nodes # None becomes 'NA' via fillna
 
 
-    def test_tripartite_edges(self):
-        
-        df = pd.DataFrame({
-            'student': [1, 2, 'Alice', None],  # Mixed types
-            'object1': ['ask', 123, 'evaluate', None],
-            'object2': [True, 'shake', None, 'nod']
-        })
-       
-        with pytest.warns(UserWarning, match="rows with empty 'student' values were removed"):
-            T = get_tripartite(df, 'student', 'object1', 'object2')
-            
-        assert (1, 'ask**True') in T.edges
-        assert (2, '123**shake') in T.edges
-        assert ('Alice', 'evaluate**NA') in T.edges  
+def test_tripartite_edges():
+
+	df = pd.DataFrame({
+		'student': [1, 2, 'Alice', None],  # Mixed types
+		'object1': ['ask', 123, 'evaluate', None],
+		'object2': [True, 'shake', None, 'nod']
+	})
+
+	with pytest.warns(UserWarning, match="rows with empty 'student' values were removed"):
+		T = get_tripartite(df, 'student', 'object1', 'object2')
+		
+	assert (1, 'ask**True') in T.edges
+	assert (2, '123**shake') in T.edges
+	assert ('Alice', 'evaluate**NA') in T.edges  
 
 if __name__ == "__main__":
     pytest.main()

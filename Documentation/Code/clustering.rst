@@ -74,14 +74,19 @@ Source Code
         cluster2weights = {}
         for e in G_info:
             i,j,w = e
-            if fix_B != node_bipartite_list[1]:
-                c = node2cluster[i]
-                if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set2})
-                cluster2weights[c][j] += w
-            else: 
-                c = node2cluster[j]
-                if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set1})
-                cluster2weights[c][i] += w
+            c = node2cluster[i]
+            if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set2})
+            cluster2weights[c][j] += w
+            # if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set2})
+            # cluster2weights[c][j] += w
+            # if fix_B != node_bipartite_list[1]:
+                # c = node2cluster[i]
+                # if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set2})
+                # cluster2weights[c][j] += w
+            # else: 
+                # c = node2cluster[j]
+                # if not(c in cluster2weights): cluster2weights[c] = Counter({k:0 for k in set1})
+                # cluster2weights[c][i] += w
 
         def logchoose(n,k):
             """

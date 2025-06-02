@@ -137,5 +137,63 @@ def test_prune_edges_custom_weights():
     
     assert alice_ask, "Edge ('Alice', 'ask questions') should be significant"
 
+def test_prune_edges_empty_graph():
+    # Test prune_edges with an empty graph with no edges
+    # Create an empty bipartite graph with no edges between nodes
+    B = nx.Graph()
+    B.add_node("Alice", bipartite="student")
+    B.add_node("question1", bipartite="object1")
+    result = prune_edges(B, fix_deg="None", alpha=0.05)
+    assert result == set()
+
+def test_prune_edges_single_edge():
+    # Test prune_edges with a graph containing only one edge
+    # Create a bipartite graph with a single edge
+    B = nx.Graph()
+    B.add_node("Alice", bipartite="student")
+    B.add_node("question1", bipartite="object1")
+    B.add_edge("Alice", "question1", weight=1)
+    result = prune_edges(B, fix_deg="None", alpha=0.05)
+    
+    # The single edge should always be significant
+    expected_edge = ("Alice", "question1", 1)
+    assert expected_edge in result
+
+def test_prune_edges_no_nodes():
+    # Test prune_edges with a completely empty graph with no nodes or edges
+    B = nx.Graph()
+    result = prune_edges(B, fix_deg="None", alpha=0.05)
+    assert result == set()
+
+def test_prune_edges_invalid_fix_deg():
+    # Test prune_edges with an invalid fix_deg parameter."""
+    B = create_test_bipartite()
+    result = prune_edges(B, fix_deg="invalid_value", alpha=0.05)
+    
+    assert "pruned network" in result
+    assert "significant edges" in result
+    assert isinstance(result["significant edges"], set)
+    assert len(result["significant edges"]) == 0
+
+def test_prune_edges_extreme_alpha():
+    # Test prune_edges with extreme alpha values 
+    B = create_test_bipartite()
+    
+    # With alpha=0, no edges should be significant
+    result_zero = prune_edges(B, fix_deg="None", alpha=0)
+    assert len(result_zero["significant edges"]) == 0
+    
+    # With alpha=1, all edges should be significant
+    result_one = prune_edges(B, fix_deg="None", alpha=1)
+    assert len(result_one["significant edges"]) == len(B.edges())
+    expected_edges = {
+        ("Alice", "ask questions", 1), 
+        ("Alice", "evaluating", 1),
+        ("Bob", "answer questions", 1), 
+        ("Charlie", "monitoring", 1)
+    }
+    result_edges = {(s, o, w) for s, o, w in result_one["significant edges"]}
+    assert result_edges == expected_edges
+    
 if __name__ == "__main__":
     pytest.main()

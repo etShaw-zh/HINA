@@ -201,7 +201,7 @@ Source Code
             diversity[i] = -sum((w / wi) * np.log(w / wi) for w in quantity_by_attr[i].values() if w > 0)
             diversity[i] /= np.log(N) 
         else:
-            diversaity[i] = 0  
+            diversity[i] = 0  
     diversity_df = pd.DataFrame(list(diversity.items()), columns=['username', 'diversity'])
     return diversity, diversity_df
 

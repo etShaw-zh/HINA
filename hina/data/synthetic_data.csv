@@ -1,0 +1,255 @@
+group,student id,code 1,code 2,code 3,task,task weight
+Group 1,2672923117,7.0,123.forming sense of community,12.Socio-emotional interactions,Task 3,1
+Group 1,4683644331,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 0,2
+Group 1,4683644331,7.0,141. Task distribution,14. Coordinative interactions,Task 9,3
+Group 1,4683644331,7.0,110.Offer solutions,11.Cognitive interactions,Task 7,4
+Group 1,2672923117,7.0,123.forming sense of community,12.Socio-emotional interactions,Task 9,3
+Group 1,0677451636,7.0,110.Offer solutions,11.Cognitive interactions,Task 1,5
+Group 1,0677451636,7.0,119.Build on others,11.Cognitive interactions,Task 2,6
+Group 1,2672923117,7.0,116.Agree with others,11.Cognitive interactions,Task 8,7
+Group 1,2672923117,7.0,123.forming sense of community,12.Socio-emotional interactions,Task 6,8
+Group 1,0656284769,7.0,141. Task distribution,14. Coordinative interactions,Task 3,1
+Group 1,0656284769,7.0,110.Offer solutions,11.Cognitive interactions,Task 5,9
+Group 1,4683644331,8.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 1,4683644331,8.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 1,4683644331,8.0,110.Offer solutions,11.Cognitive interactions,Task 8,7
+Group 1,4683644331,8.0,141. Task distribution,14. Coordinative interactions,Task 0,2
+Group 1,2672923117,8.0,135.Evaluate quality of task solution or overall performance,13.Metacognitive interactions,Task 1,5
+Group 1,2672923117,8.0,132.Monitor Shared Understanding,11.Cognitive interactions,Task 0,2
+Group 1,4683644331,8.0,132.Monitor Shared Understanding,11.Cognitive interactions,Task 5,9
+Group 1,0677451636,8.0,110.Offer solutions,11.Cognitive interactions,Task 7,4
+Group 1,4683644331,8.0,116.Agree with others,11.Cognitive interactions,Task 2,6
+Group 1,0677451636,8.0,138.Evaluate quality of GAI output,13.Metacognitive interactions,Task 7,4
+Group 1,4683644331,8.0,131.Set goals & planning,14. Coordinative interactions,Task 4,10
+Group 1,4683644331,8.0,134.Monitor Progress,14. Coordinative interactions,Task 0,2
+Group 1,0677451636,8.0,110.Offer solutions,11.Cognitive interactions,Task 2,6
+Group 1,4683644331,8.0,131.Set goals & planning,13.Metacognitive interactions,Task 1,5
+Group 1,4683644331,8.0,118.Solicite feedback,11.Cognitive interactions,Task 8,7
+Group 1,0677451636,8.0,116.Agree with others,11.Cognitive interactions,Task 5,9
+Group 1,0677451636,8.0,141. Task distribution,14. Coordinative interactions,Task 0,2
+Group 1,4683644331,8.0,task division ,14. Coordinative interactions,Task 0,2
+Group 1,4683644331,8.0,141. Task distribution,14. Coordinative interactions,Task 4,10
+Group 1,0677451636,8.0,116.Agree with others,11.Cognitive interactions,Task 6,8
+Group 1,0677451636,8.0,123.forming sense of community,12.Socio-emotional interactions,Task 5,9
+Group 1,2672923117,8.0,141. Task distribution,14. Coordinative interactions,Task 8,7
+Group 1,0677451636,8.0,116.Agree with others,11.Cognitive interactions,Task 1,5
+Group 1,4683644331,8.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 1,4683644331,8.0,112.Provide answers,11.Cognitive interactions,Task 3,1
+Group 1,0677451636,8.0,112.Provide answers,11.Cognitive interactions,Task 2,6
+Group 1,4683644331,8.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 1,0677451636,8.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 1,4683644331,8.0,115.Express uncertainties,11.Cognitive interactions,Task 1,5
+Group 1,4683644331,8.0,113.Share personal viewpoints,11.Cognitive interactions,Task 6,8
+Group 1,4683644331,8.0,118.Solicite feedback,11.Cognitive interactions,Task 4,10
+Group 1,0677451636,8.0,116.Agree with others,11.Cognitive interactions,Task 9,3
+Group 1,0677451636,8.0,110.Offer solutions,11.Cognitive interactions,Task 6,8
+Group 1,4683644331,8.0,116.Agree with others,11.Cognitive interactions,Task 6,8
+Group 1,2672923117,8.0,116.Agree with others,11.Cognitive interactions,Task 4,10
+Group 1,4683644331,8.0,133.Monitor Participation,13.Metacognitive interactions,Task 3,1
+Group 1,0677451636,8.0,131.Set goals & planning,13.Metacognitive interactions,Task 5,9
+Group 1,4683644331,8.0,116.Agree with others,11.Cognitive interactions,Task 4,10
+Group 1,0656284769,8.0,116.Agree with others,11.Cognitive interactions,Task 7,4
+Group 1,4683644331,8.0,110.Offer solutions,11.Cognitive interactions,Task 6,8
+Group 1,4683644331,8.0,110.Offer solutions,11.Cognitive interactions,Task 2,6
+Group 1,2672923117,8.0,110.Offer solutions,11.Cognitive interactions,Task 9,3
+Group 1,2672923117,8.0,110.Offer solutions,11.Cognitive interactions,Task 4,10
+Group 1,0677451636,8.0,110.Offer solutions,11.Cognitive interactions,Task 9,3
+Group 1,0656284769,8.0,110.Offer solutions,11.Cognitive interactions,Task 0,2
+Group 1,2672923117,8.0,110.Offer solutions,11.Cognitive interactions,Task 2,6
+Group 1,0656284769,8.0,116.Agree with others,11.Cognitive interactions,Task 5,9
+Group 2 ,8660641089,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 2 ,8660641089,7.0,119.Build on others,11.Cognitive interactions,Task 6,8
+Group 2 ,8660641089,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 2 ,8660641089,7.0,118.Solicite feedback,11.Cognitive interactions,Task 9,3
+Group 2 ,2696351192,7.0,112.Provide answers,11.Cognitive interactions,Task 9,3
+Group 2 ,8660641089,7.0,116.Agree with others,11.Cognitive interactions,Task 0,2
+Group 2 ,8660641089,7.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 2 ,0669299764,7.0,118.Solicite feedback,11.Cognitive interactions,Task 2,6
+Group 2 ,9643015554,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 2 ,0669299764,7.0,135.Evaluate quality of task solution or overall performance,13.Metacognitive interactions,Task 9,3
+Group 2 ,0669299764,7.0,123.forming sense of community,12.Socio-emotional interactions,Task 7,4
+Group 2 ,0669299764,7.0,114.Explain concepts or ideas,11.Cognitive interactions,Task 8,7
+Group 2 ,8686018826,7.0,111.Request clarification,11.Cognitive interactions,Task 5,9
+Group 2 ,9643015554,8.0,121.emotional expression,12.Socio-emotional interactions,Task 1,5
+Group 2 ,2696351192,8.0,121.emotional expression,12.Socio-emotional interactions,Task 8,7
+Group 2 ,2696351192,8.0,131.Set goals & planning,11.Cognitive interactions,Task 6,8
+Group 2 ,2696351192,8.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 2 ,9643015554,8.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 2 ,8686018826,8.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 2 ,8686018826,8.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 2 ,2696351192,8.0,111.Request clarification,11.Cognitive interactions,Task 1,5
+Group 2 ,0669299764,8.0,118.Solicite feedback,13.Metacognitive interactions,Task 9,3
+Group 2 ,2696351192,8.0,113.Share personal viewpoints,11.Cognitive interactions,Task 7,4
+Group 2 ,8660641089,8.0,111.Request clarification,11.Cognitive interactions,Task 5,9
+Group 3 ,7687423176,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 3 ,9692144060,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 7,4
+Group 3 ,6689337607,7.0,116.Agree with others,11.Cognitive interactions,Task 9,3
+Group 3 ,9692144060,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 3,1
+Group 3 ,6689337607,7.0,113.Share personal viewpoints,11.Cognitive interactions,Task 1,5
+Group 3 ,9692144060,7.0,119.Build on others,11.Cognitive interactions,Task 2,6
+Group 3 ,6689337607,7.0,119.Build on others,11.Cognitive interactions,Task 4,10
+Group 3 ,9692144060,7.0,116.Agree with others,11.Cognitive interactions,Task 5,9
+Group 3 ,6689337607,7.0,119.Build on others,11.Cognitive interactions,Task 4,10
+Group 3 ,5672017968,7.0,119.Build on others,11.Cognitive interactions,Task 8,7
+Group 3 ,6689337607,7.0,119.Build on others,11.Cognitive interactions,Task 9,3
+Group 3 ,9692144060,7.0,119.Build on others,11.Cognitive interactions,Task 5,9
+Group 3 ,6689337607,7.0,116.Agree with others,11.Cognitive interactions,Task 2,6
+Group 3 ,5672017968,7.0,114.Explain concepts or ideas,11.Cognitive interactions,Task 6,8
+Group 3 ,9692144060,7.0,111.Request clarification,11.Cognitive interactions,Task 4,10
+Group 3 ,9692144060,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 3 ,5672017968,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 3 ,7646103537,7.0,119.Build on others,11.Cognitive interactions,Task 4,10
+Group 3 ,9692144060,7.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 3 ,9692144060,7.0,142. Address technical issues,12.Socio-emotional interactions,Task 5,9
+Group 3 ,6689337607,7.0,142. Address technical issues,11.Cognitive interactions,Task 2,6
+Group 3 ,9692144060,7.0,118.Solicite feedback,11.Cognitive interactions,Task 0,2
+Group 3 ,5672017968,7.0,116.Agree with others,11.Cognitive interactions,Task 5,9
+Group 3 ,9692144060,7.0,138.Evaluate quality of GAI output,13.Metacognitive interactions,Task 8,7
+Group 3 ,5672017968,7.0,131.Set goals & planning,11.Cognitive interactions,Task 8,7
+Group 3 ,6689337607,7.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 3 ,9692144060,7.0,111.Request clarification,11.Cognitive interactions,Task 5,9
+Group 3 ,9692144060,7.0,113.Share personal viewpoints,11.Cognitive interactions,Task 7,4
+Group 3 ,6689337607,7.0,113.Share personal viewpoints,11.Cognitive interactions,Task 1,5
+Group 3 ,7646103537,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 1,5
+Group 3 ,7687423176,7.0,116.Agree with others,11.Cognitive interactions,Task 1,5
+Group 3 ,7646103537,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 3 ,7687423176,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 3,1
+Group 3 ,7687423176,7.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 3 ,7687423176,7.0,110.Offer solutions,11.Cognitive interactions,Task 2,6
+Group 3 ,7646103537,7.0,111.Request clarification,11.Cognitive interactions,Task 4,10
+Group 3 ,7687423176,7.0,111.Request clarification,11.Cognitive interactions,Task 5,9
+Group 3 ,7687423176,7.0,114.Explain concepts or ideas,11.Cognitive interactions,Task 1,5
+Group 3 ,7646103537,7.0,119.Build on others,11.Cognitive interactions,Task 9,3
+Group 3 ,7687423176,7.0,122.encouragement,12.Socio-emotional interactions,Task 4,10
+Group 3 ,9692144060,7.0,118.Solicite feedback,13.Metacognitive interactions,Task 6,8
+Group 3 ,9692144060,7.0,118.Solicite feedback,13.Metacognitive interactions,Task 3,1
+Group 3 ,9692144060,8.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 3 ,9692144060,8.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 3 ,9692144060,8.0,118.Solicite feedback,13.Metacognitive interactions,Task 9,3
+Group 4 ,3663181044,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 4 ,6557873471,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 4 ,6557873471,7.0,118.Solicite feedback,11.Cognitive interactions,Task 5,9
+Group 4 ,3663181044,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 4 ,6557873471,7.0,142. Address technical issues,14. Coordinative interactions,Task 6,8
+Group 4 ,6557873471,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 4 ,3663181044,7.0,121.emotional expression,11.Cognitive interactions,Task 9,3
+Group 4 ,2670306486,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 4 ,2670306486,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 4 ,6557873471,7.0,118.Solicite feedback,13.Metacognitive interactions,Task 3,1
+Group 4 ,6557873471,7.0,121.emotional expression,12.Socio-emotional interactions,Task 6,8
+Group 4 ,2670306486,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 4 ,2670306486,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 4 ,6557873471,7.0,123.forming sense of community,13.Metacognitive interactions,Task 2,6
+Group 4 ,2680733162,7.0,121.emotional expression,13.Metacognitive interactions,Task 4,10
+Group 4 ,3663181044,7.0,118.Solicite feedback,13.Metacognitive interactions,Task 6,8
+Group 4 ,2670306486,7.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 4 ,6557873471,7.0,123.forming sense of community,13.Metacognitive interactions,Task 6,8
+Group 4 ,2680733162,7.0,134.Monitor Progress,13.Metacognitive interactions,Task 7,4
+Group 4 ,6557873471,7.0,122.encouragement,12.Socio-emotional interactions,Task 8,7
+Group 4 ,2670306486,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 4,10
+Group 4 ,6557873471,7.0,131.Set goals & planning,11.Cognitive interactions,Task 0,2
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 4 ,6557873471,7.0,110.Offer solutions,11.Cognitive interactions,Task 3,1
+Group 4 ,2680733162,7.0,121.emotional expression,12.Socio-emotional interactions,Task 9,3
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 4 ,2680733162,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 4 ,2680733162,7.0,118.Solicite feedback,11.Cognitive interactions,Task 1,5
+Group 4 ,6557873471,7.0,122.encouragement,12.Socio-emotional interactions,Task 2,6
+Group 4 ,6557873471,7.0,134.Monitor Progress,13.Metacognitive interactions,Task 2,6
+Group 4 ,6557873471,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 4 ,2680733162,7.0,121.emotional expression,13.Metacognitive interactions,Task 0,2
+Group 4 ,6557873471,7.0,122.encouragement,12.Socio-emotional interactions,Task 9,3
+Group 4 ,3663181044,7.0,122.encouragement,12.Socio-emotional interactions,Task 0,2
+Group 4 ,6557873471,8.0,131.Set goals & planning,13.Metacognitive interactions,Task 1,5
+Group 4 ,6557873471,8.0,118.Solicite feedback,11.Cognitive interactions,Task 0,2
+Group 4 ,6557873471,8.0,131.Set goals & planning,11.Cognitive interactions,Task 8,7
+Group 4 ,3698704029,8.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 4 ,6557873471,8.0,112.Provide answers,11.Cognitive interactions,Task 5,9
+Group 4 ,6557873471,8.0,114.Explain concepts or ideas,11.Cognitive interactions,Task 6,8
+Group 4 ,6557873471,8.0,131.Set goals & planning,13.Metacognitive interactions,Task 4,10
+Group 4 ,6557873471,8.0,138.Evaluate quality of GAI output,13.Metacognitive interactions,Task 9,3
+Group 4 ,3698704029,8.0,131.Set goals & planning,14. Coordinative interactions,Task 2,6
+Group 4 ,6557873471,8.0,131.Set goals & planning,14. Coordinative interactions,Task 7,4
+Group 4 ,6557873471,8.0,121.emotional expression,12.Socio-emotional interactions,Task 3,1
+Group 4 ,6557873471,8.0,131.Set goals & planning,13.Metacognitive interactions,Task 5,9
+Group 4 ,3698704029,8.0,122.encouragement,12.Socio-emotional interactions,Task 4,10
+Group 4 ,6557873471,8.0,118.Solicite feedback,11.Cognitive interactions,Task 9,3
+Group 4 ,2680733162,8.0,132.Monitor Shared Understanding,11.Cognitive interactions,Task 8,7
+Group 4 ,6557873471,8.0,112.Provide answers,11.Cognitive interactions,Task 5,9
+Group 4 ,6557873471,8.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 4 ,6557873471,8.0,110.Offer solutions,14. Coordinative interactions,Task 5,9
+Group 4 ,6557873471,8.0,118.Solicite feedback,13.Metacognitive interactions,Task 5,9
+Group 4 ,6557873471,8.0,118.Solicite feedback,11.Cognitive interactions,Task 5,9
+Group 4 ,2670306486,8.0,135.Evaluate quality of task solution or overall performance,13.Metacognitive interactions,Task 8,7
+Group 4 ,6557873471,8.0,113.Share personal viewpoints,11.Cognitive interactions,Task 5,9
+Group 4 ,2680733162,8.0,131.Set goals & planning,13.Metacognitive interactions,Task 3,1
+Group 5 ,6672371941,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 5 ,1643625751,7.0,118.Solicite feedback,11.Cognitive interactions,Task 2,6
+Group 5 ,6672371941,7.0,116.Agree with others,11.Cognitive interactions,Task 7,4
+Group 5 ,6672371941,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 5 ,6672371941,7.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 5 ,6672371941,7.0,111.Request clarification,11.Cognitive interactions,Task 1,5
+Group 5 ,1643625751,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 5 ,1643625751,7.0,111.Request clarification,11.Cognitive interactions,Task 1,5
+Group 5 ,1643625751,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 5 ,1643625751,7.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 5 ,1643625751,7.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 5 ,6672371941,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 5 ,6672371941,7.0,111.Request clarification,11.Cognitive interactions,Task 4,10
+Group 5 ,9665158095,7.0,131.Set goals & planning,11.Cognitive interactions,Task 4,10
+Group 5 ,9665158095,7.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 5 ,1643625751,7.0,121.emotional expression,12.Socio-emotional interactions,Task 4,10
+Group 5 ,1643625751,7.0,118.Solicite feedback,11.Cognitive interactions,Task 3,1
+Group 5 ,8695794720,7.0,123.forming sense of community,12.Socio-emotional interactions,Task 7,4
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 5,9
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 5 ,8685112191,7.0,123.forming sense of community,12.Socio-emotional interactions,Task 0,2
+Group 5 ,8685112191,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 5 ,8695794720,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 5 ,6672371941,8.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 5 ,6672371941,8.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 5 ,8695794720,8.0,111.Request clarification,11.Cognitive interactions,Task 5,9
+Group 5 ,1643625751,8.0,111.Request clarification,11.Cognitive interactions,Task 9,3
+Group 5 ,8695794720,8.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 5 ,8695794720,8.0,121.emotional expression,12.Socio-emotional interactions,Task 1,5
+Group 6,584000468,7.0,110.Offer solutions,11.Cognitive interactions,Task 0,2
+Group 6,584000468,7.0,131.Set goals & planning,11.Cognitive interactions,Task 1,5
+Group 6,584000468,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 6,584000468,7.0,121.emotional expression,12.Socio-emotional interactions,Task 6,8
+Group 6,584000468,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 2,6
+Group 6,7669190288,7.0,116.Agree with others,11.Cognitive interactions,Task 6,8
+Group 6,584000468,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 7,4
+Group 6,3649778646,7.0,116.Agree with others,11.Cognitive interactions,Task 4,10
+Group 6,584000468,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 7,4
+Group 6,584000468,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 6,7669190288,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 6,7669190288,7.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 6,7669190288,7.0,132.Monitor Shared Understanding,13.Metacognitive interactions,Task 1,5
+Group 6,7669190288,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 2,6
+Group 6,3649778646,7.0,131.Set goals & planning,13.Metacognitive interactions,Task 9,3
+Group 6,3649778646,7.0,114.Explain concepts or ideas,11.Cognitive interactions,Task 4,10
+Group 6,3649778646,7.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 6,3649778646,7.0,111.Request clarification,11.Cognitive interactions,Task 8,7
+Group 6,3649778646,7.0,111.Request clarification,11.Cognitive interactions,Task 4,10
+Group 6,3649778646,7.0,111.Request clarification,11.Cognitive interactions,Task 6,8
+Group 6,584000468,7.0,131.Set goals & planning,14. Coordinative interactions,Task 7,4
+Group 6,584000468,7.0,118.Solicite feedback,13.Metacognitive interactions,Task 5,9
+Group 6,584000468,7.0,111.Request clarification,11.Cognitive interactions,Task 0,2
+Group 6,584000468,7.0,111.Request clarification,11.Cognitive interactions,Task 2,6
+Group 6,584000468,7.0,131.Set goals & planning,11.Cognitive interactions,Task 2,6
+Group 6,3649778646,8.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 6,584000468,8.0,111.Request clarification,11.Cognitive interactions,Task 4,10
+Group 6,584000468,8.0,111.Request clarification,11.Cognitive interactions,Task 7,4
+Group 6,584000468,8.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 6,3649778646,8.0,111.Request clarification,11.Cognitive interactions,Task 3,1
+Group 6,3649778646,8.0,111.Request clarification,11.Cognitive interactions,Task 8,7

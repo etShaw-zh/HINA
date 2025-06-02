@@ -58,5 +58,38 @@ def test_quantity():
     assert normalized_by_group['Bob'] == 0.5, "Bob should have normalized group quantity 0.5"
     assert normalized_by_group['Charlie'] == 0.5, "Charlie should have normalized group quantity 0.5"
 
+def test_quantity_return_types():
+    # Test each specific return_type option for the quantity function
+    B = create_test_graph()
+    
+    # Test 'quantity' return type
+    quantity_only = quantity(B, attr='attr', group='group', return_type='quantity')
+    assert list(quantity_only.keys()) == ['quantity'], "Should only return the quantity key"
+    assert quantity_only['quantity']['Alice'] == 2
+    assert quantity_only['quantity']['Bob'] == 1
+    assert quantity_only['quantity']['Charlie'] == 1
+    
+    # Test 'quantity_by_category' return type
+    quantity_by_category = quantity(B, attr='attr', group='group', return_type='quantity_by_category')
+    assert list(quantity_by_category.keys()) == ['quantity_by_category'], "Should only return the quantity_by_category key"
+    assert quantity_by_category['quantity_by_category'][('Alice', 'cognitive')] == 1.0
+    assert quantity_by_category['quantity_by_category'][('Alice', 'metacognitive')] == 1.0
+    assert quantity_by_category['quantity_by_category'][('Bob', 'cognitive')] == 1.0
+    assert quantity_by_category['quantity_by_category'][('Charlie', 'metacognitive')] == 1.0
+    
+    # Test 'normalized_quantity' return type
+    norm_quantity = quantity(B, attr='attr', group='group', return_type='normalized_quantity')
+    assert list(norm_quantity.keys()) == ['normalized_quantity'], "Should only return the normalized_quantity key"
+    assert norm_quantity['normalized_quantity']['Alice'] == 0.5
+    assert norm_quantity['normalized_quantity']['Bob'] == 0.25
+    assert norm_quantity['normalized_quantity']['Charlie'] == 0.25
+    
+    # Test 'normalized_quantity_by_group' return type
+    norm_by_group = quantity(B, attr='attr', group='group', return_type='normalized_quantity_by_group')
+    assert list(norm_by_group.keys()) == ['normalized_quantity_by_group'], "Should only return the normalized_quantity_by_group key"
+    assert norm_by_group['normalized_quantity_by_group']['Alice'] == 1.0
+    assert norm_by_group['normalized_quantity_by_group']['Bob'] == 0.5
+    assert norm_by_group['normalized_quantity_by_group']['Charlie'] == 0.5
+
 if __name__ == "__main__":
     pytest.main()

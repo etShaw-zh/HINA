@@ -235,6 +235,7 @@ async def quantity_diversity_endpoint(
             
         if 'normalized_quantity_by_group' in quantity_results:
             response["normalized_quantity_by_group"] = quantity_results['normalized_quantity_by_group']       
+			
         return utils.convert_numpy_scalars(response)
     except Exception as e:
         print(f"Error in quantity_diversity_endpoint: {str(e)}")

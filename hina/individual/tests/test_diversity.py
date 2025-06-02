@@ -63,5 +63,20 @@ def test_diversity_without_attr():
     assert 'Bob' in diversity_results, "Diversity for Bob should be computed."
     assert 'Charlie' in diversity_results, "Diversity for Charlie should be computed."
 
+def test_diversity_with_zero_weight_edges():
+    # Test diversity calculation for students with only zero-weight connections
+    B = create_test_graph()
+    # Now manually set edge weights to 0
+    for edge in list(B.edges()):
+        if edge[0] == 'Alice' or edge[1] == 'Alice':
+            B[edge[0]][edge[1]]['weight'] = 0
+    
+    # Calculate diversity
+    diversity_results, _ = diversity(B, attr='attr')
+    
+    # Verify diversity for all students
+    assert 'Alice' in diversity_results, "Alice should be included in diversity results"
+    assert diversity_results['Alice'] == 0, "Alice with only zero-weight connections should have diversity = 0"
+
 if __name__ == "__main__":
     pytest.main()
