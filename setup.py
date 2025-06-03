@@ -16,7 +16,7 @@ setup(
         "Documentation": "https://hina.readthedocs.io/en/latest/index.html",
         "Source": "https://hina.readthedocs.io/en/latest/index.html"
     },
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     install_requires=[
         "numpy>=1.24",    
         "pandas>=2.2",
