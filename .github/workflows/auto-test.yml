@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  auto-test and code coverage:
+  code-test-coverage:
     runs-on: ubuntu-latest
 
     steps:
