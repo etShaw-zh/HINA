@@ -5,7 +5,7 @@ import matplotlib.colors as mcolors
 from hina.dyad import prune_edges
 from hina.mesoscale import hina_communities
 
-def plot_hina(B, layout='bipartite', group_name = [None, None], pruning_kwargs=None, NetworkX_kwargs=None):
+def plot_hina(B, layout='bipartite', group_name = [None, None], pruning_kwargs=None, NetworkX_kwargs=None, show=True):
     """
     Visualizes a bipartite network with customizable layout, node grouping, and edge pruning.
 
@@ -127,14 +127,15 @@ def plot_hina(B, layout='bipartite', group_name = [None, None], pruning_kwargs=N
         )
 
     plt.title("HINA Network Visualization")
-    plt.show()
+    if show:
+        plt.show()
 
 
 
 def plot_bipartite_clusters(G, noise_scale=3, radius=20., encode_labels=False,
                            node_labels=True, edge_labels=False,
                            scale_nodes_by_degree=False, node_scale=2000.,
-                           node_kwargs={'edgecolors': 'black'}, edge_kwargs={'edge_color': 'black'}):
+                           node_kwargs={'edgecolors': 'black'}, edge_kwargs={'edge_color': 'black'}, show=True):
     """
     Visualizes a bipartite graph with nodes grouped into communities, highlighting the community structure.
 
@@ -252,4 +253,5 @@ def plot_bipartite_clusters(G, noise_scale=3, radius=20., encode_labels=False,
         edge_labels = nx.get_edge_attributes(G, 'weight')
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
-    plt.show()
+    if show:
+        plt.show()

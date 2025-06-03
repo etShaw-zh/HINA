@@ -129,7 +129,7 @@ async def build_cluster_network_endpoint(
         # Convert NetworkX graphs to JSON serializable format
         serializable_graphs = {}
         for comm_id, graph in object_object_graphs.items():
-            serializable_graphs[comm_id] = nx.node_link_data(graph)
+            serializable_graphs[comm_id] = nx.node_link_data(graph, edges="links")
         return {
             "elements": elements,
             "cluster_labels": cluster_labels,
@@ -157,7 +157,7 @@ async def build_object_network_endpoint(
         # Get the NetworkX graph for this community
         graph_data = object_graphs_data[community_id]
         # print(f"Graph data for community {community_id}: {graph_data}")
-        G = nx.node_link_graph(graph_data)
+        G = nx.node_link_graph(graph_data, edges="links")
         if len(G.nodes()) == 0:
             return {"elements": [], "community_id": community_id}
         
@@ -235,7 +235,7 @@ async def quantity_diversity_endpoint(
             
         if 'normalized_quantity_by_group' in quantity_results:
             response["normalized_quantity_by_group"] = quantity_results['normalized_quantity_by_group']       
-			
+
         return utils.convert_numpy_scalars(response)
     except Exception as e:
         print(f"Error in quantity_diversity_endpoint: {str(e)}")

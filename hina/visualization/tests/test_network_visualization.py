@@ -33,7 +33,7 @@ def test_plot_hina_basic():
 	
 	# Test with default parameters
 	plt.figure()  # Create a new figure
-	result = plot_hina(B)
+	result = plot_hina(B, show=False)
 	plt.close() 
 
 def test_plot_hina_with_layout():
@@ -42,23 +42,23 @@ def test_plot_hina_with_layout():
 	
 	# Test with bipartite layout
 	plt.figure()
-	plot_hina(B, layout='bipartite')
+	plot_hina(B, layout='bipartite', show=False)
 	plt.close()
 	
 	# Test with spring layout
 	plt.figure()
-	plot_hina(B, layout='spring')
+	plot_hina(B, layout='spring', show=False)
 	plt.close()
 	
 	# Test with circular layout
 	plt.figure()
-	plot_hina(B, layout='circular')
+	plot_hina(B, layout='circular', show=False)
 	plt.close()
 
 	# Test with invalid layout
 	plt.figure()
 	with pytest.raises(ValueError, match="Unsupported layout: test"):
-		plot_hina(B, layout='test')
+		plot_hina(B, layout='test', show=False)
 	plt.close()
 
 def test_plot_hina_with_group_filtering():
@@ -67,12 +67,12 @@ def test_plot_hina_with_group_filtering():
 	
 	# Test for all groups (no filtering)
 	plt.figure()
-	plot_hina(B, layout='bipartite', group_name=['group', None])
+	plot_hina(B, layout='bipartite', group_name=['group', None], show=False)
 	plt.close()
 	
 	# Test for specific group
 	plt.figure()
-	plot_hina(B, layout='bipartite', group_name=['group', 'A'])
+	plot_hina(B, layout='bipartite', group_name=['group', 'A'], show=False)
 	plt.close()
 
 def test_plot_hina_with_pruning():
@@ -82,7 +82,7 @@ def test_plot_hina_with_pruning():
 	# Test with custom pruning parameters
 	plt.figure()
 	pruning_kwargs = {'fix_deg': 'None', 'alpha': 0.05}
-	plot_hina(B, pruning_kwargs=pruning_kwargs)
+	plot_hina(B, pruning_kwargs=pruning_kwargs, show=False)
 	plt.close()
 
 def test_plot_hina_with_networkx_kwargs():
@@ -91,7 +91,7 @@ def test_plot_hina_with_networkx_kwargs():
 	
 	plt.figure()
 	networkx_kwargs = {'alpha': 0.7, 'edge_color': 'blue'}
-	plot_hina(B, NetworkX_kwargs=networkx_kwargs)
+	plot_hina(B, NetworkX_kwargs=networkx_kwargs, show=False)
 	plt.close()
 
 def test_plot_bipartite_clusters():
@@ -99,7 +99,7 @@ def test_plot_bipartite_clusters():
 	B = create_test_graph()
 	
 	plt.figure()
-	plot_bipartite_clusters(B)
+	plot_bipartite_clusters(B, show=False)
 	plt.close()
 
 def test_plot_bipartite_clusters_options():
@@ -107,7 +107,7 @@ def test_plot_bipartite_clusters_options():
 	B = create_test_graph()
 	
 	plt.figure()
-	plot_bipartite_clusters(B, scale_nodes_by_degree=True, encode_labels=True, node_labels=False, edge_labels=True)
+	plot_bipartite_clusters(B, scale_nodes_by_degree=True, encode_labels=True, node_labels=False, edge_labels=True, show=False)
 	plt.close()
 
 if __name__ == "__main__":
