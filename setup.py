@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages, Extension
 
-__version__ = "0.6.4"
+__version__ = "0.6.5"
 
 setup(
     name='hina',
