@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages, Extension
 
-__version__ = "0.6.3"
+__version__ = "0.6.4"
 
 setup(
     name='hina',
@@ -18,7 +18,7 @@ setup(
     },
     python_requires=">=3.9",
     install_requires=[
-        "numpy>=1.24, <2.0",    
+        "numpy>=1.24",    
         "pandas>=2.2",
         "scipy>=1.10",
         "python-multipart>=0.0.18",
